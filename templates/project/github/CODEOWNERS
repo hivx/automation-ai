@@ -1,0 +1,5 @@
+# Mẫu CODEOWNERS — thay @<owner> bằng người/nhóm thật. Người duyệt cấu hình đội và tài liệu đội.
+/.team/             @<owner>
+/.claude/           @<owner>
+/docs/team/adr/     @<owner>
+/.github/workflows/ @<owner>

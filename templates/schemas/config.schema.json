@@ -1,0 +1,306 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://automation-ai/schemas/config.schema.json",
+  "title": "team config (.team/config.json)",
+  "type": "object",
+  "required": [
+    "gates",
+    "default_size",
+    "default_mode",
+    "base_branch",
+    "protected_branches",
+    "limits"
+  ],
+  "properties": {
+    "gates": {
+      "type": "object",
+      "properties": {
+        "G0_takeover": {
+          "type": "boolean"
+        },
+        "G1_spec": {
+          "type": "boolean"
+        },
+        "G2_arch": {
+          "type": "boolean"
+        },
+        "G2b_design": {
+          "type": "boolean"
+        },
+        "G3_plan": {
+          "type": "boolean"
+        },
+        "G4_uat": {
+          "type": "boolean"
+        },
+        "G5_prod": {
+          "type": "boolean",
+          "enum": [
+            true
+          ],
+          "description": "Prod luôn cần người"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "G0_takeover",
+        "G1_spec",
+        "G2_arch",
+        "G2b_design",
+        "G3_plan",
+        "G4_uat",
+        "G5_prod"
+      ]
+    },
+    "default_size": {
+      "type": "string",
+      "enum": [
+        "auto",
+        "S",
+        "M",
+        "L"
+      ]
+    },
+    "default_mode": {
+      "type": "string",
+      "enum": [
+        "ask",
+        "decide"
+      ]
+    },
+    "base_branch": {
+      "type": "string"
+    },
+    "protected_branches": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "limits": {
+      "type": "object",
+      "properties": {
+        "max_rework": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_attempts": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_questions_round": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_parallel_dev": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_agents_per_feature": {
+          "type": "object",
+          "properties": {
+            "S": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "M": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "L": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "S",
+            "M",
+            "L"
+          ]
+        },
+        "feature_budget_usd": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "context_warn_pct": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_temp_skills": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Trần số skill/agent tạm đang hoạt động"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "max_rework",
+        "max_attempts",
+        "max_questions_round",
+        "max_parallel_dev",
+        "max_agents_per_feature",
+        "feature_budget_usd",
+        "context_warn_pct",
+        "max_temp_skills"
+      ]
+    },
+    "models": {
+      "type": "object",
+      "properties": {
+        "team-leader": {
+          "type": "string",
+          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+        },
+        "tech-lead": {
+          "type": "string",
+          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+        },
+        "coach": {
+          "type": "string",
+          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+        },
+        "analyst": {
+          "type": "string",
+          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+        },
+        "researcher": {
+          "type": "string",
+          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+        },
+        "architect": {
+          "type": "string",
+          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+        },
+        "designer": {
+          "type": "string",
+          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+        },
+        "dev": {
+          "type": "string",
+          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+        },
+        "reviewer": {
+          "type": "string",
+          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+        },
+        "qa": {
+          "type": "string",
+          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+        },
+        "writer": {
+          "type": "string",
+          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+        },
+        "maintainer": {
+          "type": "string",
+          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+        },
+        "devops": {
+          "type": "string",
+          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+        }
+      },
+      "additionalProperties": false
+    },
+    "approvers": {
+      "type": "object",
+      "properties": {
+        "G0_takeover": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Người được duyệt cổng này"
+        },
+        "G1_spec": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Người được duyệt cổng này"
+        },
+        "G2_arch": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Người được duyệt cổng này"
+        },
+        "G2b_design": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Người được duyệt cổng này"
+        },
+        "G3_plan": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Người được duyệt cổng này"
+        },
+        "G4_uat": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Người được duyệt cổng này"
+        },
+        "G5_prod": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Người được duyệt cổng này"
+        }
+      },
+      "additionalProperties": false
+    },
+    "journal": {
+      "type": "object",
+      "properties": {
+        "max_lines_per_entry": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "memory": {
+      "type": "object",
+      "properties": {
+        "handoff_max_lines": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "explore_cache_max_files": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "research_cache_ttl_by_version": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "channels": {
+      "type": "object",
+      "properties": {
+        "questions": {
+          "type": "string",
+          "description": "Nơi gửi câu hỏi khi không có hộp thoại (mặc định issue-comment)"
+        },
+        "notify": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

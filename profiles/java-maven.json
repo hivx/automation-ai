@@ -1,0 +1,95 @@
+{
+  "stack": "java-maven",
+  "language": [
+    "java"
+  ],
+  "cmd": {
+    "install": "mvn -B -q dependency:go-offline",
+    "build": "mvn -B -q package -DskipTests",
+    "test": "mvn -B test",
+    "test_one": "mvn -B test -Dtest=$(basename {file} .java)",
+    "lint": "mvn -B checkstyle:check",
+    "typecheck": "mvn -B -q compile",
+    "format": "",
+    "run": "mvn -B spring-boot:run",
+    "migrate": "mvn -B flyway:migrate"
+  },
+  "formatters_by_ext": {},
+  "structure": {
+    "src": "src/main/java",
+    "tests": "src/test/java",
+    "docs": "docs",
+    "scripts": "scripts",
+    "config": [
+      "pom.xml",
+      "src/main/resources"
+    ],
+    "allowed_new_file_roots": [
+      "src/main/java",
+      "src/main/resources",
+      "src/test/java",
+      "src/test/resources",
+      "docs"
+    ]
+  },
+  "naming": {
+    "file": "PascalCase (trùng tên lớp)",
+    "class": "PascalCase",
+    "function": "camelCase",
+    "constant": "UPPER_SNAKE_CASE",
+    "test_file": "{Name}Test.java",
+    "branch": "team/{id}-{slug}"
+  },
+  "test": {
+    "skip_markers": [
+      "@Disabled",
+      "@Ignore",
+      "Assumptions.assume",
+      "assumeTrue("
+    ]
+  },
+  "protected_paths": [
+    ".env",
+    ".env.*",
+    "**/*.pem",
+    "**/*.key",
+    "secrets/**",
+    "**/*.jks",
+    "**/*.p12",
+    "**/*.keystore",
+    "target/**",
+    "src/main/resources/application-prod*"
+  ],
+  "ci": {
+    "provider": "github",
+    "runner": "ubuntu-latest",
+    "setup": [
+      "mvn -B -q dependency:go-offline"
+    ]
+  },
+  "deploy": {
+    "staging": "",
+    "smoke": "",
+    "prod_requires_reviewer": true
+  },
+  "ui": false,
+  "tracker": "github",
+  "plugins": {
+    "required": [],
+    "recommended": [
+      "jdtls-lsp@claude-plugins-official",
+      "security-guidance@claude-plugins-official",
+      "github@claude-plugins-official"
+    ]
+  },
+  "notes": {
+    "deploy.staging": "Để trống: mỗi dự án tự khai lúc onboard.",
+    "deploy.smoke": "Để trống: mỗi dự án tự khai lúc onboard.",
+    "cmd.typecheck": "Biên dịch là bước kiểm kiểu của Java.",
+    "cmd.lint": "Chưa chắc: cần maven-checkstyle-plugin trong pom.xml.",
+    "cmd.format": "Để trống: Maven không có formatter một file mặc định; dự án có Spotless thì khai.",
+    "cmd.run": "Chưa chắc: chỉ đúng với Spring Boot.",
+    "cmd.migrate": "Chưa chắc: chỉ đúng khi dùng Flyway; Liquibase dùng liquibase:update.",
+    "protected_paths": "Maven không có lockfile; giữ pom.xml sửa được nhưng reviewer kiểm (STD-DEP-1)."
+  }
+}

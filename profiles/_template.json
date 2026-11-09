@@ -1,0 +1,93 @@
+{
+  "stack": "",
+  "language": [],
+  "cmd": {
+    "install": "",
+    "build": "",
+    "test": "",
+    "test_one": "",
+    "lint": "",
+    "typecheck": "",
+    "format": "",
+    "run": "",
+    "migrate": ""
+  },
+  "formatters_by_ext": {},
+  "structure": {
+    "src": "",
+    "tests": "",
+    "docs": "",
+    "scripts": "",
+    "config": [],
+    "allowed_new_file_roots": []
+  },
+  "naming": {
+    "file": "",
+    "class": "",
+    "function": "",
+    "constant": "",
+    "test_file": "",
+    "branch": "team/{id}-{slug}"
+  },
+  "test": {
+    "skip_markers": []
+  },
+  "protected_paths": [],
+  "ci": {
+    "provider": "none",
+    "runner": "",
+    "setup": []
+  },
+  "deploy": {
+    "staging": "",
+    "smoke": "",
+    "prod_requires_reviewer": true
+  },
+  "ui": false,
+  "tracker": "github",
+  "plugins": {
+    "required": [],
+    "recommended": []
+  },
+  "notes": {
+    "stack": "Tên stack chính, ví dụ python hoặc node-ts.",
+    "language": "Các ngôn ngữ có trong repo.",
+    "cmd.install": "Lệnh cài phụ thuộc, chạy từ gốc repo.",
+    "cmd.build": "Lệnh build; để trống nếu không có bước build.",
+    "cmd.test": "Lệnh chạy toàn bộ test.",
+    "cmd.test_one": "BẮT BUỘC. Chạy test của một file; {file} là đường dẫn tương đối từ gốc repo.",
+    "cmd.lint": "Lệnh lint toàn repo.",
+    "cmd.typecheck": "Lệnh kiểm kiểu; để trống nếu stack không có.",
+    "cmd.format": "Lệnh format MỘT file với {file}.",
+    "cmd.run": "Lệnh chạy ứng dụng ở máy dev.",
+    "cmd.migrate": "Lệnh chạy migration; để trống nếu không có cơ sở dữ liệu.",
+    "formatters_by_ext": "Đuôi file → lệnh format có {file}; hook chạy sau mỗi lần sửa.",
+    "structure.src": "Thư mục mã nguồn chính.",
+    "structure.tests": "Thư mục test, hoặc 'colocated' nếu test nằm cạnh mã.",
+    "structure.docs": "Thư mục tài liệu.",
+    "structure.scripts": "Thư mục script tiện ích.",
+    "structure.config": "Các file/thư mục cấu hình.",
+    "structure.allowed_new_file_roots": "Danh sách ĐÓNG nơi agent được tạo file mới.",
+    "naming.file": "Quy ước tên file.",
+    "naming.class": "Quy ước tên lớp/kiểu.",
+    "naming.function": "Quy ước tên hàm.",
+    "naming.constant": "Quy ước tên hằng.",
+    "naming.test_file": "Mẫu tên file test, {name} là tên module.",
+    "naming.branch": "Mẫu tên nhánh; giữ team/{id}-{slug}.",
+    "test.skip_markers": "Chuỗi đánh dấu bỏ qua test; xuất hiện trong diff là blocker.",
+    "protected_paths": "Glob không agent nào được sửa: secret, lockfile, vendored, cấu hình prod.",
+    "ci.provider": "github, gitlab hoặc none.",
+    "ci.runner": "Runner/ảnh CI, ghim phiên bản khi có thể.",
+    "ci.setup": "Lệnh chuẩn bị môi trường CI trước lint/test.",
+    "deploy.staging": "Lệnh deploy lên staging.",
+    "deploy.smoke": "Lệnh smoke test sau deploy.",
+    "deploy.prod_requires_reviewer": "Luôn true: prod cần người duyệt.",
+    "ui": "true nếu có giao diện; qa sẽ dùng công cụ kiểm UI.",
+    "tracker": "Nơi quản lý issue: github, gitlab hoặc none.",
+    "plugins.required": "Plugin bắt buộc, dạng name@marketplace.",
+    "plugins.recommended": "Plugin nên cài, dạng name@marketplace; onboard chỉ in lệnh cài.",
+    "notes": "Khe → ghi chú một dòng; đánh dấu giá trị chưa chắc chắn.",
+    "packages": "Monorepo: thư mục → profile ghi đè một phần; để {} nếu không phải monorepo."
+  },
+  "packages": {}
+}

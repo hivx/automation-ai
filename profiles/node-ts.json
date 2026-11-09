@@ -1,0 +1,107 @@
+{
+  "stack": "node-ts",
+  "language": [
+    "typescript",
+    "javascript"
+  ],
+  "cmd": {
+    "install": "npm ci",
+    "build": "npm run build",
+    "test": "npm test",
+    "test_one": "npx vitest run {file}",
+    "lint": "npx eslint .",
+    "typecheck": "npx tsc --noEmit",
+    "format": "npx prettier --write {file}",
+    "run": "npm start",
+    "migrate": ""
+  },
+  "formatters_by_ext": {
+    ".ts": "npx prettier --write {file}",
+    ".tsx": "npx prettier --write {file}",
+    ".js": "npx prettier --write {file}",
+    ".jsx": "npx prettier --write {file}",
+    ".mjs": "npx prettier --write {file}",
+    ".cjs": "npx prettier --write {file}",
+    ".json": "npx prettier --write {file}",
+    ".css": "npx prettier --write {file}",
+    ".md": "npx prettier --write {file}"
+  },
+  "structure": {
+    "src": "src",
+    "tests": "colocated",
+    "docs": "docs",
+    "scripts": "scripts",
+    "config": [
+      "package.json",
+      "tsconfig.json"
+    ],
+    "allowed_new_file_roots": [
+      "src",
+      "test",
+      "docs",
+      "scripts"
+    ]
+  },
+  "naming": {
+    "file": "kebab-case",
+    "class": "PascalCase",
+    "function": "camelCase",
+    "constant": "UPPER_SNAKE_CASE",
+    "test_file": "{name}.test.ts",
+    "branch": "team/{id}-{slug}"
+  },
+  "test": {
+    "skip_markers": [
+      ".skip(",
+      ".only(",
+      ".todo(",
+      "xit(",
+      "xdescribe(",
+      "fit(",
+      "fdescribe("
+    ]
+  },
+  "protected_paths": [
+    ".env",
+    ".env.*",
+    "**/*.pem",
+    "**/*.key",
+    "secrets/**",
+    "package-lock.json",
+    "yarn.lock",
+    "pnpm-lock.yaml",
+    "node_modules/**",
+    "dist/**",
+    "vendor/**",
+    ".env.production"
+  ],
+  "ci": {
+    "provider": "github",
+    "runner": "ubuntu-latest",
+    "setup": [
+      "npm ci"
+    ]
+  },
+  "deploy": {
+    "staging": "",
+    "smoke": "",
+    "prod_requires_reviewer": true
+  },
+  "ui": false,
+  "tracker": "github",
+  "plugins": {
+    "required": [],
+    "recommended": [
+      "typescript-lsp@claude-plugins-official",
+      "security-guidance@claude-plugins-official",
+      "github@claude-plugins-official"
+    ]
+  },
+  "notes": {
+    "deploy.staging": "Để trống: mỗi dự án tự khai lúc onboard.",
+    "deploy.smoke": "Để trống: mỗi dự án tự khai lúc onboard.",
+    "cmd.test_one": "Chưa chắc: giả định Vitest; dự án dùng Jest thì đổi thành npx jest {file}.",
+    "cmd.install": "Đổi theo trình quản lý gói: yarn install --frozen-lockfile hoặc pnpm install --frozen-lockfile.",
+    "cmd.migrate": "Để trống: tùy ORM (Prisma, Knex, TypeORM...)."
+  }
+}

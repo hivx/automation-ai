@@ -1,0 +1,216 @@
+{
+  "_note": "Giới hạn theo vai (ADJ-02). Thực thi bởi scripts/role-policy.sh. 'write': glob đường dẫn được ghi ('*' = mọi nơi, protect.sh vẫn chặn vùng cấm). 'bash': 'any' | 'read-only' | {'allow': [glob lệnh, 'cmd.*' = các khe cmd.* của profile]}; lệnh chỉ-đọc luôn được phép. 'agents': subagent_type được gọi. 'stage_exceptions': nới thêm khi .team/current.json có stage tương ứng.",
+  "readonly_commands": [
+    "cat",
+    "ls",
+    "head",
+    "tail",
+    "wc",
+    "grep",
+    "rg",
+    "find",
+    "jq",
+    "sort",
+    "uniq",
+    "cut",
+    "tr",
+    "echo",
+    "printf",
+    "date",
+    "pwd",
+    "tree",
+    "stat",
+    "file",
+    "diff",
+    "basename",
+    "dirname",
+    "realpath",
+    "which",
+    "test",
+    "true",
+    "sha256sum",
+    "awk",
+    "sed",
+    "paste",
+    "mkdir",
+    "cd"
+  ],
+  "readonly_scripts": [
+    "team.py",
+    "measure.py",
+    "teamlib.py",
+    "check-profile.py",
+    "gen-guides.py",
+    "detect-stack.sh",
+    "explore-cache.sh",
+    "log-run.sh",
+    "check-structure.sh",
+    "validate.sh"
+  ],
+  "roles": {
+    "team:team-leader": {
+      "write": [
+        "docs/team/**",
+        ".team/**",
+        ".claude/skills/**",
+        ".claude/agents/**"
+      ],
+      "bash": "read-only",
+      "agents": [
+        "team:*",
+        "Explore"
+      ],
+      "stage_exceptions": {
+        "onboard": {
+          "write": [
+            "CLAUDE.md",
+            ".gitignore",
+            ".claude/rules/**",
+            ".github/**",
+            ".gitlab-ci.yml"
+          ],
+          "bash": {
+            "allow": [
+              "cp *",
+              "jq *",
+              "mkdir *",
+              "git status*",
+              "cmd.*",
+              "python3 *render.py*"
+            ]
+          }
+        }
+      }
+    },
+    "team:tech-lead": {
+      "write": [
+        "docs/team/**",
+        ".team/current.json",
+        ".team/session/**"
+      ],
+      "bash": {
+        "allow": [
+          "git *",
+          "gh pr *",
+          "touch .team/active-build",
+          "rm .team/active-build",
+          "rm -f .team/active-build",
+          "cmd.*"
+        ]
+      },
+      "agents": [
+        "team:dev",
+        "team:reviewer",
+        "Explore"
+      ]
+    },
+    "team:coach": {
+      "write": [
+        "docs/team/retro/**",
+        "docs/team/proposals/**",
+        "docs/team/kit-issues.md",
+        "docs/team/metrics/scorecard.json",
+        ".team/current.json",
+        ".claude/agent-memory/**"
+      ],
+      "bash": "read-only",
+      "agents": []
+    },
+    "team:analyst": {
+      "write": [
+        "docs/team/**",
+        ".team/current.json",
+        ".team/session/**"
+      ],
+      "bash": "read-only",
+      "agents": [
+        "Explore"
+      ]
+    },
+    "team:researcher": {
+      "write": [
+        "docs/team/**",
+        ".team/current.json",
+        ".team/session/**"
+      ],
+      "bash": {
+        "allow": [
+          "git worktree *",
+          "cmd.*"
+        ]
+      },
+      "agents": [
+        "Explore"
+      ]
+    },
+    "team:architect": {
+      "write": [
+        "docs/team/**",
+        ".team/current.json",
+        ".team/session/**"
+      ],
+      "bash": "read-only",
+      "agents": [
+        "Explore"
+      ]
+    },
+    "team:designer": {
+      "write": [
+        "docs/team/**",
+        ".team/current.json",
+        ".team/session/**"
+      ],
+      "bash": "read-only",
+      "agents": [
+        "Explore"
+      ]
+    },
+    "team:reviewer": {
+      "write": [
+        ".claude/agent-memory/**"
+      ],
+      "bash": "read-only",
+      "agents": []
+    },
+    "team:qa": {
+      "write": [
+        "docs/team/features/**",
+        ".team/current.json",
+        ".claude/agent-memory/**"
+      ],
+      "bash": "any",
+      "agents": []
+    },
+    "team:writer": {
+      "write": [
+        "docs/**",
+        "CHANGELOG.md",
+        "README.md",
+        ".team/current.json"
+      ],
+      "bash": "read-only",
+      "agents": []
+    },
+    "team:dev": {
+      "write": [
+        "*"
+      ],
+      "bash": "any",
+      "agents": []
+    },
+    "team:maintainer": {
+      "write": [
+        "*"
+      ],
+      "bash": "any",
+      "agents": []
+    },
+    "team:devops": {
+      "write": [
+        "*"
+      ],
+      "bash": "any",
+      "agents": []
+    }
+  }
+}

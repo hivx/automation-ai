@@ -1,0 +1,16 @@
+---
+paths:
+  - "{{structure.tests}}/**"
+  - "**/*test*"
+---
+
+# Khi sửa test
+
+- Test hỏng trước, dán đầu ra đỏ; bắt buộc với bug-fix (STD-TEST-1).
+- Chạy test một file: `{{cmd.test_one}}` (thay `{file}`); trước khi gộp: `{{cmd.test}}` (STD-TEST-3).
+- CẤM thêm các dấu bỏ qua để cho xanh: {{test.skip_markers}} — vi phạm là blocker (STD-TEST-4).
+- Không sửa assertion cho khớp hành vi sai; chỉ đổi test khi spec đổi (STD-TEST-5).
+- Test độc lập, lặp lại được: không phụ thuộc thứ tự, giờ thật, mạng ngoài (STD-TEST-6).
+- Phủ cả trường hợp biên và đường lỗi (STD-TEST-8).
+- Tên file test: `{{naming.test_file}}` (STD-NAME-3).
+- Test chập chờn → ghi `docs/team/debt.md`, không tắt (STD-TEST-7).

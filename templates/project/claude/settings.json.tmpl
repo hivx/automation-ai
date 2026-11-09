@@ -1,0 +1,32 @@
+{
+  "agent": "team:team-leader",
+  "enabledPlugins": {
+    "team@automation-ai": true
+  },
+  "permissions": {
+    "allow": [
+      "{{cmd.*}}",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git checkout *)",
+      "Bash(git switch *)",
+      "Bash(git worktree *)",
+      "Bash(gh issue *)",
+      "Bash(gh pr *)",
+      "Bash(jq *)",
+      "Bash(python3 *)"
+    ],
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(rm -rf *)",
+      "Edit({{protected_paths}})",
+      "Read(./.env)",
+      "Read(./.env.*)"
+    ]
+  },
+  "skillOverrides": {}
+}

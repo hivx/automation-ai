@@ -1,0 +1,99 @@
+{
+  "stack": "python",
+  "language": [
+    "python"
+  ],
+  "cmd": {
+    "install": "pip install -e '.[dev]'",
+    "build": "python -m build",
+    "test": "pytest -q",
+    "test_one": "pytest -q {file}",
+    "lint": "ruff check .",
+    "typecheck": "mypy .",
+    "format": "ruff format {file}",
+    "run": "python -m app",
+    "migrate": "alembic upgrade head"
+  },
+  "formatters_by_ext": {
+    ".py": "ruff format {file}",
+    ".pyi": "ruff format {file}"
+  },
+  "structure": {
+    "src": "src",
+    "tests": "tests",
+    "docs": "docs",
+    "scripts": "scripts",
+    "config": [
+      "pyproject.toml",
+      "setup.cfg"
+    ],
+    "allowed_new_file_roots": [
+      "src",
+      "tests",
+      "docs",
+      "scripts"
+    ]
+  },
+  "naming": {
+    "file": "snake_case",
+    "class": "PascalCase",
+    "function": "snake_case",
+    "constant": "UPPER_SNAKE_CASE",
+    "test_file": "test_{name}.py",
+    "branch": "team/{id}-{slug}"
+  },
+  "test": {
+    "skip_markers": [
+      "@pytest.mark.skip",
+      "@pytest.mark.skipif",
+      "@pytest.mark.xfail",
+      "pytest.skip(",
+      "@unittest.skip"
+    ]
+  },
+  "protected_paths": [
+    ".env",
+    ".env.*",
+    "**/*.pem",
+    "**/*.key",
+    "secrets/**",
+    "poetry.lock",
+    "uv.lock",
+    "Pipfile.lock",
+    ".venv/**",
+    "vendor/**",
+    "config/production*",
+    "**/settings/prod*.py"
+  ],
+  "ci": {
+    "provider": "github",
+    "runner": "ubuntu-latest",
+    "setup": [
+      "python -m pip install --upgrade pip",
+      "pip install -e '.[dev]'"
+    ]
+  },
+  "deploy": {
+    "staging": "",
+    "smoke": "",
+    "prod_requires_reviewer": true
+  },
+  "ui": false,
+  "tracker": "github",
+  "plugins": {
+    "required": [],
+    "recommended": [
+      "pyright-lsp@claude-plugins-official",
+      "security-guidance@claude-plugins-official",
+      "github@claude-plugins-official"
+    ]
+  },
+  "notes": {
+    "deploy.staging": "Để trống: mỗi dự án tự khai lúc onboard.",
+    "deploy.smoke": "Để trống: mỗi dự án tự khai lúc onboard.",
+    "cmd.install": "Giả định pyproject có extra [dev]; dự án dùng requirements.txt/poetry/uv thì sửa.",
+    "cmd.typecheck": "Chưa chắc: mypy hoặc pyright tùy dự án.",
+    "cmd.run": "Chưa chắc: tên module 'app' là giả định.",
+    "cmd.migrate": "Chưa chắc: chỉ đúng khi dự án dùng Alembic; Django dùng manage.py migrate."
+  }
+}

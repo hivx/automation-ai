@@ -1,0 +1,19 @@
+---
+paths:
+  - "{{structure.src}}/**"
+---
+
+# Khi sửa mã nguồn
+
+- Chỉ sửa trong touchpoints của task; cần sửa ngoài → dừng, báo `DESIGN_CONFLICT` (STD-DESIGN-1).
+- Theo phong cách sẵn có của file; không đổi phong cách hàng loạt (STD-STYLE-4).
+- Không để code chết, code comment-out, log gỡ lỗi (STD-STYLE-5).
+- Giải pháp đơn giản nhất đáp ứng spec; tái dùng logic có sẵn (STD-DESIGN-4, STD-DESIGN-5).
+- Không nuốt lỗi; kiểm đầu vào ở ranh giới; gọi ngoài có timeout và retry giới hạn (STD-ERR-1, -2, -5).
+- Giá trị theo môi trường đọc từ cấu hình, không ghi cứng (STD-DESIGN-7).
+- Tên theo `naming.*` của profile (STD-NAME-1, STD-NAME-2).
+
+## Đọc gì bằng gì
+- Tìm chỗ sửa trong nhiều file → agent `Explore`; một file đã biết → Read đúng đoạn.
+- Tài liệu thư viện → WebFetch docs chính thức đúng phiên bản; dự phòng: mã nguồn thư viện đã cài.
+- Định dạng sau khi sửa do hook làm (formatters_by_ext); không chạy formatter tay cho cả repo.

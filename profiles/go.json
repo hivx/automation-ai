@@ -1,0 +1,92 @@
+{
+  "stack": "go",
+  "language": [
+    "go"
+  ],
+  "cmd": {
+    "install": "go mod download",
+    "build": "go build ./...",
+    "test": "go test ./...",
+    "test_one": "go test ./$(dirname {file})",
+    "lint": "golangci-lint run",
+    "typecheck": "go vet ./...",
+    "format": "gofmt -w {file}",
+    "run": "go run .",
+    "migrate": ""
+  },
+  "formatters_by_ext": {
+    ".go": "gofmt -w {file}"
+  },
+  "structure": {
+    "src": ".",
+    "tests": "colocated",
+    "docs": "docs",
+    "scripts": "scripts",
+    "config": [
+      "go.mod"
+    ],
+    "allowed_new_file_roots": [
+      "cmd",
+      "internal",
+      "pkg",
+      "docs",
+      "scripts"
+    ]
+  },
+  "naming": {
+    "file": "snake_case",
+    "class": "MixedCaps (PascalCase khi export)",
+    "function": "MixedCaps (camelCase khi không export)",
+    "constant": "MixedCaps",
+    "test_file": "{name}_test.go",
+    "branch": "team/{id}-{slug}"
+  },
+  "test": {
+    "skip_markers": [
+      "t.Skip(",
+      "t.SkipNow(",
+      "t.Skipf("
+    ]
+  },
+  "protected_paths": [
+    ".env",
+    ".env.*",
+    "**/*.pem",
+    "**/*.key",
+    "secrets/**",
+    "go.sum",
+    "vendor/**",
+    "bin/**",
+    "config/production*"
+  ],
+  "ci": {
+    "provider": "github",
+    "runner": "ubuntu-latest",
+    "setup": [
+      "go mod download"
+    ]
+  },
+  "deploy": {
+    "staging": "",
+    "smoke": "",
+    "prod_requires_reviewer": true
+  },
+  "ui": false,
+  "tracker": "github",
+  "plugins": {
+    "required": [],
+    "recommended": [
+      "gopls-lsp@claude-plugins-official",
+      "security-guidance@claude-plugins-official",
+      "github@claude-plugins-official"
+    ]
+  },
+  "notes": {
+    "deploy.staging": "Để trống: mỗi dự án tự khai lúc onboard.",
+    "deploy.smoke": "Để trống: mỗi dự án tự khai lúc onboard.",
+    "cmd.test_one": "Go chạy test theo package: lệnh lấy thư mục của {file}.",
+    "cmd.lint": "Cần cài golangci-lint; nếu không có thì dùng go vet ./....",
+    "cmd.run": "Chưa chắc: ứng dụng nhiều binary thì là go run ./cmd/<tên>.",
+    "cmd.migrate": "Để trống: tùy công cụ (golang-migrate, goose...)."
+  }
+}

@@ -1,0 +1,15 @@
+# TODO(v2): bản GitLab tương đương team-ci.yml. Hiện chỉ là khung; onboard chép khi ci.provider = gitlab.
+stages: [check]
+
+team-check:
+  stage: check
+  image: ubuntu:24.04
+  timeout: 30m
+  script:
+    - {{ci.setup|lines:4}}
+    - {{cmd.lint|or:true}}
+    - {{cmd.typecheck|or:true}}
+    - {{cmd.test|or:true}}
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "{{base_branch|or:main}}"

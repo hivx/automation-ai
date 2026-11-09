@@ -1,0 +1,32 @@
+# Do /team:onboard sinh từ profile (ci.*, cmd.*). Sửa profile rồi chạy lại onboard thay vì sửa tay.
+name: team-ci
+
+on:
+  pull_request:
+  push:
+    branches: ["{{base_branch|or:main}}"]
+
+concurrency:
+  group: team-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: {{ci.runner|or:ubuntu-latest}}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        run: |
+          {{ci.setup|lines:10}}
+      - name: Lint
+        run: {{cmd.lint|or:true}}
+      - name: Typecheck
+        run: {{cmd.typecheck|or:true}}
+      - name: Test
+        run: {{cmd.test|or:true}}
+      - name: Build
+        run: {{cmd.build|or:true}}

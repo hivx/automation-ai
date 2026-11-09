@@ -1,0 +1,256 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://automation-ai/schemas/profile.schema.json",
+  "title": "team profile (.team/profile.json)",
+  "type": "object",
+  "required": [
+    "stack",
+    "cmd",
+    "structure",
+    "protected_paths"
+  ],
+  "properties": {
+    "stack": {
+      "type": "string",
+      "description": "Tên stack chính"
+    },
+    "language": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Ngôn ngữ dùng trong repo"
+    },
+    "cmd": {
+      "type": "object",
+      "properties": {
+        "install": {
+          "type": "string",
+          "description": "Cài phụ thuộc"
+        },
+        "build": {
+          "type": "string",
+          "description": "Build"
+        },
+        "test": {
+          "type": "string",
+          "description": "Toàn bộ test"
+        },
+        "test_one": {
+          "type": "string",
+          "description": "Test của một file; dùng chỗ thay {file}; phải chứa {file} (chỗ thay duy nhất) hoặc để rỗng",
+          "pattern": "^$|\\{file\\}"
+        },
+        "lint": {
+          "type": "string",
+          "description": "Lint"
+        },
+        "typecheck": {
+          "type": "string",
+          "description": "Kiểm kiểu"
+        },
+        "format": {
+          "type": "string",
+          "description": "Format một file; dùng chỗ thay {file}; phải chứa {file} (chỗ thay duy nhất) hoặc để rỗng",
+          "pattern": "^$|\\{file\\}"
+        },
+        "run": {
+          "type": "string",
+          "description": "Chạy ứng dụng"
+        },
+        "migrate": {
+          "type": "string",
+          "description": "Chạy migration"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "test_one"
+      ],
+      "description": "Lệnh chạy từ gốc repo; {file} là chỗ thay duy nhất"
+    },
+    "formatters_by_ext": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "\\{file\\}"
+      },
+      "description": "Đuôi file → lệnh format có {file}"
+    },
+    "structure": {
+      "type": "object",
+      "properties": {
+        "src": {
+          "type": "string",
+          "description": "Thư mục mã nguồn"
+        },
+        "tests": {
+          "type": "string",
+          "description": "Thư mục test hoặc 'colocated'"
+        },
+        "docs": {
+          "type": "string",
+          "description": "Thư mục tài liệu"
+        },
+        "scripts": {
+          "type": "string",
+          "description": "Thư mục script"
+        },
+        "config": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "File/thư mục cấu hình"
+        },
+        "allowed_new_file_roots": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Danh sách ĐÓNG nơi được tạo file mới"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "allowed_new_file_roots"
+      ]
+    },
+    "naming": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "class": {
+          "type": "string"
+        },
+        "function": {
+          "type": "string"
+        },
+        "constant": {
+          "type": "string"
+        },
+        "test_file": {
+          "type": "string"
+        },
+        "branch": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "test": {
+      "type": "object",
+      "properties": {
+        "skip_markers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Dấu bỏ qua test bị cấm dùng để cho xanh"
+        }
+      },
+      "additionalProperties": false
+    },
+    "protected_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Glob không agent nào được sửa: secret, lockfile, vendored, cấu hình prod"
+    },
+    "ci": {
+      "type": "object",
+      "properties": {
+        "provider": {
+          "type": "string",
+          "enum": [
+            "github",
+            "gitlab",
+            "none"
+          ]
+        },
+        "runner": {
+          "type": "string"
+        },
+        "setup": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Lệnh chuẩn bị môi trường CI"
+        }
+      },
+      "additionalProperties": false
+    },
+    "deploy": {
+      "type": "object",
+      "properties": {
+        "staging": {
+          "type": "string",
+          "description": "Lệnh deploy staging"
+        },
+        "smoke": {
+          "type": "string",
+          "description": "Lệnh smoke test"
+        },
+        "prod_requires_reviewer": {
+          "type": "boolean",
+          "enum": [
+            true
+          ],
+          "description": "Prod luôn cần người duyệt"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ui": {
+      "type": "boolean",
+      "description": "Dự án có giao diện người dùng"
+    },
+    "tracker": {
+      "type": "string",
+      "enum": [
+        "github",
+        "gitlab",
+        "none"
+      ]
+    },
+    "plugins": {
+      "type": "object",
+      "properties": {
+        "required": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "name@marketplace"
+        },
+        "recommended": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "name@marketplace"
+        }
+      },
+      "additionalProperties": false
+    },
+    "notes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Khe → ghi chú một dòng (giá trị chưa chắc, lý do)"
+    },
+    "packages": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object"
+      },
+      "description": "Monorepo: thư mục → profile ghi đè một phần"
+    }
+  },
+  "additionalProperties": false
+}

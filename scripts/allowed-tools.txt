@@ -1,0 +1,17 @@
+# Tên tool được phép trong trường `tools` của agents/*.md — mỗi dòng một tên.
+# Nguồn: https://code.claude.com/docs/en/tools-reference.md (truy cập 2026-11-09, Claude Code 2.1.319).
+# Chỉ liệt kê tool có ích cho các vai; thêm tool mới phải kèm lý do trong PR.
+Agent
+AskUserQuestion
+Bash
+Edit
+Glob
+Grep
+LSP
+NotebookEdit
+Read
+Skill
+TodoWrite
+WebFetch
+WebSearch
+Write

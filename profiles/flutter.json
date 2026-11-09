@@ -1,0 +1,95 @@
+{
+  "stack": "flutter",
+  "language": [
+    "dart"
+  ],
+  "cmd": {
+    "install": "flutter pub get",
+    "build": "flutter build apk --debug",
+    "test": "flutter test",
+    "test_one": "flutter test {file}",
+    "lint": "flutter analyze",
+    "typecheck": "",
+    "format": "dart format {file}",
+    "run": "flutter run",
+    "migrate": ""
+  },
+  "formatters_by_ext": {
+    ".dart": "dart format {file}"
+  },
+  "structure": {
+    "src": "lib",
+    "tests": "test",
+    "docs": "docs",
+    "scripts": "scripts",
+    "config": [
+      "pubspec.yaml",
+      "analysis_options.yaml"
+    ],
+    "allowed_new_file_roots": [
+      "lib",
+      "test",
+      "integration_test",
+      "assets",
+      "docs"
+    ]
+  },
+  "naming": {
+    "file": "snake_case",
+    "class": "UpperCamelCase",
+    "function": "lowerCamelCase",
+    "constant": "lowerCamelCase",
+    "test_file": "{name}_test.dart",
+    "branch": "team/{id}-{slug}"
+  },
+  "test": {
+    "skip_markers": [
+      "skip:",
+      "solo:"
+    ]
+  },
+  "protected_paths": [
+    ".env",
+    ".env.*",
+    "**/*.pem",
+    "**/*.key",
+    "secrets/**",
+    "pubspec.lock",
+    "build/**",
+    ".dart_tool/**",
+    "android/key.properties",
+    "**/*.jks",
+    "**/*.keystore",
+    "android/app/google-services.json",
+    "ios/Runner/GoogleService-Info.plist"
+  ],
+  "ci": {
+    "provider": "github",
+    "runner": "ubuntu-latest",
+    "setup": [
+      "flutter pub get"
+    ]
+  },
+  "deploy": {
+    "staging": "",
+    "smoke": "",
+    "prod_requires_reviewer": true
+  },
+  "ui": true,
+  "tracker": "github",
+  "plugins": {
+    "required": [],
+    "recommended": [
+      "security-guidance@claude-plugins-official",
+      "github@claude-plugins-official"
+    ]
+  },
+  "notes": {
+    "deploy.staging": "Để trống: mỗi dự án tự khai lúc onboard.",
+    "deploy.smoke": "Để trống: mỗi dự án tự khai lúc onboard.",
+    "cmd.typecheck": "Để trống: flutter analyze đã kiểm kiểu.",
+    "cmd.build": "Chưa chắc: chọn đích build (apk, ipa, web) theo dự án.",
+    "test.skip_markers": "package:test dùng tham số skip: và solo:.",
+    "plugins.recommended": "Chưa có plugin LSP chính thức cho Dart trong claude-plugins-official."
+  }
+}

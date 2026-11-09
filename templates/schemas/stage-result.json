@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://automation-ai/schemas/stage-result.json",
+  "title": "team stage result (bàn giao ≤ 10 dòng dạng JSON khi chạy headless)",
+  "type": "object",
+  "required": ["feature", "stage", "agent", "verdict", "next"],
+  "properties": {
+    "feature": {"type": "string", "description": "Mã feature, ví dụ FEAT-001"},
+    "stage": {"type": "string", "enum": ["takeover", "onboard", "intake", "analyze", "research", "architect", "design", "plan", "build", "verify", "asbuilt", "pr", "release", "clean", "ci", "retro", "audit"]},
+    "agent": {"type": "string", "description": "Vai đã làm, ví dụ team:qa"},
+    "artifact": {"type": ["string", "null"], "description": "Đường dẫn artifact chính"},
+    "verdict": {"type": "string", "enum": ["done", "SPECIFIED", "NEEDS_ANSWER", "WAITING_FOR_ANSWER", "WAITING_FOR_APPROVAL", "BLOCKED", "DESIGN_CONFLICT", "approve", "request-changes", "design-defect", "accepted", "rework"]},
+    "evidence_ref": {"type": ["string", "null"], "description": "Nơi có đầu ra lệnh thật (file:dòng hoặc log)"},
+    "missing": {"type": "array", "items": {"type": "string"}},
+    "next": {"type": "string", "description": "Lệnh kế tiếp cho người hoặc vai gọi"}
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,2 @@
+{"ts": "2026-11-08T12:00:00Z", "from": "human", "about": "agent:team:tech-lead", "feature": "FEAT-002", "stage": "build", "score": 2, "note": "chậm, sửa nhiều vòng"}
+{"ts": "2026-11-08T12:05:00Z", "from": "human", "about": "agent:team:reviewer", "feature": "FEAT-001", "stage": "build", "score": 5, "note": "rõ ràng"}
