@@ -204,6 +204,9 @@ def check_git(root, data):
         if not parts:
             continue
         cdir, sub, args = parts
+        bad_c = [seg[i + 1] for i, t in enumerate(seg[:-1]) if t == "-c" and re.match(r"^(alias\.|core\.hooksPath|core\.sshCommand|core\.pager|core\.editor|core\.fsmonitor|diff\.external|credential\.helper)", seg[i + 1], re.I)]
+        if bad_c or "--exec-path" in " ".join(seg):
+            return 2, f"BLOCKED (STD-GIT-2): `git -c {bad_c[0] if bad_c else '--exec-path'}` có thể bỏ qua hook hoặc chạy lệnh tùy ý.", warnings
         wd = os.path.join(cwd, cdir) if cdir else cwd
         current = git_out(wd, "rev-parse", "--abbrev-ref", "HEAD")
         if sub in ("filter-branch", "filter-repo"):

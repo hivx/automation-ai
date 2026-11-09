@@ -5,6 +5,13 @@ Mọi thay đổi đáng kể của bộ kit được ghi ở đây.
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-09
+
+### Security
+- K-41: chặn `git -c` với khóa nguy hiểm (`alias.*`, `core.hooksPath`, …) và `--exec-path` — bỏ qua hook hoặc chạy shell tùy ý.
+- K-42: `takeover` thu hẹp `allowed-tools` từ `Bash(bash *)` về đúng hai script của kit.
+- Ghi nhận từ `/team:audit-kit` trên v0.2.0: K-39..K-45 (`docs/kit-issues.md`).
+
 ## [0.2.0] - 2026-11-09
 
 Vòng 1 nâng chất lượng (P7): cùng vai, giai đoạn, cổng, artifact và khe; viết lại cách skill/agent làm việc, có bằng chứng.

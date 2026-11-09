@@ -18,7 +18,7 @@ Nguồn: chạy end-to-end P6 trên dự án mẫu `sample-existing` (Python, 24
 | K-12 | major | đã sửa | team-leader | team-leader vẫn ghi `current.json` và journal bằng `printf` trong Bash → bị từ chối ở `-p`; journal thiếu dòng. | Thân agent ghi rõ "(Write)" ở bước 4 và 7. |
 | K-13 | major | đã sửa | role-policy | Lệnh chỉ-đọc bị chặn: reviewer `git worktree list`, `git ls-tree`; tech-lead `cd <worktree>`. | Thêm `cd` và git `ls-tree`, `for-each-ref`, `show-ref`, `worktree list` vào danh sách chỉ-đọc; ca thử. |
 | K-14 | major | đã sửa | dev / worktree | Vòng sửa: dev mới nằm ở worktree khác, cố trỏ git vào worktree cũ → Claude Code từ chối. | dev bước 1: vòng sửa thì `git switch` nhánh task trong worktree của mình. |
-| K-15 | major | đã sửa (P7) | build / max_agents_per_feature | Cỡ S dùng 2 dev + 2 reviewer (1 vòng sửa) + analyst + tech-lead + qa > trần S = 3; SPEC nói cỡ S "verify tự động, không qa riêng" nhưng skill `verify` luôn fork sang qa. | v0.2: định nghĩa trần là số VAI khác nhau, không tính lần gọi lại trong vòng sửa; cỡ S verify chạy trong tech-lead. |
+| K-15 | major | đã sửa (P7) | build / max_agents_per_feature | Cỡ S dùng 2 dev + 2 reviewer (1 vòng sửa) + analyst + tech-lead + qa > trần S = 3; SPEC nói cỡ S "verify tự động, không qa riêng" nhưng skill `verify` luôn fork sang qa. | P7: trần = số VAI khác nhau team-leader tự gọi (kể cả skill fork), không tính dev/reviewer do tech-lead gọi và lần gọi lại; cỡ S = analyst, tech-lead, qa = 3. qa vẫn nghiệm thu cỡ S (bước kiểm tự động thu gọn). |
 | K-16 | minor | đã sửa (P7) | team-leader | Đọc `gates` trong config và nghĩ G1 áp cho cỡ S dù `team.py` báo READY. | Đã thêm cột "Cổng áp dụng" vào `team.py status`; theo dõi ở vòng sau. |
 | K-17 | minor | đã sửa | gitignore.tmpl | `.claude/worktrees/` của subagent hiện là file untracked. | Thêm vào `gitignore.tmpl`. |
 | K-18 | minor | mở | scorecard.sh | `result` đoán từ chữ trong tin cuối: dev ghi `DESIGN_CONFLICT`, Explore ghi `approve` chỉ vì có từ đó. | v0.2: vai trả dòng JSON theo `stage-result.json`; scorecard đọc trường `verdict`. |
@@ -69,3 +69,17 @@ Kết quả: 7 cao, 7 trung bình, 5 thấp. Báo cáo không ghi được vào 
 | Hook chặn nhầm | 3 (qa `python3 -c`, reviewer `git worktree list`, tech-lead `cd`) | 2 (K-36, K-37 — đều do sửa an toàn ở P6) → đã sửa | Ca thử mới chặn tái diễn |
 | Phán quyết verify | accepted | rework (K-35) → sửa → chạy lại: `Verdict: accepted`, dừng ở G4 ($1.25) | Checklist #5 đạt với cách viết mới |
 | Chi phí intake→verify | ≈ $3.9 (3 lần run) | $3.29 (intake $0.26 + run $3.03) | — |
+
+## Từ `/team:audit-kit` trên v0.2.0 (2026-11-09, coach, $0.94)
+11 vấn đề (4 cao, 3 trung bình, 4 thấp); không lệch tên, không cặp luật mâu thuẫn mới. Báo cáo không ghi được vào repo kit (như K-20), chép vào đây.
+
+| ID | Mức | Trạng thái | Nơi | Hiện tượng | Xử lý |
+|---|---|---|---|---|---|
+| K-39 | major | mở | teamlib.py `is_readonly` / role-policy.json | Chỉ-đọc vẫn lọt: `sed 'e cmd'`, `sed 'w f'`, `sort -o f`, `uniq IN OUT`, `tree -o f`, `rg --pre cmd`; chuyển hướng `>&`, `<>` không được nhận; `mkdir` trong danh sách chỉ-đọc. | v0.2.x: chặn từng dạng, bỏ `mkdir`, ca thử cho mỗi dạng. |
+| K-40 | major | mở | teamlib.py `readonly_scripts` | So theo tên file, không theo đường dẫn: `validate.sh`/`team.py` ở thư mục bất kỳ đều được coi là chỉ-đọc; `log-run.sh`, `validate.sh` có ghi file. | v0.2.x: so đường dẫn tuyệt đối dưới `<kit>/scripts/`; tách script có ghi. |
+| K-41 | major | đã sửa (v0.2.1) | check-git.sh / teamlib.py | `git -c core.hooksPath=/dev/null commit` bỏ qua hook commit; `git -c alias.x='!cmd'` chạy shell tùy ý. | Chặn `-c` với `alias.*`, `core.hooksPath`, `core.sshCommand`, `core.pager`, `core.editor`, `core.fsmonitor`, `diff.external`, `credential.helper`, và `--exec-path`; 3 ca thử. Thu hẹp `git *` trong allow-list: vòng sau. |
+| K-42 | major | đã sửa (v0.2.1) | skills/takeover | `allowed-tools` còn `Bash(bash *)` (phiên chính không có `agent_type` nên role-policy không áp). | Thu hẹp về `Bash(bash ${CLAUDE_PLUGIN_ROOT}/scripts/{detect-stack,explore-cache}.sh *)`. |
+| K-43 | minor | mở | coach.md / audit-kit / role-policy | K-27 còn: danh sách ghi của coach lệch ba nơi; lần chạy này gặp đúng xung đột. | Vòng 2 viết lại coach + audit-kit. |
+| K-44 | minor | mở | skills/audit-kit | Chạy audit-kit ngay trong repo kit (`<kit>` = gốc dự án) thì báo cáo không ghi được về đúng chỗ. | Nhận dạng trường hợp này, in hướng dẫn chép vào `docs/kit-issues.md`. |
+| K-45 | minor | mở | docs/01-process.md | Ghi "cỡ S verify tự động" trong khi verify luôn fork qa (đúng với định nghĩa trần mới). | Sửa văn bản ở vòng 2. |
+Cũng được audit nhắc lại (đã có): K-24, K-06, K-30, K-28.

@@ -52,6 +52,9 @@ check "git: commit --no-verify bị chặn"          2 check-git.sh "$(b 'git co
 check "git: commit -n bị chặn"                   2 check-git.sh "$(b 'git commit -n -m "x"')"
 check "git: commit sai định dạng chỉ cảnh báo"   0 check-git.sh "$(b 'git commit -m "update stuff"')"
 check "git: lệnh ghép && push main bị chặn"      2 check-git.sh "$(b 'git add . && git push origin main')"
+check "git: -c core.hooksPath bị chặn"         2 check-git.sh "$(b 'git -c core.hooksPath=/dev/null commit -m x')"
+check "git: -c alias.x=!cmd bị chặn"           2 check-git.sh "$(b "git -c alias.x='!rm -rf .' x")"
+check "git: -c user.name hợp lệ qua"           0 check-git.sh "$(b 'git -c user.name=A log -1')"
 check "git: filter-branch bị chặn"               2 check-git.sh "$(b 'git filter-branch --tree-filter x HEAD')"
 git switch -q main
 check "git: reset --hard trên main bị chặn"      2 check-git.sh "$(b 'git reset --hard HEAD~1')"

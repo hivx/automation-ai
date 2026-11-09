@@ -3,7 +3,7 @@ name: takeover
 description: Dùng khi đội nhận một repo đã có code mà chưa có .team/profile.json, hoặc người hỏi dự án này làm gì, đã tới đâu, việc tiếp theo là gì.
 argument-hint: "[--full]"
 disable-model-invocation: true
-allowed-tools: Read Glob Bash(bash *) Bash(git log *) Bash(git branch *) Bash(git tag *) Bash(ls *) Bash(cat *) Bash(jq *) Bash(gh issue list *) Bash(gh pr list *)
+allowed-tools: Read Glob Bash(bash ${CLAUDE_PLUGIN_ROOT}/scripts/detect-stack.sh *) Bash(bash ${CLAUDE_PLUGIN_ROOT}/scripts/explore-cache.sh *) Bash(git log *) Bash(git branch *) Bash(git tag *) Bash(ls *) Bash(cat *) Bash(jq *) Bash(gh issue list *) Bash(gh pr list *)
 ---
 
 # Tiếp nhận dự án có sẵn
