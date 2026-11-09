@@ -21,3 +21,30 @@ Nguồn: chạy end-to-end P6 trên dự án mẫu `sample-existing` (Python, 24
 | K-15 | major | mở | build / max_agents_per_feature | Cỡ S dùng 2 dev + 2 reviewer (1 vòng sửa) + analyst + tech-lead + qa > trần S = 3; SPEC nói cỡ S "verify tự động, không qa riêng" nhưng skill `verify` luôn fork sang qa. | v0.2: định nghĩa trần là số VAI khác nhau, không tính lần gọi lại trong vòng sửa; cỡ S verify chạy trong tech-lead. |
 | K-16 | minor | mở | team-leader | Đọc `gates` trong config và nghĩ G1 áp cho cỡ S dù `team.py` báo READY. | Đã thêm cột "Cổng áp dụng" vào `team.py status`; theo dõi ở vòng sau. |
 | K-17 | minor | đã sửa | gitignore.tmpl | `.claude/worktrees/` của subagent hiện là file untracked. | Thêm vào `gitignore.tmpl`. |
+| K-18 | minor | mở | scorecard.sh | `result` đoán từ chữ trong tin cuối: dev ghi `DESIGN_CONFLICT`, Explore ghi `approve` chỉ vì có từ đó. | v0.2: vai trả dòng JSON theo `stage-result.json`; scorecard đọc trường `verdict`. |
+| K-19 | minor | mở | team-leader | Có feature chờ G4 thì team-leader từ chối nhận yêu cầu mới (cổng chặn feature, không chặn cả đội). | v0.2: ghi rõ trong team-leader/intake: cổng chỉ chặn feature của nó. |
+| K-20 | major | đã sửa | evals/run-eval.sh | Bản sao dự án nằm trong thư mục kit (plugin) → Claude Code từ chối ghi ("sensitive file"); kết quả with-skill vô giá trị. | Bản sao chuyển ra `$EVAL_WORK_ROOT` ngoài kit; chạy lại. |
+
+## Từ `/team:audit-kit` chạy trên chính kit (2026-11-09, coach, $1.48)
+Kết quả: 7 cao, 7 trung bình, 5 thấp. Báo cáo không ghi được vào repo kit (cùng nguyên nhân K-20: thư mục plugin), nên được chép vào đây.
+
+| ID | Mức | Trạng thái | Nơi | Hiện tượng | Xử lý |
+|---|---|---|---|---|---|
+| K-21 | major | đã sửa | teamlib.py (chỉ-đọc) | `$(…)`, backtick, `python3 -c`, `bash -c`, `git -c core.pager=…`, `git diff --output`, `awk system()`, `sed --in-place`, `find -fprint` lọt qua kiểm chỉ-đọc. | Chặn các dạng đó cho vai chỉ-đọc; bỏ `awk` khỏi danh sách; ca thử. |
+| K-22 | major | đã sửa | hooks.json / teamlib.py | Cài cục bộ bỏ tiền tố `team:` nhưng matcher SubagentStop và kiểm Agent vẫn đòi tiền tố → stop-check không chạy cho dev; tech-lead bị chặn gọi `dev`. | Matcher `^(team:)?(dev\|maintainer\|researcher)$`; chuẩn hóa `subagent_type`; ca thử. |
+| K-23 | major | đã sửa | protect.sh | `.team/*`, `.claude/*` luôn cho ghi → dev sửa được `profile.json` (đổi lệnh test mà stop-check chạy). | Chỉ cho `docs/team/**`, `.team/**` trừ profile/config (chỉ lúc onboard), `.claude/{agent-memory,skills,agents,rules}/**`; ca thử. |
+| K-24 | major | mở | hooks.json | `protect.sh` không gắn vào Bash: vai `bash: any` (dev, maintainer, devops, qa) sửa được `protected_paths` bằng shell (`>`, `tee`, `cp`, `sed -i`). | v0.2: kiểm đích ghi của Bash cho mọi vai. |
+| K-25 | minor | mở | 18 skill | `Bash(python3 *)` trong `allowed-tools` cho phép mọi `python3 -c`. | v0.2: thu hẹp về đúng script của kit. |
+| K-26 | minor | mở | onboard | Ngoại lệ onboard cho `cp *` không kiểm vùng cấm. | v0.2: chỉ cho chép từ `<kit>/templates/`. |
+| K-27 | minor | mở | coach.md / audit-kit / role-policy | Danh sách ghi của coach lệch giữa ba nơi; coach dừng khi thiếu `runs.jsonl` trong khi audit-kit vẫn cho chạy kiểm tĩnh. | v0.2: đồng bộ (sẽ làm khi viết lại coach ở P7). |
+| K-28 | minor | mở | docs/01-process.md / team-feature.yml | Nhãn `team:decide`, `team:size:*` được nhắc trong docs nhưng workflow không đọc. | v0.2: workflow truyền nhãn vào prompt. |
+| K-29 | minor | đã sửa | teamlib.py | So khớp `cmd.*` không có ranh giới từ (`pytest` khớp `pytestfoo`). | Đòi khoảng trắng sau tiền tố. |
+| K-30 | minor | mở | hooks.json | Hook format không áp cho NotebookEdit. | v0.2: thêm hoặc ghi là cố ý. |
+| K-31 | minor | đã sửa | evals/config.json | `Bash(bash *)` ≈ Bash không giới hạn. | Thay bằng `Bash(bash <kit>/scripts/*)` do run-eval thêm. |
+
+## Từ eval và kiểm cài đặt (2026-11-09)
+| ID | Mức | Trạng thái | Nơi | Hiện tượng | Xử lý |
+|---|---|---|---|---|---|
+| K-32 | major | đã sửa | install-local.sh | Cài cục bộ bỏ tiền tố → skill thành `/status`, `/run`, `/verify`, `/feedback`, trùng tên lệnh/skill có sẵn của Claude Code. | Skill cục bộ đổi thành `team-<tên>`; `team.py` in `/team-<tên>` khi kit nằm ở `.claude/team-kit`. |
+| K-33 | minor | mở | evals/using-team | Kịch bản 1 không phân biệt baseline/with-skill (check quá hẹp hoặc quá yếu). | P7: viết lại kịch bản và check. |
+| K-34 | major | mở | team-leader / build | Cỡ S: team-leader gọi thẳng dev, không qua `/team:build` → không có reviewer (vi phạm "luôn review"). | P7: team-leader cỡ S vẫn gọi `/team:build` (1 dev + reviewer). |

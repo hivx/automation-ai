@@ -367,5 +367,19 @@ def main(argv):
     return 64
 
 
+class _LocalPrefix:
+    """Cài cục bộ (kit nằm trong .claude/team-kit): lệnh là /team-<tên> thay cho /team:<tên>."""
+    def __init__(self, stream):
+        self.stream = stream
+
+    def write(self, s):
+        return self.stream.write(s.replace("/team:", "/team-"))
+
+    def flush(self):
+        return self.stream.flush()
+
+
 if __name__ == "__main__":
+    if kit_dir().replace(os.sep, "/").endswith("/.claude/team-kit"):
+        sys.stdout = _LocalPrefix(sys.stdout)
     sys.exit(main(sys.argv[1:]))

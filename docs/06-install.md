@@ -7,7 +7,7 @@ Yêu cầu: Claude Code ≥ 2.1; `bash`, `python3`, `jq`, `git`; `gh` tùy chọ
 |---|---|---|---|---|
 | 1. Marketplace (khuyên dùng) | `/plugin marketplace add <owner>/automation-ai` rồi `/plugin install team@automation-ai` | có | có | `/team:<tên>` |
 | 2. `npx skills` (tùy chọn) | `npx skills add <owner>/automation-ai` | không | không | `/<tên>` |
-| 3. Chép cục bộ | `scripts/install-local.sh [--dry-run] [--force] <dự-án>` | có (tên không tiền tố) | có (gộp vào `.claude/settings.json`) | `/<tên>` |
+| 3. Chép cục bộ | `scripts/install-local.sh [--dry-run] [--force] <dự-án>` | có (tên không tiền tố) | có (gộp vào `.claude/settings.json`) | `/team-<tên>` |
 
 - Cách 1 cũng chạy được bằng shell: `claude plugin marketplace add <owner>/automation-ai`, `claude plugin install team@automation-ai`.
 - Cách 2 thiếu luật máy (hook), chỉ hợp để đọc thử skill.

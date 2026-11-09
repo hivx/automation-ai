@@ -66,7 +66,7 @@ def skills():
 
 def render_skills_readme(rows):
     out = [GEN, "# Skills của plugin `team`", "",
-           "Mỗi thư mục là một lệnh `/team:<tên>`. Cài cục bộ thì gõ `/<tên>`.", "",
+           "Mỗi thư mục là một lệnh `/team:<tên>`. Cài cục bộ thì gõ `/team-<tên>`.", "",
            "| Skill | Ai gọi | Vai chạy | Artifact |", "|---|---|---|---|"]
     for r in rows:
         arts = ", ".join(f"`{cell(a)}`" for a in r["outs"]) or "—"
@@ -76,7 +76,7 @@ def render_skills_readme(rows):
 
 def render_want(rows):
     out = [GEN, "# Muốn X thì gõ Y", "",
-           "Bảng sinh từ `skills/*/SKILL.md`. Cài cục bộ (không qua marketplace): bỏ tiền tố `team:`.", "",
+           "Bảng sinh từ `skills/*/SKILL.md`. Cài cục bộ (không qua marketplace): gõ `/team-<tên>` thay cho `/team:<tên>`.", "",
            "| Khi | Gõ | Vai chạy | Để lại |", "|---|---|---|---|"]
     for r in rows:
         if r["who"] == "Claude":

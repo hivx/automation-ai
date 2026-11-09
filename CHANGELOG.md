@@ -5,7 +5,28 @@ Mọi thay đổi đáng kể của bộ kit được ghi ở đây.
 
 ## [Unreleased]
 
-### Added
+## [0.1.0] - 2026-11-09
+
+Bản dùng được đầu tiên của plugin `team`. Đã chạy end-to-end trên dự án mẫu: takeover → G0 → onboard → một feature cỡ S (analyze → build → verify, dừng ở G4) → retro.
+
+### Bộ kit gồm
+- 13 agent (`agents/`), 26 skill (`skills/`), 16 playbook + 4 batch workflow (`workflows/`).
+- Hook cho 8 sự kiện qua 9 script (`hooks/hooks.json`, `hooks/role-policy.json`); tổng 25 script bash/python3 stdlib trong `scripts/`.
+- Sổ tay `handbook/STD.md`: 12 mảng, 86 quy tắc, checklist review (10) và nghiệm thu (6); `STD-short.md` sinh tự động.
+- 6 profile (`_template`, python, node-ts, go, java-maven, flutter), 3 schema, 25 template artifact, 15 template dự án (CLAUDE.md, settings, rules, GitHub/GitLab CI, PR/issue, CODEOWNERS, gitignore).
+- Test: 62 ca hook, 23 ca `team.py status`, 9 unit test `measure.py`; `validate.sh --strict` (gồm `audit-xref.py`) chạy trong CI.
+- Eval cho 8 skill kỷ luật (`evals/`, `run-eval.sh`); kết quả trong `evals/RESULTS.md`.
+
+### Hạn chế đã biết
+- Mở (major): K-06 headless ở thư mục chưa được tin phải truyền `--allowedTools`; K-15 định nghĩa `max_agents_per_feature` và verify cỡ S; K-24 Bash của vai `bash: any` không qua `protect.sh`. Chi tiết và minor: `docs/kit-issues.md`.
+- Ngôn ngữ văn xuôi là tiếng Việt; ngân sách chữ đếm theo âm tiết nên thân skill/agent còn ngắn (P7 sẽ nâng).
+- Phạm vi v2 theo SPEC: GitLab CI đầy đủ (hiện là khung), scorecard nâng cao, canary tự động, đưa skill tạm lên kit, cấu hình MCP mẫu.
+
+### Đã sửa khi chạy end-to-end (P6)
+- Blocker: K-01 `cmd.test_one` sai chỗ thay (schema bắt `{file}`), K-02 cổng theo cỡ, K-03 quyền đọc kit lần đầu, K-11 task in đậm không được tính.
+- Major: K-04/K-12 ghi file bằng Write, K-05 CHANGELOG ở gốc, K-13 lệnh chỉ-đọc bị chặn nhầm, K-14 worktree vòng sửa, K-20 eval ghi trong thư mục plugin, K-21..K-23 lỗ hổng chỉ-đọc, matcher cài cục bộ, vùng luôn-cho-ghi quá rộng.
+
+### Added (P1–P5)
 - Khung repo: manifest plugin `team` và marketplace `automation-ai`.
 - `scripts/validate.sh` (kiểm tĩnh, `--strict`) và `scripts/install-local.sh` (cài cục bộ).
 - `SPEC.md`, `README.md`, `CLAUDE.md`, tài liệu `docs/` và `docs/guides/`.

@@ -67,7 +67,7 @@
     ],
     "SubagentStop": [
       {
-        "matcher": "^team:(dev|maintainer|researcher)$",
+        "matcher": "^(team:)?(dev|maintainer|researcher)$",
         "hooks": [
           {
             "type": "command",

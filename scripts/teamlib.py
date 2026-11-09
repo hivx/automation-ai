@@ -328,19 +328,25 @@ def is_readonly(seg, policy, kit):
     seg = strip_prefix(seg)
     if not seg:
         return True
+    if any(("$(" in t or "`" in t or "<(" in t or ">(" in t) for t in seg):
+        return False  # thay thế lệnh có thể chạy bất cứ gì
     head = os.path.basename(seg[0])
     if head == "git":
+        if any(t == "-c" or t.startswith(("--output", "--ext-diff", "-O")) for t in seg[1:]):
+            return False
         parts = git_parts(seg)
         return bool(parts) and parts[1] in READONLY_GIT and git_listing_only(parts[1], parts[2])
     if head == "gh":
         return len(seg) >= 3 and (seg[1], seg[2]) in READONLY_GH
     if head in ("python3", "python", "bash", "sh"):
+        if any(a in ("-c", "-m") for a in seg[1:]):
+            return False
         script = next((a for a in seg[1:] if not a.startswith("-")), "")
         return os.path.basename(script) in set(policy.get("readonly_scripts", []))
     if head in ("find",):
-        return not any(a in ("-delete", "-exec", "-execdir", "-ok") for a in seg)
+        return not any(a in ("-delete", "-exec", "-execdir", "-ok", "-okdir", "-fprint", "-fprint0", "-fprintf", "-fls") for a in seg)
     if head == "sed":
-        return not any(a.startswith("-i") for a in seg)
+        return not any(a.startswith(("-i", "--in-place")) or (a.startswith("-") and not a.startswith("--") and "i" in a[1:]) for a in seg)
     return head in set(policy.get("readonly_commands", []))
 
 
@@ -381,7 +387,8 @@ def role_policy(root, data, policy_path):
     if tool == "Agent":
         target = tin.get("subagent_type") or "general-purpose"
         allowed = role.get("agents", [])
-        if any(fnmatch.fnmatchcase(target, p) for p in allowed):
+        names = {target, target if target.startswith("team:") or target in ("Explore", "Plan", "general-purpose") else f"team:{target}"}
+        if any(fnmatch.fnmatchcase(n, p) for n in names for p in allowed):
             return 0, ""
         return 2, f"BLOCKED (role-policy): {agent} không được gọi `{target}` (cho phép: {', '.join(allowed) or 'không ai'})."
     if tool == "Bash":
@@ -399,7 +406,7 @@ def role_policy(root, data, policy_path):
                 continue
             if any(p != "cmd.*" and fnmatch.fnmatchcase(text, p) for p in extra):
                 continue
-            if any(text == p or text.startswith(p + " ") or text.startswith(p) for p in prefixes if p):
+            if any(text == p or text.startswith(p + " ") for p in prefixes if p):
                 continue
             return 2, (f"BLOCKED (role-policy): {agent} chỉ chạy lệnh chỉ-đọc"
                        f"{' hoặc ' + ', '.join(extra) if extra else ''}; nhận `{text[:120]}`.")

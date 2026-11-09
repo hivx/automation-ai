@@ -4,7 +4,8 @@
     "name": "automation-ai contributors"
   },
   "metadata": {
-    "description": "Marketplace tự lưu trữ của plugin team."
+    "description": "Marketplace tự lưu trữ của plugin team.",
+    "version": "0.1.0"
   },
   "plugins": [
     {

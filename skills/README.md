@@ -1,7 +1,7 @@
 <!-- GENERATED — do not edit; run scripts/gen-guides.py -->
 # Skills của plugin `team`
 
-Mỗi thư mục là một lệnh `/team:<tên>`. Cài cục bộ thì gõ `/<tên>`.
+Mỗi thư mục là một lệnh `/team:<tên>`. Cài cục bộ thì gõ `/team-<tên>`.
 
 | Skill | Ai gọi | Vai chạy | Artifact |
 |---|---|---|---|

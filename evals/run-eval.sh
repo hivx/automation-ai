@@ -4,7 +4,8 @@
 #   --project  dự án mẫu đã onboard (mặc định: "project" trong evals/config.json hoặc $EVAL_PROJECT).
 #   Mỗi chế độ chạy trên BẢN SAO của dự án; kit cho baseline là bản sao bỏ thư mục skills/<skill>.
 #   model, max_turns, max_budget_usd, allowed_tools lấy từ evals/config.json.
-#   Kết quả: evals/<skill>/out/<YYYY-MM-DD>/s<n>-<mode>/{result.json,stderr.txt,work/}; in PASS/FAIL từng check.
+#   Kết quả: evals/<skill>/out/<YYYY-MM-DD>/s<n>-<mode>/{result.json,stderr.txt,output.txt,workdir.txt}; in PASS/FAIL từng check.
+#   Bản sao dự án nằm NGOÀI kit: $EVAL_WORK_ROOT (mặc định $TMPDIR/team-evals) — Claude Code từ chối ghi trong thư mục plugin.
 # Định dạng kịch bản (evals/<skill>/scenarios.md): "## Scenario <n> — …", các dòng "- Setup: `…`",
 #   "- Input: `…`", "- Baseline input: `…`", và dưới "- Checks:" các dòng
 #   "grep: `<regex>` in `<file|OUTPUT>`", "absent: `<regex>` in `<file|OUTPUT>`", "exists: `<path>`", "unchanged: `<path>`".
@@ -33,32 +34,32 @@ spec="$(parse)" || exit 64
 day="$(date +%F)"
 modes=(); [[ $mode == both || $mode == baseline ]] && modes+=(baseline); [[ $mode == both || $mode == with-skill ]] && modes+=(with-skill)
 for m in "${modes[@]}"; do
-  out="$EVALS/$skill/out/$day/s$n-$m"; prompt="$(jq -r "if \"$m\" == \"baseline\" then .baseline else .input end" <<<"$spec")"
-  kitdir="$KIT"; [[ $m == baseline ]] && kitdir="$out/kit"
-  cmd=(claude -p --plugin-dir "$kitdir" --model "$(cfg model)" --permission-mode acceptEdits "--allowedTools=$(cfg allowed_tools),Read(/$kitdir/**)"
+  out="$EVALS/$skill/out/$day/s$n-$m"; work="${EVAL_WORK_ROOT:-${TMPDIR:-/tmp}/team-evals}/$skill/$day/s$n-$m"; prompt="$(jq -r "if \"$m\" == \"baseline\" then .baseline else .input end" <<<"$spec")"
+  kitdir="$KIT"; [[ $m == baseline ]] && kitdir="$work.kit"
+  cmd=(claude -p --plugin-dir "$kitdir" --model "$(cfg model)" --permission-mode acceptEdits "--allowedTools=$(cfg allowed_tools),Read(/$kitdir/**),Bash(bash $kitdir/scripts/*),Bash(bash \"$kitdir/scripts/*)"
        --max-turns "$(cfg max_turns)" --max-budget-usd "$(cfg max_budget_usd)" --output-format json "$prompt")
   echo "== $skill s$n [$m]"
   if (( dry )); then
-    echo "  workdir: cp -a <project> $out/work"; [[ $m == baseline ]] && echo "  kit: copy of $KIT without skills/$skill"
+    echo "  workdir: cp -a <project> $work"; [[ $m == baseline ]] && echo "  kit: copy of $KIT without skills/$skill"
     [[ -n $(jq -r .setup <<<"$spec") ]] && echo "  setup: $(jq -r .setup <<<"$spec")"
     printf '  run:'; printf ' %q' "${cmd[@]}"; echo
     jq -r '.checks[] | "  check: \(.kind) \(.pattern) \(.target)"' <<<"$spec"; continue
   fi
   [[ -d $project ]] || { echo "run-eval: --project không hợp lệ: '$project'" >&2; exit 64; }
-  rm -rf "$out"; mkdir -p "$out"; cp -a "$project" "$out/work"
-  if [[ $m == baseline ]]; then mkdir -p "$out/kit"; (cd "$KIT" && tar --exclude="./skills/$skill" --exclude=./evals --exclude=./.git -cf - .) | tar -xf - -C "$out/kit"; fi
-  echo "$kitdir" >"$out/work/.team/plugin_root" 2>/dev/null || true
-  setup="$(jq -r .setup <<<"$spec")"; [[ -n $setup ]] && (cd "$out/work" && bash -c "$setup")
-  (cd "$out/work" && timeout 1800 "${cmd[@]}" </dev/null >"$out/result.json" 2>"$out/stderr.txt")
+  rm -rf "$out" "$work" "$work.kit"; mkdir -p "$out" "$(dirname "$work")"; cp -a "$project" "$work"; echo "$work" >"$out/workdir.txt"
+  if [[ $m == baseline ]]; then mkdir -p "$work.kit"; (cd "$KIT" && tar --exclude="./skills/$skill" --exclude=./evals --exclude=./.git -cf - .) | tar -xf - -C "$work.kit"; fi
+  echo "$kitdir" >"$work/.team/plugin_root" 2>/dev/null || true
+  setup="$(jq -r .setup <<<"$spec")"; [[ -n $setup ]] && (cd "$work" && bash -c "$setup")
+  (cd "$work" && timeout 1800 "${cmd[@]}" </dev/null >"$out/result.json" 2>"$out/stderr.txt")
   jq -r '.result // ""' "$out/result.json" >"$out/output.txt" 2>/dev/null
   pass=0; fail=0
   while IFS=$'\t' read -r kind pat target; do
-    ok=0; f="$out/work/$target"; [[ $target == OUTPUT ]] && f="$out/output.txt"
+    ok=0; f="$work/$target"; [[ $target == OUTPUT ]] && f="$out/output.txt"
     case $kind in
       grep) cat $f 2>/dev/null | grep -qiE -- "$pat" && ok=1 ;;
       absent) cat $f 2>/dev/null | grep -qiE -- "$pat" || ok=1 ;;
-      exists) compgen -G "$out/work/$pat" >/dev/null && ok=1 ;;
-      unchanged) (cd "$out/work" && git diff --quiet HEAD -- "$pat" && [[ -z $(git ls-files --others --exclude-standard -- "$pat") ]]) && ok=1 ;;
+      exists) compgen -G "$work/$pat" >/dev/null && ok=1 ;;
+      unchanged) (cd "$work" && git diff --quiet HEAD -- "$pat" && [[ -z $(git ls-files --others --exclude-standard -- "$pat") ]]) && ok=1 ;;
     esac
     if (( ok )); then pass=$((pass + 1)); echo "  PASS $kind $pat ${target}"; else fail=$((fail + 1)); echo "  FAIL $kind $pat ${target}"; fi
   done < <(jq -r '.checks[] | [.kind, .pattern, .target] | @tsv' <<<"$spec")

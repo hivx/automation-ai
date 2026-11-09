@@ -2,6 +2,8 @@
 
 `automation-ai` là bộ AGENT + SKILL + QUY TẮC + HƯỚNG DẪN + QUY TRÌNH cài được cho Claude Code. Cài vào bất kỳ dự án phần mềm nào (mọi ngôn ngữ, mọi nền tảng), Claude Code trở thành một đội IT chuyên nghiệp: tiếp nhận dự án và báo cáo hiện trạng, nhận yêu cầu thô rồi làm trọn từ phân tích đến phát hành, chỉ dừng ở các cổng duyệt bạn bật, và tự đo lường để đề xuất cải tiến chính mình. Lệnh, cấu trúc và quy ước của từng dự án nằm trong `.team/profile.json`, không nằm trong lõi.
 
+**Trạng thái: v0.1.0 — dùng được; xem hạn chế đã biết trong [`CHANGELOG.md`](CHANGELOG.md).**
+
 Đặc tả đầy đủ: [`SPEC.md`](SPEC.md). Tài liệu cho người: [`docs/`](docs/00-overview.md).
 
 ## Dòng chảy 9 giai đoạn
@@ -50,7 +52,7 @@ git clone https://github.com/<owner>/automation-ai
 automation-ai/scripts/install-local.sh [--dry-run] [--force] /đường/dẫn/dự-án
 ```
 
-Khi cài cục bộ, lệnh là `/<tên>` thay vì `/team:<tên>`. Chi tiết, gỡ cài và phạm vi settings: [`docs/06-install.md`](docs/06-install.md).
+Khi cài cục bộ, lệnh là `/team-<tên>` thay vì `/team:<tên>`. Chi tiết, gỡ cài và phạm vi settings: [`docs/06-install.md`](docs/06-install.md).
 
 ## Giờ đầu tiên trên dự án đã có code
 

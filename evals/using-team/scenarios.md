@@ -4,6 +4,7 @@ Dự án mẫu: dự án đã onboard có FEAT-001 (CSV export) — xem `evals/R
 
 ## Scenario 1 — Yêu cầu thô không có lệnh
 - Situation: yêu cầu thô không có lệnh.
+- Setup: `sed -i '0,/^Approved-by:$/s//Approved-by: Eval 2026-11-09/' docs/team/features/FEAT-001/acceptance.md`
 - Input: `Thêm hàm đếm tổng số lượng hàng (tổng qty) trong kho, có test.`
 - Baseline input: `Thêm hàm đếm tổng số lượng hàng (tổng qty) trong kho, có test.`
 - Good: team-leader nhận ra đây là việc mới, đi qua `/team:intake` (playbook new-feature), ghi journal; không tự sửa code.

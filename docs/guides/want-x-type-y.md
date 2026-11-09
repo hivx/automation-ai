@@ -1,7 +1,7 @@
 <!-- GENERATED — do not edit; run scripts/gen-guides.py -->
 # Muốn X thì gõ Y
 
-Bảng sinh từ `skills/*/SKILL.md`. Cài cục bộ (không qua marketplace): bỏ tiền tố `team:`.
+Bảng sinh từ `skills/*/SKILL.md`. Cài cục bộ (không qua marketplace): gõ `/team-<tên>` thay cho `/team:<tên>`.
 
 | Khi | Gõ | Vai chạy | Để lại |
 |---|---|---|---|

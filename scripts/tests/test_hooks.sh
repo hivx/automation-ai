@@ -28,6 +28,8 @@ check "protect: settings.json bị chặn"           2 protect.sh "$(w Write "$P
 check "protect: file mới ngoài roots bị chặn"    2 protect.sh "$(w Write "$P/random/new.py")"
 check "protect: file mới trong src cho qua"      0 protect.sh "$(w Write "$P/src/new.py")"
 check "protect: sửa file có sẵn cho qua"         0 protect.sh "$(w Edit "$P/src/existing.py")"
+check "protect: .team/profile.json bị chặn"     2 protect.sh "$(w Edit "$P/.team/profile.json")"
+check "protect: .team/current.json cho qua"     0 protect.sh "$(w Write "$P/.team/current.json")"
 check "protect: docs/team luôn cho qua"          0 protect.sh "$(w Write "$P/docs/team/features/FEAT-001/spec.md")"
 check "protect: ngoài dự án cho qua"             0 protect.sh "$(w Write "/tmp/elsewhere.txt")"
 check "protect: CHANGELOG.md mới ở gốc cho qua"  0 protect.sh "$(w Write "$P/CHANGELOG.md")"
@@ -56,6 +58,7 @@ check "git: reset --hard trên team/* cho qua"    0 check-git.sh "$(b 'git reset
 
 # role-policy.sh
 rw() { jq -nc --arg t "$1" --arg f "$2" --arg a "$3" '{tool_name:$t, agent_type:$a, tool_input:{file_path:$f}}'; }
+ag() { jq -nc --arg s "$1" --arg a "$2" '{tool_name:"Agent", agent_type:$a, tool_input:{subagent_type:$s, prompt:"x"}}'; }
 check "role: team-leader ghi docs/team qua"      0 role-policy.sh "$(rw Write "$P/docs/team/journal/FEAT-001.md" team:team-leader)"
 check "role: team-leader ghi src bị chặn"        2 role-policy.sh "$(rw Write "$P/src/new.py" team:team-leader)"
 check "role: dev ghi src qua"                    0 role-policy.sh "$(rw Write "$P/src/new.py" team:dev)"
@@ -65,13 +68,18 @@ check "role: team-leader bash chỉ-đọc qua"       0 role-policy.sh "$(b 'git
 check "role: reviewer git worktree list qua"    0 role-policy.sh "$(b 'git worktree list' team:reviewer)"
 check "role: reviewer git worktree add chặn"    2 role-policy.sh "$(b 'git worktree add x' team:reviewer)"
 check "role: tech-lead cd rồi git qua"          0 role-policy.sh "$(b 'cd src && git status' team:tech-lead)"
+check "role: reviewer \$(...) bị chặn"            2 role-policy.sh "$(b 'echo $(touch x)' team:reviewer)"
+check "role: reviewer python3 -c bị chặn"        2 role-policy.sh "$(b 'python3 -c "open(1)"' team:reviewer)"
+check "role: reviewer git -c pager bị chặn"      2 role-policy.sh "$(b 'git -c core.pager=sh log' team:reviewer)"
+check "role: reviewer awk bị chặn"               2 role-policy.sh "$(b 'awk "BEGIN{system(1)}"' team:reviewer)"
+check "role: tech-lead gọi dev (không tiền tố) qua" 0 role-policy.sh "$(ag dev team:tech-lead)"
+check "role: tech-lead (cục bộ) gọi dev qua"     0 role-policy.sh "$(ag dev tech-lead)"
 check "role: team-leader rm bị chặn"             2 role-policy.sh "$(b 'rm -rf src' team:team-leader)"
 check "role: team-leader chuyển hướng ra src chặn" 2 role-policy.sh "$(b 'echo x > src/a.py' team:team-leader)"
 check "role: team-leader jq >> feedback qua"     0 role-policy.sh "$(b 'jq -nc {} >> docs/team/metrics/feedback.jsonl' team:team-leader)"
 check "role: qa chạy lệnh kiểm tùy ý qua"        0 role-policy.sh "$(b 'python3 -c "print(1)"' team:qa)"
 check "role: tech-lead chạy cmd.test qua"        0 role-policy.sh "$(b 'pytest -q tests/test_x.py' team:tech-lead)"
 check "role: tech-lead curl bị chặn"             2 role-policy.sh "$(b 'curl https://example.com' team:tech-lead)"
-ag() { jq -nc --arg s "$1" --arg a "$2" '{tool_name:"Agent", agent_type:$a, tool_input:{subagent_type:$s, prompt:"x"}}'; }
 check "role: tech-lead gọi team:dev qua"         0 role-policy.sh "$(ag team:dev team:tech-lead)"
 check "role: tech-lead gọi team:qa bị chặn"      2 role-policy.sh "$(ag team:qa team:tech-lead)"
 check "role: analyst gọi Explore qua"            0 role-policy.sh "$(ag Explore team:analyst)"

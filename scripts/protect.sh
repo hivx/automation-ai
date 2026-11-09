@@ -2,7 +2,7 @@
 # protect.sh — hook PreToolUse (Edit|Write|NotebookEdit): chặn ghi vào vùng cấm.
 # Chặn (thoát 2): .git/**, .claude/settings*.json, protected_paths (STD-SEC-1);
 #   file MỚI ngoài structure.allowed_new_file_roots (STD-STRUCT-1).
-# Luôn cho phép: docs/team/**, .team/**, .claude/** (trừ settings), CHANGELOG.md ở gốc.
+# Luôn cho phép: docs/team/**, .team/** (trừ profile/config ngoài onboard), .claude/{agent-memory,skills,agents,rules}/**, CHANGELOG.md ở gốc.
 # Đọc JSON hook từ stdin: tool_name, tool_input.file_path | tool_input.notebook_path.
 # Dùng: protect.sh [--root DIR] < hook.json ; protect.sh --help
 set -uo pipefail
@@ -20,7 +20,10 @@ case "$rel" in
   .git|.git/*) block "BLOCKED (STD-SEC-1): không sửa trong .git/." ;;
   .claude/settings.json|.claude/settings.local.json)
     block "BLOCKED (STD-SEC-1): $rel chỉ đổi qua /team:onboard hoặc do người sửa." ;;
-  docs/team/*|.team/*|.claude/*) allow ;;
+  .team/profile.json|.team/config.json)
+    [[ "$(current_stage)" == onboard ]] && allow
+    block "BLOCKED (STD-SEC-1): $rel chỉ đổi qua /team:onboard hoặc do người sửa." ;;
+  docs/team/*|.team/*|.claude/agent-memory/*|.claude/skills/*|.claude/agents/*|.claude/rules/*) allow ;;
   CHANGELOG.md) allow ;;   # DoD đòi CHANGELOG ở gốc (STD-DOC-3)
 esac
 

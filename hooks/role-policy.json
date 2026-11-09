@@ -29,7 +29,6 @@
     "test",
     "true",
     "sha256sum",
-    "awk",
     "sed",
     "paste",
     "mkdir",

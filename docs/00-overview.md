@@ -64,7 +64,7 @@ SPEC giữ nguyên văn. Các điểm dưới đây đã được người duy�
 | ADJ-05 | Mục plugin trong `marketplace.json` không ghi `version`; chỉ `plugin.json` ghi. | Ghi cả hai thì `plugin.json` thắng và validate cảnh báo. |
 | ADJ-06 | `effort` nhận `low|medium|high|xhigh|max`; SessionStart có thêm matcher `fork`. | Docs hiện hành. |
 | ADJ-07 | Bỏ `TaskCreate/TaskUpdate` khỏi tool của team-leader; `tasks.md` là trạng thái. | Hai tool này chỉ mặc định có trên model cũ. |
-| ADJ-08 | Cài cục bộ (`install-local.sh`, `npx skills`) không có namespace: lệnh là `/<tên>`. Hook được nối vào `.claude/settings.json` ở P5. `npx skills` chỉ cài skill. | `${CLAUDE_PLUGIN_ROOT}` và `hooks/hooks.json` chỉ có hiệu lực trong plugin. |
+| ADJ-08 | Cài cục bộ (`install-local.sh`, `npx skills`) không có namespace: lệnh là `/team-<tên>` (ADJ-22). Hook được nối vào `.claude/settings.json` (P5). `npx skills` chỉ cài skill. | `${CLAUDE_PLUGIN_ROOT}` và `hooks/hooks.json` chỉ có hiệu lực trong plugin. |
 | ADJ-09 | Cổng áp theo cỡ việc: cỡ S không qua G1 theo thiết kế; playbook refactor bật G2b. | Đọc đơn giản nhất của SPEC §4. |
 | ADJ-10 | `designer` mặc định opus; team-leader truyền `model: sonnet` khi gọi cho việc cỡ S/M. | Một file agent chỉ có một `model`. |
 | ADJ-11 | Bổ sung tool so với SPEC §3: `Write` cho tech-lead và qa (phải tạo `plan.md`, `tasks.md`, `review-NN.md`, `acceptance.md`); `Skill` cho mọi vai (dùng skill tạm, `/team:commit`); bỏ `AskUserQuestion` khỏi analyst (ADJ-01). | Edit không tạo được file mới; thiếu `Skill` thì subagent không gọi được skill. |
@@ -78,4 +78,4 @@ SPEC giữ nguyên văn. Các điểm dưới đây đã được người duy�
 | ADJ-19 | `Read(//<kit>/**)` ghi vào `.claude/settings.local.json`, không phải settings dùng chung. | Đường dẫn kit khác nhau giữa các máy; dry-run P4 cho thấy cần quyền này. |
 | ADJ-20 | `stop-check.sh` chạy cả ở SubagentStop của `team:dev`, `team:maintainer`, `team:researcher`. | Vòng build chạy trong subagent; chỉ Stop của phiên chính thì quá muộn. |
 | ADJ-21 | STD-GIT-3 ở mức máy: chỉ push `team/*` hoặc tag; `--force-with-lease` cũng bị chặn; Edit/Write vào `.claude/settings*.json` bị chặn. | Đơn giản nhất và an toàn nhất. |
-| ADJ-22 | Cài cục bộ: `install-local.sh` bỏ tiền tố `team:` của tên agent và lệnh, gộp hook vào `.claude/settings.json`; role-policy nhận cả tên không tiền tố. | Không có namespace plugin khi cài cục bộ. |
+| ADJ-22 | Cài cục bộ: `install-local.sh` bỏ tiền tố `team:` của tên agent, đổi skill thành `team-<tên>` (tránh đụng `/status`, `/run`, `/verify`…), gộp hook vào `.claude/settings.json`; role-policy nhận cả tên không tiền tố. | Không có namespace plugin khi cài cục bộ. |
