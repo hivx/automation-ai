@@ -174,7 +174,7 @@ qa trích nguyên văn. Mỗi mục phải có đầu ra thật được dán.
 2. `cmd.test`, `cmd.lint`, `cmd.typecheck` xanh trên nhánh feature (STD-TEST-3, STD-STYLE-2, STD-STYLE-3).
 3. Diff không thêm dấu bỏ qua test nào trong `test.skip_markers` (STD-TEST-4).
 4. Migration chạy lên rồi xuống thành công; dữ liệu đối soát khớp (STD-OPS-2, STD-OPS-3).
-5. DoD đủ: As-Built, README/tài liệu, CHANGELOG (STD-DOC-1, STD-DOC-2, STD-DOC-3).
+5. Phần DoD của build đủ (test, code, tài liệu đã sửa trong task); As-Built, CHANGELOG và tài liệu người dùng là việc của `/team:asbuilt` sau G4 — ghi chủ và lệnh kiểm, `/team:release` kiểm lại (STD-DOC-1, STD-DOC-2, STD-DOC-3).
 6. Diff không chạm `protected_paths` và không chứa secret (STD-SEC-1).
 
 ## Finding format

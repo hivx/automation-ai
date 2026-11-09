@@ -62,7 +62,11 @@ def relpath(root, path):
         return "."
     if not full.startswith(root + os.sep):
         return ""
-    return os.path.relpath(full, root).replace(os.sep, "/")
+    rel = os.path.relpath(full, root).replace(os.sep, "/")
+    parts = rel.split("/")
+    if len(parts) > 3 and parts[0] == ".claude" and parts[1] == "worktrees":
+        rel = "/".join(parts[3:])  # worktree của subagent: luật áp như ở gốc repo
+    return rel
 
 
 def glob_re(pat):
@@ -396,7 +400,15 @@ def role_policy(root, data, policy_path):
             return 0, ""
         extra = bash.get("allow", []) if isinstance(bash, dict) else []
         prefixes = cmd_prefixes(root) if "cmd.*" in extra else []
-        for seg in segments(tin.get("command", "")):
+        command = tin.get("command", "")
+        try:
+            with open(os.path.join(root, ".team", "plugin_root"), encoding="utf-8") as fh:
+                kit_path = fh.read().strip() or kit
+        except OSError:
+            kit_path = kit
+        for form in ('"$(cat .team/plugin_root)"', "$(cat .team/plugin_root)"):
+            command = command.replace(form, kit_path)  # cách skill gọi script của kit; thay thế khác vẫn bị chặn
+        for seg in segments(command):
             clean, targets = redirect_targets(seg)
             for t in targets:
                 if t not in ("/dev/null",) and not writable(t):

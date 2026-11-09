@@ -5,6 +5,29 @@ Mọi thay đổi đáng kể của bộ kit được ghi ở đây.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-09
+
+Vòng 1 nâng chất lượng (P7): cùng vai, giai đoạn, cổng, artifact và khe; viết lại cách skill/agent làm việc, có bằng chứng.
+
+### Viết lại tới chuẩn (chữ trước → sau)
+- Skill nạp thường xuyên (≤ 400 chữ, 4 mục): using-team 200 → 395, handbook 182 → 375, status 138 → 273, run 189 → 313, intake 194 → 305, feedback 222 → 263.
+- Skill đầy đủ (1.200–2.500 chữ, 10 mục, kèm `references/`): analyze 325 → 1.590, plan 282 → 1.316, takeover 433 → 1.510, build 350 → 1.504, verify 274 → 1.510, commit 242 → 1.501, pr 290 → 1.425.
+- Agent (600–1.200 chữ, 10 mục, ví dụ tin trả, tin dừng 4 dòng): team-leader 345 → 1.062, tech-lead 342 → 945, dev 342 → 959, reviewer 349 → 946, qa 337 → 902.
+- Trung vị chữ của 8 skill kỷ luật: 297,5 → 1.502,5. Mục đạt chuẩn: 0/39 → 18/39 (100% mục đã viết lại).
+- Tham khảo: addyosmani/agent-skills, obra/superpowers, wshobson/agents, VoltAgent subagents, BMAD-METHOD (`docs/research/reference-kits.md`, `docs/credits.md`).
+
+### Validator
+- `scripts/kit-metrics.py` (đo, score 0–100, `--check`); chuẩn trong `scripts/skill-budgets.txt`, `skill-sections.txt`, `agent-sections.txt`.
+- Bỏ ngân sách cũ 200/500 chữ và trần 350 chữ cho agent, bỏ danh sách 8 tiêu đề cũ; `validate.sh` chạy `kit-metrics.py --check`. Mục chưa đạt: `scripts/quality-backlog.txt` (21 mục, chỉ được rút ngắn).
+
+### Eval (`evals/RESULTS.md`, Round 1)
+- using-team s1: BEFORE 3/5 → AFTER 5/5 (AFTER có analyze + reviewer; BEFORE giao thẳng dev, bỏ review).
+- verify s1: 4/4 → 4/4 (rẻ hơn 8%); analyze s1: 4/4 → 4/4.
+
+### Vấn đề của kit
+- Đóng: K-10, K-15, K-16, K-19, K-33, K-34 (viết lại); K-35 DoD lệch thời điểm verify/asbuilt, K-36 file mới trong worktree bị chặn, K-37 thay thế `$(cat .team/plugin_root)` bị chặn (blocker, sửa trong vòng).
+- Mở: K-06, K-24 (major), K-08, K-09, K-18, K-25..K-28, K-30, K-38 (minor) — `docs/kit-issues.md`.
+
 ## [0.1.0] - 2026-11-09
 
 Bản dùng được đầu tiên của plugin `team`. Đã chạy end-to-end trên dự án mẫu: takeover → G0 → onboard → một feature cỡ S (analyze → build → verify, dừng ở G4) → retro.

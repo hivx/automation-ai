@@ -26,12 +26,12 @@ ARTIFACT_TEMPLATE = {
     "ai-readiness.md": "ai-readiness", "profile-proposal.md": "profile-proposal", "debt.md": "debt",
     "open-questions.md": "open-questions", "<ID>.md": "journal-entry", "skills-registry.md": "skills-registry",
     "kit-issues.md": "kit-issues", "onboarding.md": "onboarding", "defects.md": "defects", "ci.md": "ci",
-    "<agent-or-skill>.md": "proposal", "*.md": "proposal",
+    "<agent-or-skill>.md": "proposal", "*.md": "proposal", "takeover.md": "journal-entry",
 }
 NO_TEMPLATE = {"diff.patch", "pr-body.md", "feedback.jsonl", "runs.jsonl", "sessions.jsonl", "scorecard.json",
                "CHANGELOG.md", "README.md", "CLAUDE.md", "plan.md@session", "<id>.md", "<topic>@<version>.md",
                "profile.json", "config.json", "current.json", "settings.json", "SKILL.md", "tests.md",
-               "<name>.md", "<name>.tests.md", "explore"}
+               "<name>.md", "<name>.tests.md", "explore", "<slug>.md"}
 TEXT_DIRS = ["agents", "skills", "workflows", "handbook", "docs", "templates", "evals"]
 TOP_FILES = ["README.md", "CLAUDE.md"]
 EXTS = (".md", ".json", ".yml", ".tmpl", ".sh", ".py")

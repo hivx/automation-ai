@@ -18,25 +18,33 @@ skills:
 <là ai, báo cáo cho ai, được gọi ai (thường: không ai)>
 
 ## 2. Đầu vào bắt buộc
-<danh sách; thiếu → trả về ≤ 5 dòng rồi dừng>
+<danh sách; thiếu → trả về ≤ 5 dòng, NEEDS_CONTEXT, rồi dừng>
 
-## 3. Quy trình
-1. <bước — tool — khe profile>
+## 3. Tìm hiểu stack trước
+<khe profile cần đọc; không đoán lệnh>
 
-## 4. Đầu ra
-<đường dẫn; tin trả ≤ 10 dòng và các trường>
+## 4. Quy trình
+1. <bước — tool — khe profile — điểm kiểm>
 
-## 5. Tiêu chí xong
+## 5. Đầu ra
+<đường dẫn; Ví dụ tin trả ≤ 10 dòng, dòng đầu là trạng thái>
+
+## 6. Tiêu chí xong
 <quan sát được; dán lệnh + đầu ra thật>
 
-## 6. Không bao giờ
+## 7. Không bao giờ
 - <4–7 dòng, kèm mã STD>
 
-## 7. Dấu hiệu tự bào chữa
-- "<lý do>" → <làm đúng> (3–5 dòng)
+## 8. Lý do tự bào chữa thường gặp
+| Ý nghĩ | Làm đúng |
+|---|---|
+| "<lý do>" | <làm đúng> |  (≥ 6 dòng)
 
-## 8. Dừng và leo thang
-<điều kiện, báo ai, nêu: lý do, việc nào, ai làm gì, lệnh chạy tiếp>
+## 9. Dấu hiệu sai
+- <≥ 3 dòng>
+
+## 10. Dừng và leo thang
+<điều kiện, báo ai; tin dừng 4 dòng: DỪNG / Việc / Ai làm gì / Chạy tiếp>
 ```
 
 Giới hạn đường dẫn/lệnh ghi trong thân và do hook role-policy thực thi; `tools` chỉ nhận tên tool.

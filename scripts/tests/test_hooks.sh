@@ -31,6 +31,9 @@ check "protect: sửa file có sẵn cho qua"         0 protect.sh "$(w Edit "$P
 check "protect: .team/profile.json bị chặn"     2 protect.sh "$(w Edit "$P/.team/profile.json")"
 check "protect: .team/current.json cho qua"     0 protect.sh "$(w Write "$P/.team/current.json")"
 check "protect: docs/team luôn cho qua"          0 protect.sh "$(w Write "$P/docs/team/features/FEAT-001/spec.md")"
+check "protect: file mới trong worktree/tests qua" 0 protect.sh "$(w Write "$P/.claude/worktrees/agent-x/tests/test_new.py")"
+check "protect: worktree/.env bị chặn"         2 protect.sh "$(w Write "$P/.claude/worktrees/agent-x/.env")"
+check "protect: worktree/random bị chặn"       2 protect.sh "$(w Write "$P/.claude/worktrees/agent-x/random/x.py")"
 check "protect: ngoài dự án cho qua"             0 protect.sh "$(w Write "/tmp/elsewhere.txt")"
 check "protect: CHANGELOG.md mới ở gốc cho qua"  0 protect.sh "$(w Write "$P/CHANGELOG.md")"
 
@@ -74,6 +77,8 @@ check "role: reviewer git -c pager bị chặn"      2 role-policy.sh "$(b 'git 
 check "role: reviewer awk bị chặn"               2 role-policy.sh "$(b 'awk "BEGIN{system(1)}"' team:reviewer)"
 check "role: tech-lead gọi dev (không tiền tố) qua" 0 role-policy.sh "$(ag dev team:tech-lead)"
 check "role: tech-lead (cục bộ) gọi dev qua"     0 role-policy.sh "$(ag dev tech-lead)"
+check "role: tech-lead team.py qua plugin_root"  0 role-policy.sh "$(b 'python3 "$(cat .team/plugin_root)/scripts/team.py" status FEAT-001' team:tech-lead)"
+check "role: reviewer \$(cat khác) bị chặn"       2 role-policy.sh "$(b 'cat $(cat .env)' team:reviewer)"
 check "role: team-leader rm bị chặn"             2 role-policy.sh "$(b 'rm -rf src' team:team-leader)"
 check "role: team-leader chuyển hướng ra src chặn" 2 role-policy.sh "$(b 'echo x > src/a.py' team:team-leader)"
 check "role: team-leader jq >> feedback qua"     0 role-policy.sh "$(b 'jq -nc {} >> docs/team/metrics/feedback.jsonl' team:team-leader)"

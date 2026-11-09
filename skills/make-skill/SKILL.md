@@ -19,7 +19,7 @@ Tạo một skill tạm của dự án đúng chuẩn, dùng ngay, có đăng k�
 ## Các bước
 1. Tìm trùng: skill của kit (`<kit>/skills/`), `.claude/skills/`, skill của plugin đã cài (danh sách skill đang thấy). Trùng hoặc gần trùng → từ chối, chỉ ra skill có sẵn.
 2. Gom mẫu trong repo (Agent → Explore): 2–3 file mẫu, quy ước, lệnh của profile. Cần docs ngoài → gọi researcher.
-3. Viết `.claude/skills/<name>/SKILL.md` theo `${CLAUDE_SKILL_DIR}/references/skill-template.md`: mô tả bắt đầu "Dùng khi", 8 mục, ≤ 500 từ thân, `allowed-tools` tối thiểu, không ghi cứng lệnh stack.
+3. Viết `.claude/skills/<name>/SKILL.md` theo `${CLAUDE_SKILL_DIR}/references/skill-template.md`: mô tả bắt đầu "Dùng khi"; thân theo 10 mục và 1.200–2.500 chữ của `<kit>/scripts/skill-sections.txt` (skill nạp thường xuyên: 4 mục, ≤ 400 chữ); `allowed-tools` tối thiểu; không ghi cứng lệnh stack.
 4. Dòng đầu thân: `<!-- team: temp, created <YYYY-MM-DD>, need: <nhu cầu> -->`.
 5. `references/tests.md`: 1–2 ca thử (đầu vào → kết quả mong đợi).
 6. Đăng ký trong `docs/team/skills-registry.md` (mẫu `<kit>/templates/artifacts/skills-registry.md`): tên, nhu cầu, ngày tạo, trạng thái `temp`, lần dùng cuối.
@@ -29,7 +29,7 @@ Tạo một skill tạm của dự án đúng chuẩn, dùng ngay, có đăng k�
 - `.claude/skills/<name>/SKILL.md`, `.claude/skills/<name>/references/tests.md`; dòng mới trong `docs/team/skills-registry.md`.
 
 ## Tiêu chí xong
-- Skill mới có 8 mục, mô tả bắt đầu "Dùng khi", thân ≤ 500 từ (`wc -w` dán); registry có dòng (dán).
+- Skill mới đạt chuẩn (`python3 "<kit>/scripts/kit-metrics.py"` không áp cho `.claude/skills/`: đếm `wc -w` và tiêu đề, dán); registry có dòng (dán).
 
 ## Dấu hiệu sai
 - "Tạo sẵn cho chắc" → chỉ khi có nhu cầu đang làm.

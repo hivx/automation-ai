@@ -13,16 +13,16 @@ Nguồn: chạy end-to-end P6 trên dự án mẫu `sample-existing` (Python, 24
 | K-07 | minor | đã sửa | takeover | Repo 11 file: T2 đọc trực tiếp, không qua Explore (có ghi lý do). | `tiers.md`: repo < 30 file được đọc trực tiếp ở T2, ghi rõ trong bảng tầng. |
 | K-08 | minor | mở | takeover | Đếm sai số dòng CLAUDE.md (116 thay vì 120). | v0.2: `detect-stack.sh` báo số dòng CLAUDE.md/AGENTS.md (máy đếm, không phải LLM). |
 | K-09 | minor | mở | onboard | AI-readiness `clean-first` nhưng onboard vẫn chạy khi G0 đã duyệt, chỉ nhắc viết lại CLAUDE.md ở việc tay. | v0.2: onboard đòi xác nhận riêng khi verdict là `clean-first`. |
-| K-10 | minor | mở | feedback | Skill `feedback` nối `feedback.jsonl` bằng `jq >>`; ở `-p` có thể bị từ chối như K-04. | v0.2: `log-run.sh --feedback` ghi dòng góp ý. |
+| K-10 | minor | đã sửa (P7) | feedback | Skill `feedback` nối `feedback.jsonl` bằng `jq >>`; ở `-p` có thể bị từ chối như K-04. | v0.2: `log-run.sh --feedback` ghi dòng góp ý. |
 | K-11 | blocker | đã sửa | team.py | `- [x] **T1 — …**` (T in đậm) không được tính là task tick → status kẹt ở `planned`, team-leader không đi tiếp. | Regex task chấp nhận `*`, `_`, `` ` `` trước mã task; thêm ca thử. |
 | K-12 | major | đã sửa | team-leader | team-leader vẫn ghi `current.json` và journal bằng `printf` trong Bash → bị từ chối ở `-p`; journal thiếu dòng. | Thân agent ghi rõ "(Write)" ở bước 4 và 7. |
 | K-13 | major | đã sửa | role-policy | Lệnh chỉ-đọc bị chặn: reviewer `git worktree list`, `git ls-tree`; tech-lead `cd <worktree>`. | Thêm `cd` và git `ls-tree`, `for-each-ref`, `show-ref`, `worktree list` vào danh sách chỉ-đọc; ca thử. |
 | K-14 | major | đã sửa | dev / worktree | Vòng sửa: dev mới nằm ở worktree khác, cố trỏ git vào worktree cũ → Claude Code từ chối. | dev bước 1: vòng sửa thì `git switch` nhánh task trong worktree của mình. |
-| K-15 | major | mở | build / max_agents_per_feature | Cỡ S dùng 2 dev + 2 reviewer (1 vòng sửa) + analyst + tech-lead + qa > trần S = 3; SPEC nói cỡ S "verify tự động, không qa riêng" nhưng skill `verify` luôn fork sang qa. | v0.2: định nghĩa trần là số VAI khác nhau, không tính lần gọi lại trong vòng sửa; cỡ S verify chạy trong tech-lead. |
-| K-16 | minor | mở | team-leader | Đọc `gates` trong config và nghĩ G1 áp cho cỡ S dù `team.py` báo READY. | Đã thêm cột "Cổng áp dụng" vào `team.py status`; theo dõi ở vòng sau. |
+| K-15 | major | đã sửa (P7) | build / max_agents_per_feature | Cỡ S dùng 2 dev + 2 reviewer (1 vòng sửa) + analyst + tech-lead + qa > trần S = 3; SPEC nói cỡ S "verify tự động, không qa riêng" nhưng skill `verify` luôn fork sang qa. | v0.2: định nghĩa trần là số VAI khác nhau, không tính lần gọi lại trong vòng sửa; cỡ S verify chạy trong tech-lead. |
+| K-16 | minor | đã sửa (P7) | team-leader | Đọc `gates` trong config và nghĩ G1 áp cho cỡ S dù `team.py` báo READY. | Đã thêm cột "Cổng áp dụng" vào `team.py status`; theo dõi ở vòng sau. |
 | K-17 | minor | đã sửa | gitignore.tmpl | `.claude/worktrees/` của subagent hiện là file untracked. | Thêm vào `gitignore.tmpl`. |
 | K-18 | minor | mở | scorecard.sh | `result` đoán từ chữ trong tin cuối: dev ghi `DESIGN_CONFLICT`, Explore ghi `approve` chỉ vì có từ đó. | v0.2: vai trả dòng JSON theo `stage-result.json`; scorecard đọc trường `verdict`. |
-| K-19 | minor | mở | team-leader | Có feature chờ G4 thì team-leader từ chối nhận yêu cầu mới (cổng chặn feature, không chặn cả đội). | v0.2: ghi rõ trong team-leader/intake: cổng chỉ chặn feature của nó. |
+| K-19 | minor | đã sửa (P7) | team-leader | Có feature chờ G4 thì team-leader từ chối nhận yêu cầu mới (cổng chặn feature, không chặn cả đội). | v0.2: ghi rõ trong team-leader/intake: cổng chỉ chặn feature của nó. |
 | K-20 | major | đã sửa | evals/run-eval.sh | Bản sao dự án nằm trong thư mục kit (plugin) → Claude Code từ chối ghi ("sensitive file"); kết quả with-skill vô giá trị. | Bản sao chuyển ra `$EVAL_WORK_ROOT` ngoài kit; chạy lại. |
 
 ## Từ `/team:audit-kit` chạy trên chính kit (2026-11-09, coach, $1.48)
@@ -46,5 +46,26 @@ Kết quả: 7 cao, 7 trung bình, 5 thấp. Báo cáo không ghi được vào 
 | ID | Mức | Trạng thái | Nơi | Hiện tượng | Xử lý |
 |---|---|---|---|---|---|
 | K-32 | major | đã sửa | install-local.sh | Cài cục bộ bỏ tiền tố → skill thành `/status`, `/run`, `/verify`, `/feedback`, trùng tên lệnh/skill có sẵn của Claude Code. | Skill cục bộ đổi thành `team-<tên>`; `team.py` in `/team-<tên>` khi kit nằm ở `.claude/team-kit`. |
-| K-33 | minor | mở | evals/using-team | Kịch bản 1 không phân biệt baseline/with-skill (check quá hẹp hoặc quá yếu). | P7: viết lại kịch bản và check. |
-| K-34 | major | mở | team-leader / build | Cỡ S: team-leader gọi thẳng dev, không qua `/team:build` → không có reviewer (vi phạm "luôn review"). | P7: team-leader cỡ S vẫn gọi `/team:build` (1 dev + reviewer). |
+| K-33 | minor | đã sửa (P7) | evals/using-team | Kịch bản 1 không phân biệt baseline/with-skill (check quá hẹp hoặc quá yếu). | P7: viết lại kịch bản và check. |
+| K-34 | major | đã sửa (P7) | team-leader / build | Cỡ S: team-leader gọi thẳng dev, không qua `/team:build` → không có reviewer (vi phạm "luôn review"). | P7: team-leader cỡ S vẫn gọi `/team:build` (1 dev + reviewer). |
+
+## Vòng 1 P7 — chạy lại end-to-end (2026-11-09)
+Đã đóng nhờ viết lại skill/agent: K-10 (feedback ghi bằng Write), K-15 (trần vai = số vai khác nhau team-leader tự gọi; cỡ S: analyst, tech-lead, qa = 3), K-16/K-19 (cổng chỉ theo `team.py`, chỉ chặn feature của nó), K-33 (kịch bản using-team s1 có 5 check), K-34 (cỡ S qua `/team:build` có reviewer — xác nhận trong eval và end-to-end).
+
+| ID | Mức | Trạng thái | Nơi | Hiện tượng | Xử lý |
+|---|---|---|---|---|---|
+| K-35 | blocker | đã sửa | handbook Acceptance checklist #5, verify, qa, spec template | qa trả `rework` dù 5/5 tiêu chí đạt vì DoD đòi As-Built, CHANGELOG, tài liệu người dùng — những thứ `/team:asbuilt` chỉ viết SAU G4. Vòng lặp không thoát được. | Checklist #5: phần DoD của build; phần sau G4 ghi chủ, `/team:release` kiểm lại; release thêm điều kiện CHANGELOG + tài liệu. Chạy lại verify trên mẫu. |
+| K-36 | blocker | đã sửa | protect.sh / teamlib.relpath | Sau K-23, file MỚI trong worktree của dev (`.claude/worktrees/<n>/…`) bị chặn như nằm ngoài allowed roots (dev không ghi được báo cáo; file test mới cũng sẽ bị chặn). | Đường dẫn trong worktree được xét tương đối với worktree; 3 ca thử. |
+| K-37 | blocker | đã sửa | teamlib role-policy (K-21) | Chặn `$(…)` cho vai chỉ-đọc cũng chặn lệnh của chính skill: `python3 "$(cat .team/plugin_root)/scripts/team.py" status`. | Chỉ thay đúng dạng `$(cat .team/plugin_root)` bằng đường dẫn kit; mọi thay thế khác vẫn bị chặn; 2 ca thử. |
+| K-38 | minor | mở | coach / retro | Retro tạo 2 đề xuất (asbuilt, config-max-agents) dựa trên một feature; độ tin cậy thấp nhưng vẫn hợp lệ theo luật mới. | Theo dõi ở vòng sau khi có ≥ 2 feature. |
+
+### So sánh với lần chạy P6 (cùng dự án mẫu, cùng yêu cầu)
+| Chỉ số | P6 (v0.1.0) | P7 vòng 1 | Ghi chú |
+|---|---|---|---|
+| Số lần `/team:run` để tới verify | 3 (2 lần dừng sai: G1 cỡ S; task in đậm) | 1 | K-02, K-11 không tái diễn |
+| Dòng journal FEAT-001 | 4 (thiếu dòng analyst) | 6 (mỗi lần gọi có lý do trước) | Một số trường nhận xét còn "—" khi chưa có kết quả |
+| Vai team-leader tự gọi / trần S | 5 vai, journal ghi sai "3" | 3 / 3 (analyst, tech-lead, qa) | Định nghĩa đếm mới (K-15) |
+| Vòng rework | 1 | 0 (reviewer approve vòng 1) | — |
+| Hook chặn nhầm | 3 (qa `python3 -c`, reviewer `git worktree list`, tech-lead `cd`) | 2 (K-36, K-37 — đều do sửa an toàn ở P6) → đã sửa | Ca thử mới chặn tái diễn |
+| Phán quyết verify | accepted | rework (K-35) → sửa → chạy lại: `Verdict: accepted`, dừng ở G4 ($1.25) | Checklist #5 đạt với cách viết mới |
+| Chi phí intake→verify | ≈ $3.9 (3 lần run) | $3.29 (intake $0.26 + run $3.03) | — |

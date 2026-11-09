@@ -6,33 +6,32 @@ disable-model-invocation: true
 allowed-tools: Bash(python3 *) Bash(cat *)
 ---
 
-## Mục đích
-Chạy giai đoạn kế tiếp của feature theo playbook.
+# Chạy tiếp feature
 
-## Đầu vào
-`$ARGUMENTS`: mã feature (mặc định từ `.team/current.json`), `--until-blocked`.
+## Tổng quan
+Chạy giai đoạn kế tiếp của feature theo playbook và cổng. `$ARGUMENTS`: mã feature (mặc định từ `.team/current.json`), `--until-blocked` để lặp tới khi bị chặn. Không bao giờ vượt cổng.
 
-## Điều kiện trước
-`intake.md` của feature có.
+## Quy trình
+1. Kiểm `docs/team/features/<ID>/intake.md` có; không có → in `/team:intake`, dừng.
+2. Bash: `python3 "$(cat .team/plugin_root)/scripts/team.py" next <ID>` và `status <ID>`.
+3. Cổng: CHỈ theo đầu ra `team.py` (đã tính theo cỡ: S bỏ G1, G3; refactor/data-migration bật G2b). Không tự đọc `gates` trong config. `WAITING_FOR_*` → dừng, in việc người cần làm.
+4. Lệnh kế là skill chỉ người gọi được (`/team:release`, `/team:ci`) → in lệnh, dừng.
+5. Ghi journal một câu lý do (Write), rồi gọi skill kế (Skill). Cỡ S vẫn đi qua `/team:build` để có reviewer.
+6. Sau skill: chạy lại `team.py status <ID>`; giai đoạn không đổi → dừng và báo (không chạy lại cùng skill).
+7. Ghi số liệu: `bash "<kit>/scripts/log-run.sh" --skill <skill> --result <kết quả>`.
+8. `--until-blocked` → về bước 2; không → dừng.
 
-## Các bước
-1. `python3 "$(cat .team/plugin_root)/scripts/team.py" next <ID>` (Bash) → giai đoạn kế và cổng.
-2. Cổng: CHỈ theo đầu ra `team.py` (đã tính cổng theo cỡ: S bỏ G1, G3); không tự đọc `gates` trong config. `WAITING_FOR_APPROVAL` → dừng, in cổng.
-3. Bước kế là `/team:release` hoặc skill chỉ người gọi → in lệnh, dừng.
-4. Ghi lý do vào journal, gọi skill kế (Skill).
-5. Kiểm artifact mới bằng `team.py status`; ghi số liệu: `bash "<kit>/scripts/log-run.sh" --skill <skill> --result <kết quả>`.
-6. `--until-blocked` → lặp bước 1; không → dừng.
+## Lý do tự bào chữa thường gặp
+| Ý nghĩ | Làm đúng |
+|---|---|
+| "Cổng chắc sẽ được duyệt" | Dừng ở cổng. |
+| "Config bật G1 nên phải chờ" | Tin `team.py`; cỡ S không có G1. |
+| "Cỡ S, gọi thẳng dev cho nhanh" | Vẫn `/team:build` (dev + reviewer). |
+| "Status chưa đổi, chạy lại build" | Dừng và báo; artifact có thể sai định dạng. |
+| "Feature khác chờ cổng nên dừng hết" | Cổng chỉ chặn feature của nó. |
+| "Bỏ log-run cho nhanh" | Số liệu là đầu vào của retro. |
 
-## Đầu ra
-Artifact của giai đoạn vừa chạy; journal.
-
-## Tiêu chí xong
-Dán đầu ra `team.py status` sau khi chạy.
-
-## Dấu hiệu sai
-- "Cổng chắc sẽ được duyệt" → dừng.
-- "Gọi thêm giai đoạn cho nhanh" → đúng playbook.
-- "Artifact thiếu cũng được" → dừng, báo.
-
-## Lệnh tiếp theo
-In lệnh từ `team.py next` hoặc cổng chờ duyệt.
+## Kiểm chứng
+- Dán đầu ra `team.py status <ID>` sau mỗi giai đoạn.
+- Mỗi skill đã gọi có một dòng journal.
+- Lần dừng nêu: lý do, việc nào, ai làm gì, lệnh chạy tiếp.

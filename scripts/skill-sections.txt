@@ -1,0 +1,16 @@
+# Tiêu đề bắt buộc của SKILL.md theo lớp, đúng thứ tự. Dòng: <lớp> | <tiêu đề> [| rows>=N | bullets>=N | checks>=N]
+# rows = dòng bảng (trừ tiêu đề và gạch); bullets = dòng "- "; checks = dòng "- [ ]".
+always | ## Tổng quan
+always | ## Quy trình
+always | ## Lý do tự bào chữa thường gặp | rows>=6
+always | ## Kiểm chứng
+full | ## Tổng quan
+full | ## Khi nào dùng (và khi nào không)
+full | ## Tìm hiểu stack trước
+full | ## Đầu vào và điều kiện trước
+full | ## Quy trình
+full | ## Đầu ra
+full | ## Lý do tự bào chữa thường gặp | rows>=6
+full | ## Dấu hiệu sai | bullets>=5
+full | ## Kiểm chứng | checks>=4
+full | ## Xem thêm

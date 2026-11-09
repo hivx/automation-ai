@@ -3,7 +3,7 @@
 # Dùng: evals/run-eval.sh <skill> <n> [--project DIR] [--mode both|baseline|with-skill] [--dry-run]
 #   --project  dự án mẫu đã onboard (mặc định: "project" trong evals/config.json hoặc $EVAL_PROJECT).
 #   Mỗi chế độ chạy trên BẢN SAO của dự án; kit cho baseline là bản sao bỏ thư mục skills/<skill>.
-#   model, max_turns, max_budget_usd, allowed_tools lấy từ evals/config.json.
+#   model, max_turns, max_budget_usd, allowed_tools lấy từ evals/config.json. EVAL_KIT=<thư mục kit> để chạy bản kit khác.
 #   Kết quả: evals/<skill>/out/<YYYY-MM-DD>/s<n>-<mode>/{result.json,stderr.txt,output.txt,workdir.txt}; in PASS/FAIL từng check.
 #   Bản sao dự án nằm NGOÀI kit: $EVAL_WORK_ROOT (mặc định $TMPDIR/team-evals) — Claude Code từ chối ghi trong thư mục plugin.
 # Định dạng kịch bản (evals/<skill>/scenarios.md): "## Scenario <n> — …", các dòng "- Setup: `…`",
@@ -11,7 +11,7 @@
 #   "grep: `<regex>` in `<file|OUTPUT>`", "absent: `<regex>` in `<file|OUTPUT>`", "exists: `<path>`", "unchanged: `<path>`".
 set -uo pipefail
 [[ ${1:-} == --help || ${1:-} == -h || $# -lt 2 ]] && { sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'; exit 0; }
-EVALS="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; KIT="$(dirname "$EVALS")"
+EVALS="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; KIT="${EVAL_KIT:-$(dirname "$EVALS")}"  # EVAL_KIT: chạy với một bản kit khác (so sánh trước/sau)
 skill=$1; n=$2; shift 2
 mode=both; dry=0; project="${EVAL_PROJECT:-$(jq -r '.project // ""' "$EVALS/config.json")}"
 while (( $# )); do case "$1" in --project) project="$2"; shift 2 ;; --mode) mode="$2"; shift 2 ;; --dry-run) dry=1; shift ;; *) shift ;; esac; done
@@ -34,7 +34,7 @@ spec="$(parse)" || exit 64
 day="$(date +%F)"
 modes=(); [[ $mode == both || $mode == baseline ]] && modes+=(baseline); [[ $mode == both || $mode == with-skill ]] && modes+=(with-skill)
 for m in "${modes[@]}"; do
-  out="$EVALS/$skill/out/$day/s$n-$m"; work="${EVAL_WORK_ROOT:-${TMPDIR:-/tmp}/team-evals}/$skill/$day/s$n-$m"; prompt="$(jq -r "if \"$m\" == \"baseline\" then .baseline else .input end" <<<"$spec")"
+  tag="${EVAL_TAG:+-$EVAL_TAG}"; out="$EVALS/$skill/out/$day/s$n-$m$tag"; work="${EVAL_WORK_ROOT:-${TMPDIR:-/tmp}/team-evals}/$skill/$day/s$n-$m$tag"; prompt="$(jq -r "if \"$m\" == \"baseline\" then .baseline else .input end" <<<"$spec")"
   kitdir="$KIT"; [[ $m == baseline ]] && kitdir="$work.kit"
   cmd=(claude -p --plugin-dir "$kitdir" --model "$(cfg model)" --permission-mode acceptEdits "--allowedTools=$(cfg allowed_tools),Read(/$kitdir/**),Bash(bash $kitdir/scripts/*),Bash(bash \"$kitdir/scripts/*)"
        --max-turns "$(cfg max_turns)" --max-budget-usd "$(cfg max_budget_usd)" --output-format json "$prompt")

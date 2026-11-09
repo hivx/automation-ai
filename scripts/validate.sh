@@ -12,11 +12,10 @@ SKILL_DESC_PREFIX="Dùng khi"                       # tương đương "Use when
 DESC_MAX_CHARS=500
 AGENT_DESC_PREFIX="Giao khi"                       # tương đương "Delegate when"
 AGENT_DESC_MAX_CHARS=300
-AGENT_BODY_WORDS=350
-AGENT_HEADINGS="## 1. Danh tính|## 2. Đầu vào bắt buộc|## 3. Quy trình|## 4. Đầu ra|## 5. Tiêu chí xong|## 6. Không bao giờ|## 7. Dấu hiệu tự bào chữa|## 8. Dừng và leo thang"
+# Chuẩn chất lượng skill/agent (chữ, tiêu đề, số dòng tự bào chữa/dấu hiệu sai/kiểm chứng): scripts/skill-budgets.txt,
+# scripts/skill-sections.txt, scripts/agent-sections.txt — kiểm bằng scripts/kit-metrics.py --check (mục 6c).
 ALLOWED_TOOLS_FILE="scripts/allowed-tools.txt"
-SKILL_HEADINGS="## Mục đích|## Đầu vào|## Điều kiện trước|## Các bước|## Đầu ra|## Tiêu chí xong|## Dấu hiệu sai|## Lệnh tiếp theo"
-SKILL_HEADING_EXEMPT="handbook using-team"         # skill nạp sẵn (P3) có cấu trúc riêng
+SKILL_HEADING_EXEMPT="handbook using-team"         # skill nạp sẵn không cần argument-hint
 HUMAN_ONLY_SKILLS="takeover onboard intake run session retro audit-kit release ci"
 FORK_SKILLS="analyze=analyst research=researcher architect=architect design=designer plan=tech-lead build=tech-lead verify=qa asbuilt=writer clean=maintainer ci=devops retro=coach pr=tech-lead audit-kit=coach"
 WORKFLOW_HEADINGS="## Khi nào áp dụng|## Cỡ mặc định|## Chuỗi|## Cổng|## Điểm dừng|## Tiêu chí xong|## Lỗi thường gặp|## Playbook liên quan"
@@ -26,9 +25,6 @@ PLAYBOOK_WORDS=300
 BATCH_WORDS=400
 PENDING_PATHS_FILE="scripts/pending-paths.txt"     # đường dẫn bước sau mới tạo; P5 làm rỗng
 PATH_SCAN="agents skills workflows handbook docs templates profiles README.md CLAUDE.md"
-SMALL_BUDGET_SKILLS="handbook using-team intake status run"
-SMALL_BUDGET_WORDS=200
-DEFAULT_BUDGET_WORDS=500
 STACK_CMD_BLACKLIST="pytest|npm test|npm run|yarn|pnpm|go test|mvn|gradle|bench |flutter test|cargo test|dotnet test"
 STACK_CMD_SCAN_DIRS="agents skills hooks scripts"  # nơi cấm ghi cứng lệnh stack
 STACK_CMD_EXEMPT="scripts/validate.sh scripts/detect-stack.sh scripts/tests/"  # danh sách tên manifest/ca thử, không phải lệnh chạy
@@ -91,9 +87,7 @@ fi
 # ---- 2–6. Frontmatter, word budgets, @file, stack commands, references (python stdlib) ----
 SKILL_DESC_PREFIX="$SKILL_DESC_PREFIX" DESC_MAX_CHARS="$DESC_MAX_CHARS" \
 AGENT_DESC_PREFIX="$AGENT_DESC_PREFIX" AGENT_DESC_MAX_CHARS="$AGENT_DESC_MAX_CHARS" \
-AGENT_BODY_WORDS="$AGENT_BODY_WORDS" AGENT_HEADINGS="$AGENT_HEADINGS" ALLOWED_TOOLS_FILE="$ALLOWED_TOOLS_FILE" \
-SMALL_BUDGET_SKILLS="$SMALL_BUDGET_SKILLS" SMALL_BUDGET_WORDS="$SMALL_BUDGET_WORDS" \
-DEFAULT_BUDGET_WORDS="$DEFAULT_BUDGET_WORDS" STACK_CMD_BLACKLIST="$STACK_CMD_BLACKLIST" \
+ALLOWED_TOOLS_FILE="$ALLOWED_TOOLS_FILE" STACK_CMD_BLACKLIST="$STACK_CMD_BLACKLIST" \
 STACK_CMD_SCAN_DIRS="$STACK_CMD_SCAN_DIRS" STACK_CMD_EXEMPT="$STACK_CMD_EXEMPT" REF_SCAN_PATHS="$REF_SCAN_PATHS" \
 python3 -I - >>"$REPORT" <<'PY'
 import os, re, pathlib
@@ -101,9 +95,6 @@ import os, re, pathlib
 env = os.environ
 PREFIX = env["SKILL_DESC_PREFIX"]
 DESC_MAX = int(env["DESC_MAX_CHARS"])
-SMALL = set(env["SMALL_BUDGET_SKILLS"].split())
-SMALL_W = int(env["SMALL_BUDGET_WORDS"])
-DEFAULT_W = int(env["DEFAULT_BUDGET_WORDS"])
 SELF = "scripts/validate.sh"
 TEXT_EXT = {".md", ".sh", ".py", ".json", ".yml", ".yaml", ".tmpl", ".txt", ""}
 
@@ -197,21 +188,7 @@ for kind, f, expected in docs:
         for tool in tools:
             if tool not in ALLOWED_TOOLS:
                 out("FAIL", str(f), f"tool '{tool}' not in {env['ALLOWED_TOOLS_FILE']}")
-        heads = [l.strip() for l in body.split("\n") if l.startswith("## ")]
-        want = env["AGENT_HEADINGS"].split("|")
-        if heads != want:
-            missing = [h for h in want if h not in heads]
-            out("FAIL", str(f), "headings must be exactly, in order: " + " / ".join(want)
-                + (f" (missing: {', '.join(missing)})" if missing else " (order or extra heading)"))
-        words = len(body.split())
-        print(f"{f}: INFO: body {words} words")
-        if words > int(env["AGENT_BODY_WORDS"]):
-            out("FAIL", str(f), f"body has {words} words (budget {env['AGENT_BODY_WORDS']})")
-    if kind == "skill":
-        words = len(body.split())
-        budget = SMALL_W if expected in SMALL else DEFAULT_W
-        if words > budget:
-            out("FAIL", str(f), f"body has {words} words (budget {budget})")
+        print(f"{f}: INFO: body {len(body.split())} words")
 
 # 3. no @file includes in skills/agents
 inc = re.compile(r"^\s*@(?:[~.]?/|[\w.-]+/|[\w-]+\.[A-Za-z0-9]+\b)")
@@ -262,7 +239,7 @@ for f in files_under(env["REF_SCAN_PATHS"].split()):
 PY
 
 # ---- 6b. P4 checks: skill structure, workflows, kit path references ----
-SKILL_HEADINGS="$SKILL_HEADINGS" SKILL_HEADING_EXEMPT="$SKILL_HEADING_EXEMPT" HUMAN_ONLY_SKILLS="$HUMAN_ONLY_SKILLS" \
+SKILL_HEADING_EXEMPT="$SKILL_HEADING_EXEMPT" HUMAN_ONLY_SKILLS="$HUMAN_ONLY_SKILLS" \
 FORK_SKILLS="$FORK_SKILLS" WORKFLOW_HEADINGS="$WORKFLOW_HEADINGS" PLAYBOOK_WORDS="$PLAYBOOK_WORDS" \
 BATCH_WORDS="$BATCH_WORDS" PLAYBOOKS="$PLAYBOOKS" BATCH_FLOWS="$BATCH_FLOWS" ALLOWED_TOOLS_FILE="$ALLOWED_TOOLS_FILE" \
 PENDING_PATHS_FILE="$PENDING_PATHS_FILE" PATH_SCAN="$PATH_SCAN" \
@@ -292,7 +269,6 @@ def split_fm(text):
 
 tools_ok = {l.strip() for l in open(env["ALLOWED_TOOLS_FILE"], encoding="utf-8")
             if l.strip() and not l.startswith("#")}
-want = env["SKILL_HEADINGS"].split("|")
 exempt = set(env["SKILL_HEADING_EXEMPT"].split())
 human = set(env["HUMAN_ONLY_SKILLS"].split())
 forks = dict(p.split("=") for p in env["FORK_SKILLS"].split())
@@ -302,11 +278,6 @@ for sk in sorted(pathlib.Path("skills").glob("*/SKILL.md")):
     name = sk.parent.name
     fm, body = split_fm(sk.read_text(encoding="utf-8"))
     if name not in exempt:
-        heads = [l.strip() for l in body.split("\n") if l.startswith("## ")]
-        if heads != want:
-            miss = [h for h in want if h not in heads]
-            out("FAIL", str(sk), "headings must be exactly, in order: " + " / ".join(want)
-                + (f" (missing: {', '.join(miss)})" if miss else " (order or extra heading)"))
         if not fm.get("argument-hint"):
             out("FAIL", str(sk), "missing argument-hint")
     for entry in re.findall(r"[A-Za-z]+(?:\([^)]*\))?", fm.get("allowed-tools", "")):
@@ -372,6 +343,19 @@ for f in targets:
 for path, where in sorted(seen_missing.items()):
     out("FAIL", where, f"kit path {path} does not exist (add to {env['PENDING_PATHS_FILE']} only if a later step creates it)")
 PY
+
+# ---- 6c. quality bar (P7): every skill/agent at the bar unless listed in scripts/quality-backlog.txt ----
+if [[ -f scripts/kit-metrics.py ]]; then
+  while IFS= read -r line; do
+    [[ -n $line ]] && echo "${line%%: *}: FAIL: quality ${line#*: }" >>"$REPORT"
+  done < <(python3 -I scripts/kit-metrics.py --check 2>&1 || true)
+  if [[ -f scripts/quality-backlog.txt ]]; then
+    while IFS= read -r item; do
+      [[ -z $item || $item == \#* ]] && continue
+      echo "scripts/quality-backlog.txt: INFO: $item chưa đạt chuẩn chất lượng (vòng sau)" >>"$REPORT"
+    done < scripts/quality-backlog.txt
+  fi
+fi
 
 # ---- 7. bash -n / py_compile ----
 shopt -s nullglob

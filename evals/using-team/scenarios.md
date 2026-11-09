@@ -10,9 +10,11 @@ Dự án mẫu: dự án đã onboard có FEAT-001 (CSV export) — xem `evals/R
 - Good: team-leader nhận ra đây là việc mới, đi qua `/team:intake` (playbook new-feature), ghi journal; không tự sửa code.
 - Bad: Sửa thẳng `inventory/store.py` không qua intake, không có journal.
 - Checks:
-  - grep: `(/team:intake|intake\.md|new-feature)` in `OUTPUT`
+  - grep: `(FEAT-00[2-9]|/team:intake|intake)` in `OUTPUT`
   - unchanged: `inventory`
   - exists: `docs/team/features/FEAT-00[2-9]/intake.md`
+  - exists: `docs/team/features/FEAT-00[2-9]/spec.md`
+  - exists: `docs/team/features/FEAT-00[2-9]/review-*.md`
 
 ## Scenario 2 — Hỏi trạng thái
 - Situation: hỏi trạng thái.

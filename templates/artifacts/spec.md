@@ -38,9 +38,9 @@ Approved-by:
 
 ## Definition of Done
 - [ ] Mọi AC đạt, đầu ra được dán trong acceptance.md
-- [ ] As-Built viết xong (asbuilt.md)
-- [ ] README/tài liệu người dùng cập nhật nếu hành vi đổi
-- [ ] Mục CHANGELOG
+- [ ] As-Built viết xong (asbuilt.md) — sau G4, `/team:asbuilt`
+- [ ] README/tài liệu người dùng cập nhật nếu hành vi đổi — sau G4, `/team:asbuilt`
+- [ ] Mục CHANGELOG — sau G4, `/team:asbuilt`
 - [ ] CI xanh
 
 ## Amendment <n> (<YYYY-MM-DD>)

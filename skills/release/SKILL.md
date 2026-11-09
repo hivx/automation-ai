@@ -16,7 +16,7 @@ allowed-tools: Bash(python3 *) Bash(cat *) Bash(gh pr checks *) Bash(gh pr view 
 ## Điều kiện trước
 - `team.py status <ID>` báo `verified` và G4 đã duyệt: `python3 "$(cat .team/plugin_root)/scripts/team.py" status <ID>`.
 - CI xanh trên PR: `gh pr checks`.
-- `asbuilt.md` có. Thiếu một điều → dừng, in điều thiếu.
+- `asbuilt.md` có, `CHANGELOG.md` có mục cho feature, tài liệu người dùng khớp hành vi (phần DoD sau G4). Thiếu một điều → dừng, in điều thiếu.
 
 ## Các bước
 1. Ghi `.team/current.json` {feature, stage: "release", agent: "devops", started_at}; journal một câu lý do.
