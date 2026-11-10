@@ -1,37 +1,37 @@
-# Chọn công cụ: hook, script, rule, skill hay agent
+# Choosing a tool: hook, script, rule, skill or agent
 
-Dùng bảng này trước khi thêm bất cứ thứ gì vào kit hoặc vào `.claude/` của dự án. Đi từ trên xuống, dừng ở dòng đầu tiên khớp.
+Use this table before adding anything to the kit or to a project's `.claude/`. Go from the top down and stop at the first row that matches.
 
-## Bảng quyết định
-| # | Nếu việc cần... | Dùng | Vì sao |
+## Decision table
+| # | If the job needs to... | Use | Why |
 |---|---|---|---|
-| 1 | Xảy ra 100%, không được sai | hook + script (và `permissions.deny` nếu là chặn quyền) | Máy chạy luôn; LLM có thể bỏ qua văn bản (STD mức 3) |
-| 2 | Tính toán hoặc đọc dữ liệu | script | Tất định, rẻ, không tốn token |
-| 3 | Kiến thức tĩnh gắn với một loại đường dẫn | rule có `paths:` trong `.claude/rules/` | Chỉ nạp khi chạm file khớp |
-| 4 | Quy trình nhiều bước, có điểm kiểm | skill | Nạp khi gọi; bước, điểm dừng, bằng chứng |
-| 5 | Cần ngữ cảnh, bộ tool hoặc model riêng | agent | Ngữ cảnh sạch, quyền hẹp, model phù hợp |
+| 1 | Happen 100% of the time, with no room for error | hook + script (and `permissions.deny` if it blocks a permission) | The machine always runs it; an LLM can ignore text (STD level 3) |
+| 2 | Compute something or read data | script | Deterministic, cheap, costs no tokens |
+| 3 | Carry static knowledge tied to one kind of path | rule with `paths:` in `.claude/rules/` | Loaded only when a matching file is touched |
+| 4 | Run a multi-step process with checkpoints | skill | Loaded on call; steps, stop points, evidence |
+| 5 | Have its own context, tool set or model | agent | Clean context, narrow permissions, fitting model |
 
-Luật phụ: điều gì viết được thành hook thì KHÔNG viết thành rule.
+Side rule: anything that can be written as a hook is NOT written as a rule.
 
-## Ví dụ
-| Việc | Chọn | Ghi chú |
+## Examples
+| Job | Choice | Note |
 |---|---|---|
-| Chặn sửa file `.env` | hook PreToolUse + `permissions.deny` | Dòng 1; khe `protected_paths` |
-| Biết lệnh test của dự án | khe `cmd.test_one` trong profile, script đọc ra | Dòng 2; không ghi lệnh vào skill/agent |
-| Tính feature đang ở giai đoạn nào | script (`team.py status`) | Dòng 2; trạng thái tính từ artifact |
-| Format file sau mỗi lần sửa | hook PostToolUse gọi script đọc `formatters_by_ext` | Dòng 1 |
-| Cách viết migration trong repo này | rule có `paths:` trỏ thư mục migration | Dòng 3; chỉ nạp khi chạm migration |
-| Quy ước test của thư mục test | rule có `paths:` trỏ `structure.tests` | Dòng 3 |
-| Chạy nghiệm thu | skill `verify` | Dòng 4; nhiều bước, cần dán đầu ra |
-| Tiếp nhận dự án theo tầng | skill `takeover` | Dòng 4; có ngân sách mỗi tầng, điểm dừng |
-| Review trong ngữ cảnh sạch | agent `reviewer` | Dòng 5; không thấy hội thoại của dev, model mạnh |
-| Đọc nhiều file để tìm chỗ sửa | agent `Explore` có sẵn | Dòng 5; giữ ngữ cảnh chính gọn |
-| Cấm push nhánh bảo vệ | hook PreToolUse(Bash) + `permissions.deny` | Dòng 1; KHÔNG viết thành rule |
+| Block edits to `.env` files | PreToolUse hook + `permissions.deny` | Row 1; slot `protected_paths` |
+| Know the project's test command | slot `cmd.test_one` in the profile, read by a script | Row 2; never write the command into a skill/agent |
+| Work out which stage a feature is in | script (`team.py status`) | Row 2; state is computed from artifacts |
+| Format a file after every edit | PostToolUse hook calling a script that reads `formatters_by_ext` | Row 1 |
+| How to write a migration in this repo | rule with `paths:` pointing at the migration directory | Row 3; loaded only when a migration is touched |
+| Test conventions of the test directory | rule with `paths:` pointing at `structure.tests` | Row 3 |
+| Run acceptance | skill `verify` | Row 4; many steps, output must be pasted |
+| Take over a project layer by layer | skill `takeover` | Row 4; per-layer budget, stop points |
+| Review in a clean context | agent `reviewer` | Row 5; does not see the dev's conversation, strong model |
+| Read many files to find where to edit | built-in agent `Explore` | Row 5; keeps the main context lean |
+| Forbid pushing to protected branches | PreToolUse(Bash) hook + `permissions.deny` | Row 1; NOT written as a rule |
 
-## Dấu hiệu chọn sai
-- **Rule lẽ ra là hook:** rule viết "không bao giờ", "luôn luôn", "bắt buộc" về một thao tác tool nhận diện được (sửa đường dẫn, lệnh git). Chuyển thành hook.
-- **Skill chỉ là văn xuôi:** skill không có bước đánh số, không điểm kiểm, không đòi bằng chứng. Viết lại thành quy trình hoặc chuyển thành rule.
-- **Agent cho việc 2 phút:** gọi agent cho việc một lệnh hay một lần đọc file. Làm tại chỗ hoặc dùng script.
-- **Script gọi LLM để "đánh giá":** tính toán phải tất định. Phần cần phán đoán đưa cho agent.
-- **Kiến thức viết hai nơi:** một rule và một skill cùng nói một điều. Giữ một nơi, nơi kia trỏ tới.
-- **Ghi lệnh stack vào skill/agent/hook:** luôn đọc từ khe `cmd.*`.
+## Signs of a wrong choice
+- **A rule that should be a hook:** the rule says "never", "always" or "must" about a tool action that can be recognized (editing a path, a git command). Turn it into a hook.
+- **A skill that is only prose:** the skill has no numbered steps, no checkpoints and asks for no evidence. Rewrite it as a process or turn it into a rule.
+- **An agent for a two-minute job:** calling an agent for one command or one file read. Do it in place or use a script.
+- **A script that calls an LLM to "judge":** computation must be deterministic. Hand the part that needs judgment to an agent.
+- **Knowledge written in two places:** a rule and a skill say the same thing. Keep one place; the other points to it.
+- **Stack commands written into a skill/agent/hook:** always read them from the `cmd.*` slots.

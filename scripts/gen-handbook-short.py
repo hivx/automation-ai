@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Sinh handbook/STD-short.md từ handbook/STD.md (chỉ thư viện chuẩn).
+"""Generate handbook/STD-short.md from handbook/STD.md (standard library only).
 
-Bản rút gọn chỉ gồm: quy tắc mức 2 và 3 (mã + câu quy tắc), hai checklist, định dạng phát hiện.
-Đầu ra tất định. Dùng:
-  scripts/gen-handbook-short.py                 ghi handbook/STD-short.md
-  scripts/gen-handbook-short.py --stdout        in ra stdout (validate.sh dùng để so khớp)
-  scripts/gen-handbook-short.py --stats         in số quy tắc theo mảng
-Mã thoát 1 khi STD.md sai cấu trúc.
+The short version holds only: level 2 and 3 rules (code + rule sentence), the two checklists,
+and the finding format. Output is deterministic. Usage:
+  scripts/gen-handbook-short.py                 write handbook/STD-short.md
+  scripts/gen-handbook-short.py --stdout        print to stdout (validate.sh compares it)
+  scripts/gen-handbook-short.py --stats         print the rule count per area
+Exit code 1 when STD.md is structurally invalid.
 """
 import pathlib
 import re
@@ -28,7 +28,7 @@ def die(msg):
 
 
 def section(lines, title):
-    """Trả các dòng giữa '## <title>' và tiêu đề '## ' kế tiếp."""
+    """Return the lines between '## <title>' and the next '## ' heading."""
     try:
         start = lines.index(f"## {title}")
     except ValueError:
@@ -82,8 +82,8 @@ def parse():
 
 
 def render(rules, review, accept, finding):
-    out = [HEADER, "# STD-short — bản rút gọn của handbook/STD.md", ""]
-    out.append("## Quy tắc mức 2–3 (mức trong ngoặc)")
+    out = [HEADER, "# STD-short — short version of handbook/STD.md", ""]
+    out.append("## Level 2–3 rules (level in parentheses)")
     for area, _, code, text, level in rules:
         if level >= 2:
             out.append(f"- {code} ({level}) {text}")

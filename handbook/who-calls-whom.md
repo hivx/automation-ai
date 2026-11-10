@@ -1,9 +1,9 @@
-# Ai gọi ai
+# Who calls whom
 
-## Ma trận
-Hàng = người gọi, cột = người được gọi. ✓ = được gọi; — = không.
+## Matrix
+Row = caller, column = callee. ✓ = may call; — = may not.
 
-| người gọi ↓ / được gọi → | team-leader | tech-lead | coach | analyst | researcher | architect | designer | dev | reviewer | qa | writer | maintainer | devops | Explore |
+| caller ↓ / callee → | team-leader | tech-lead | coach | analyst | researcher | architect | designer | dev | reviewer | qa | writer | maintainer | devops | Explore |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | team-leader | — | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | tech-lead | — | — | — | — | — | — | — | ✓ | ✓ | — | — | — | — | ✓ |
@@ -19,39 +19,39 @@ Hàng = người gọi, cột = người được gọi. ✓ = được gọi; �
 | maintainer | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
 | devops | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
 
-- Chỉ team-leader và tech-lead gọi vai khác. Vai khác chỉ được gọi `Explore` khi có tool `Agent`.
-- team-leader không gọi thẳng `dev` để làm task: mọi cỡ, kể cả S, đi qua `/team:build` (tech-lead → dev + reviewer, K-34).
-- Agent tạm (`/team:make-agent`) chỉ team-leader gọi; hook áp vai `_temp` (Bash chỉ-đọc + git cơ bản + `cmd.*`, chỉ gọi Explore).
-- Không ai gọi team-leader: nó là phiên chính và là cửa duy nhất với người.
-- Ma trận do hook role-policy thực thi (STD mức 3), không chỉ là văn bản.
-- Độ sâu tối đa: phiên chính (team-leader) → tech-lead → dev/reviewer → Explore.
+- Only team-leader and tech-lead call other roles. Other roles may call only `Explore`, and only when they have the `Agent` tool.
+- team-leader never calls `dev` directly to do a task: every size, S included, goes through `/team:build` (tech-lead → dev + reviewer, K-34).
+- Temp agents (`/team:make-agent`) are called only by team-leader; the hook applies the `_temp` role (read-only Bash + basic git + `cmd.*`, may call only Explore).
+- Nobody calls team-leader: it is the main session and the only door to the human.
+- The matrix is enforced by the role-policy hook (STD level 3), not just written down.
+- Maximum depth: main session (team-leader) → tech-lead → dev/reviewer → Explore.
 
-## Bàn giao
-Bàn giao = MỘT FILE + một tin nhắn tự đủ ≤ 10 dòng. Người nhận KHÔNG thấy hội thoại của người gửi, nên tin nhắn phải đủ để làm mà không hỏi lại.
+## Handoff
+Handoff = ONE FILE + a self-contained message of ≤ 10 lines. The receiver does NOT see the sender's conversation, so the message must be enough to do the work without asking back.
 
-Tin nhắn giao việc luôn có:
-1. Mã feature/task.
-2. Đường dẫn file đầu vào (artifact).
-3. Mục tiêu một câu.
-4. Tiêu chí xong.
-5. Giới hạn (đường dẫn được sửa, điều không được làm).
+A handoff message always has:
+1. The feature/task ID.
+2. The path of the input file (artifact).
+3. A one-sentence goal.
+4. Done criteria.
+5. Limits (paths that may be edited, things that must not be done).
 
-Tin nhắn trả việc luôn có:
-1. Kết quả / phán quyết.
-2. Đường dẫn file đầu ra.
-3. Bằng chứng (đầu ra lệnh đã chạy).
-4. Còn thiếu gì, rủi ro gì.
+A return message always has:
+1. The result / verdict.
+2. The path of the output file.
+3. Evidence (output of the commands run).
+4. What is still missing, what the risks are.
 
-### Trường bắt buộc theo chiều
-| Chiều | Trường bắt buộc |
+### Required fields per direction
+| Direction | Required fields |
 |---|---|
-| tech-lead → dev | mã task; tiêu chí nghiệm thu; touchpoints; `cmd.test_one`; nhánh; câu "chỉ sửa trong touchpoints" |
-| dev → tech-lead | file đã đổi; test đã chạy kèm đầu ra thật; còn thiếu gì |
-| tech-lead → reviewer | diff (commit hoặc nhánh); `design.md`; tiêu chí task; câu "chấm theo Review checklist (10)" |
-| reviewer → tech-lead | phán quyết approve / request-changes / design-defect; phát hiện theo định dạng STD |
-| team-leader → qa | `spec.md` (DoD); nhánh feature; câu "chấm theo Acceptance checklist (6)" |
-| qa → team-leader | phán quyết accepted / rework / design-defect; `acceptance.md` có đầu ra thật |
-| vai bất kỳ → team-leader khi cần hỏi người | trạng thái `NEEDS_ANSWER`; file chứa câu hỏi (2–4 lựa chọn, khuyến nghị, hậu quả) |
+| tech-lead → dev | task ID; acceptance criteria; touchpoints; `cmd.test_one`; branch; the sentence "edit only within the touchpoints" |
+| dev → tech-lead | files changed; tests run with real output; what is still missing |
+| tech-lead → reviewer | diff (commit or branch); `design.md`; task criteria; the sentence "grade against the Review checklist (10)" |
+| reviewer → tech-lead | verdict approve / request-changes / design-defect; findings in the STD format |
+| team-leader → qa | `spec.md` (DoD); feature branch; the sentence "grade against the Acceptance checklist (6)" |
+| qa → team-leader | verdict accepted / rework / design-defect; `acceptance.md` with real output |
+| any role → team-leader when the human must be asked | status `NEEDS_ANSWER`; file holding the question (2–4 options, recommendation, consequences) |
 
-## Lý do gọi
-Mỗi lần gọi một vai, người gọi ghi MỘT câu lý do vào `docs/team/journal/<feature>.md` trước khi gọi, ví dụ: "Gọi researcher vì spec cần thư viện ký số chưa có trong dự án." Không có lý do thì không gọi.
+## Reason for calling
+Each time a role is called, the caller writes ONE sentence of reason in `docs/team/journal/<feature>.md` before the call, e.g. "Calling researcher because the spec needs a digital-signature library the project does not have yet." No reason, no call.
