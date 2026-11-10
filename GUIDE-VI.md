@@ -488,6 +488,6 @@ Các mốc sau do script và cổng đọc bằng máy: **không bao giờ dịc
 - Phiên bản kit: 0.3.0
 - Skill: 26 · agent: 13 · playbook: 16 (+ 4 lô) · script: 30
 - Số từ trung vị (tiếng Anh): skill nạp thường xuyên 346.0, skill khác 1509.0, agent 918
-- Commit: 08526c0
+- Commit: f134aa7
 - Ngày sinh file: 2026-11-10
 <!-- /gen:stats -->

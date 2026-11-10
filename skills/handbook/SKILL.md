@@ -12,7 +12,7 @@ The kit's `handbook/STD-short.md` is the LAW for all code the team writes. Prelo
 ## Process
 1. **Before anything else:** Read `${CLAUDE_PLUGIN_ROOT}/handbook/STD-short.md`. Failing that → Read `<kit>/handbook/STD-short.md`. Both fail → stop and report to the caller.
 2. Read `.team/profile.json`. Build/test/lint/format commands come only from the `cmd.*` slots and `formatters_by_ext`. Missing slot → stop and report; never guess a command.
-3. Write artifacts, the journal and `.team/current.json` with Write/Edit, never Bash redirection (`>`, `>>`, heredoc) — headless mode refuses it. **Artifact language:** take the template from `<kit>/templates/artifacts/vi/<file>` when `config.output_language` is `vi` and that file exists, else from `<kit>/templates/artifacts/<file>`; write prose in `output_language`; anchors (`<kit>/scripts/anchors.txt`) always stay English.
+3. Write artifacts, the journal and `.team/current.json` with Write/Edit, never Bash redirection (`>`, `>>`, heredoc) — headless mode refuses it. **Artifact language:** `output_language` in `.team/config.json` (no file or key yet → `vi`); template `<kit>/templates/artifacts/vi/<file>` when `vi` and present, else `<kit>/templates/artifacts/<file>`; prose in that language; anchors (`<kit>/scripts/anchors.txt`) stay English.
 4. Keep the six core rules (restate them after every context compaction):
    1. New files only inside `structure.allowed_new_file_roots` (STD-STRUCT-1).
    2. Failing test first; mandatory for bug fixes (STD-TEST-1).
