@@ -1,18 +1,18 @@
-# Bắt đầu trong 5 phút
+# Start in 5 minutes
 
-1. **Cài** (trong Claude Code):
+1. **Install** (inside Claude Code):
    ```
    /plugin marketplace add <owner>/automation-ai
    /plugin install team@automation-ai
    ```
-2. **Mở dự án**: `cd <dự-án> && claude`.
-3. **Dự án đã có code?**
-   - Có: `/team:takeover`. Đọc `docs/team/assessment.md` và `docs/team/ai-readiness.md`. Thêm `Approved-by: <tên> <YYYY-MM-DD>` vào đầu `ai-readiness.md`.
-   - Chưa (repo rỗng): bỏ qua bước này.
-4. **Cấu hình đội**: `/team:onboard` (repo rỗng: `/team:onboard --new`). Kiểm tra `.team/profile.json`: nhất là `cmd.test_one`.
-5. **Giao việc đầu tiên**: `/team:intake "Thêm nút xuất CSV cho danh sách đơn hàng"`.
-6. **Theo dõi**: `/team:status`. Khi đội dừng ở cổng, đọc artifact được nhắc tới, thêm dòng `Approved-by:` rồi `/team:run`.
+2. **Open the project**: `cd <project> && claude`.
+3. **Does the project already have code?**
+   - Yes: `/team:takeover`. Read `docs/team/assessment.md` and `docs/team/ai-readiness.md`. Add `Approved-by: <name> <YYYY-MM-DD>` at the top of `ai-readiness.md`.
+   - No (empty repo): skip this step.
+4. **Configure the team**: `/team:onboard` (empty repo: `/team:onboard --new`). Check `.team/profile.json`, especially `cmd.test_one`. Artifacts are written in Vietnamese by default; set `"output_language": "en"` in `.team/config.json` for English.
+5. **Hand over the first piece of work**: `/team:intake "Add a CSV export button to the order list"`.
+6. **Follow along**: `/team:status`. When the team stops at a gate, read the artifact it names, add the `Approved-by:` line, then `/team:run`.
 
-Muốn đội tự chạy không hỏi: `/team:intake --decide "<yêu cầu>"`. Muốn tắt hẳn cổng: đặt `false` trong `.team/config.json → gates`; "tự động hoàn toàn" = mọi cổng `false` trừ `G5_prod`, và `default_mode: "decide"`.
+Want the team to run without asking: `/team:intake --decide "<request>"`. Want to turn a gate off entirely: set it to `false` in `.team/config.json → gates`; "fully automatic" = every gate `false` except `G5_prod`, plus `default_mode: "decide"`.
 
-Tiếp theo: `want-x-type-y.md`, `decision-tree.md`.
+Next: `want-x-type-y.md`, `decision-tree.md`.

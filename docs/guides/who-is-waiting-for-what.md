@@ -1,30 +1,30 @@
-# Ai đang chờ cái gì — đọc `/team:status`
+# Who is waiting for what — reading `/team:status`
 
-`/team:status` tính vị trí từ artifact trong `docs/team/features/<ID>/`, không đọc con trỏ lưu sẵn. Kết quả trả lời ba điều: feature ở giai đoạn nào, ai đang giữ bóng, lệnh tiếp theo.
+`/team:status` computes the position from the artifacts in `docs/team/features/<ID>/`; it does not read a stored pointer. The result answers three things: which stage the feature is in, who holds the ball, and the next command.
 
-## Giai đoạn được tính thế nào
-| Có artifact | Trạng thái |
+## How the stage is computed
+| Artifact present | Status |
 |---|---|
 | `intake.md` | intaken |
-| `spec.md` có DoD | specified |
+| `spec.md` with DoD | specified |
 | `research.md` | researched |
-| `arch-impact.md` hoặc tham chiếu `architecture.md` | architected |
+| `arch-impact.md` or a reference to `architecture.md` | architected |
 | `design.md` | designed |
 | `plan.md` + `tasks.md` | planned |
-| mọi task đã tick | built |
-| `acceptance.md` verdict accepted | verified |
-| `asbuilt.md` + dấu Released | released |
+| every task ticked | built |
+| `acceptance.md` with verdict accepted | verified |
+| `asbuilt.md` + the Released mark | released |
 
-Cổng bật mà chưa duyệt chặn mọi trạng thái sau nó.
+An enabled gate that is not approved blocks every status after it.
 
-## Ai đang chờ
-| Status báo | Ai phải làm | Làm gì |
+## Who is waiting
+| Status reports | Who must act | What to do |
 |---|---|---|
-| `WAITING_FOR_APPROVAL Gn` | Người | Đọc artifact được nêu, thêm `Approved-by:` (hoặc `@claude approve Gn`), rồi `/team:run` |
-| `WAITING_FOR_ANSWER` | Người | Trả lời câu hỏi (trong phiên hoặc bình luận issue), rồi `/team:run` |
-| `BLOCKED` | Người hoặc tech-lead | Đọc lý do; sửa nguyên nhân; chạy lệnh tiếp tục được in ra |
-| `DESIGN_CONFLICT` / `design-defect` | designer/architect, người duyệt lại | Sửa `design.md`, duyệt lại cổng liên quan |
-| `IN_PROGRESS <agent>` | Đội | Chờ, hoặc `/team:session` để xem bàn giao |
-| `READY` | Người | Gõ lệnh tiếp theo được in ra |
+| `WAITING_FOR_APPROVAL Gn` | The human | Read the named artifact, add `Approved-by:` (or `@claude approve Gn`), then `/team:run` |
+| `WAITING_FOR_ANSWER` | The human | Answer the questions (in the session or as an issue comment), then `/team:run` |
+| `BLOCKED` | The human or tech-lead | Read the reason; fix the cause; run the printed resume command |
+| `DESIGN_CONFLICT` / `design-defect` | designer/architect, the human re-approves | Fix `design.md`, re-approve the related gate |
+| `IN_PROGRESS <agent>` | The team | Wait, or `/team:session` to see the handoff |
+| `READY` | The human | Type the next command that was printed |
 
-Mỗi lần dừng luôn có: lý do, việc nào, ai làm gì, lệnh để chạy tiếp. Thiếu một trong bốn thì báo bằng `/team:feedback`.
+Every stop always states: the reason, which piece of work, who does what, and the command to resume. If one of the four is missing, report it with `/team:feedback`.

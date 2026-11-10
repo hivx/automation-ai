@@ -1,59 +1,61 @@
-# 04 — Profile dự án (`.team/profile.json`)
+# 04 — The project profile (`.team/profile.json`)
 
-Profile chứa mọi điều riêng của stack. Agent, skill và hook chỉ nhắc tên KHE, không ghi lệnh. File được commit.
+The profile holds everything that is specific to the stack. Agents, skills and hooks only name SLOTS; they never contain commands. The file is committed.
 
-| File | Vai trò |
+| File | Purpose |
 |---|---|
-| `templates/schemas/profile.schema.json` | Schema (JSON Schema draft-07) của profile |
-| `templates/schemas/config.schema.json` | Schema của `.team/config.json` |
-| `templates/project/team/config.json` | Config mặc định chép vào dự án lúc onboard |
-| `profiles/_template.json` | Đủ mọi khe, giá trị rỗng, `notes` giải thích từng khe |
-| `profiles/python.json`, `node-ts.json`, `go.json`, `java-maven.json`, `flutter.json` | Mặc định hợp lý theo stack; giá trị chưa chắc được ghi trong `notes` |
-| `scripts/check-profile.py` | Kiểm một file theo schema: `scripts/check-profile.py <schema> <file>...` |
+| `templates/schemas/profile.schema.json` | Schema (JSON Schema draft-07) of the profile |
+| `templates/schemas/config.schema.json` | Schema of `.team/config.json` |
+| `templates/project/team/config.json` | Default config copied into the project at onboard |
+| `profiles/_template.json` | Every slot, empty values, `notes` explaining each slot |
+| `profiles/python.json`, `node-ts.json`, `go.json`, `java-maven.json`, `flutter.json` | Sensible per-stack defaults; uncertain values are flagged in `notes` |
+| `scripts/check-profile.py` | Checks a file against a schema: `scripts/check-profile.py <schema> <file>...` |
 
-`/team:takeover` đề xuất profile kèm bằng chứng cho từng khe (`docs/team/profile-proposal.md`); `/team:onboard` ghi file sau khi người duyệt G0.
+`/team:takeover` proposes a profile with evidence for every slot (`docs/team/profile-proposal.md`); `/team:onboard` writes the file after the human approves G0.
 
-## Các khe
-| Khe | Nghĩa | Ví dụ (minh họa, dự án Python) |
+**Config slot `output_language`** (in `.team/config.json`, not in the profile): enum `vi|en`, default `vi`. It sets the prose language of the artifacts the team writes in `docs/team/` (spec, design, plan, review, acceptance, As-Built…); templates come from `templates/artifacts/vi/` when it is `vi` and that file exists, otherwise from `templates/artifacts/`. Machine-read anchors never translate, whatever the value: `Approved-by:`, `## Definition of Done`, `Verdict: …`, statuses, task lines, STD codes, IDs (full list: `scripts/anchors.txt`).
+
+## The slots
+| Slot | Meaning | Example (illustration, Python project) |
 |---|---|---|
-| `stack` | Tên stack chính | `"python"` |
-| `language[]` | Ngôn ngữ dùng trong repo | `["python", "sql"]` |
-| `cmd.install` | Cài phụ thuộc | `"pip install -e .[dev]"` |
+| `stack` | Name of the main stack | `"python"` |
+| `language[]` | Languages used in the repo | `["python", "sql"]` |
+| `cmd.install` | Install dependencies | `"pip install -e .[dev]"` |
 | `cmd.build` | Build | `"python -m build"` |
-| `cmd.test` | Toàn bộ test | `"pytest -q"` |
-| `cmd.test_one` | **Bắt buộc.** Chạy test của một file, `{file}` là chỗ thay | `"pytest -q {file}"` |
+| `cmd.test` | The whole test suite | `"pytest -q"` |
+| `cmd.test_one` | **Required.** Run the tests of one file; `{file}` is the placeholder | `"pytest -q {file}"` |
 | `cmd.lint` | Lint | `"ruff check ."` |
-| `cmd.typecheck` | Kiểm kiểu | `"mypy src"` |
-| `cmd.format` | Format một file | `"ruff format {file}"` |
-| `cmd.run` | Chạy ứng dụng | `"python -m app"` |
-| `cmd.migrate` | Chạy migration | `"alembic upgrade head"` |
-| `formatters_by_ext{}` | Formatter theo đuôi file, dùng sau mỗi lần sửa | `{".py": "ruff format {file}"}` |
-| `structure.src` | Thư mục mã nguồn | `"src"` |
-| `structure.tests` | Thư mục test, hoặc `"colocated"` | `"tests"` |
-| `structure.docs`, `structure.scripts`, `structure.config[]` | Nơi tài liệu, script, cấu hình | `"docs"`, `"scripts"`, `["pyproject.toml"]` |
-| `structure.allowed_new_file_roots[]` | Danh sách ĐÓNG nơi được tạo file mới | `["src", "tests", "docs"]` |
-| `naming.file`, `class`, `function`, `constant`, `test_file` | Quy ước đặt tên | `"snake_case"`, `"PascalCase"`, `"test_{name}.py"` |
-| `naming.branch` | Mẫu nhánh | `"team/{id}-{slug}"` |
-| `test.skip_markers[]` | Dấu bỏ qua test bị cấm dùng để cho xanh | `["@pytest.mark.skip", "xfail"]` |
-| `protected_paths[]` | Không agent nào được sửa: secret, lockfile, thư viện vendored, cấu hình prod | `[".env*", "poetry.lock", "vendor/**"]` |
-| `ci.provider`, `ci.runner`, `ci.setup[]` | Nền CI | `"github"`, `"ubuntu-latest"` |
-| `deploy.staging`, `deploy.smoke`, `deploy.prod_requires_reviewer` | Lệnh deploy staging, smoke test; prod luôn cần người | `true` |
-| `ui` | Dự án có giao diện (bật qa dùng Playwright) | `false` |
-| `tracker` | Nơi quản lý issue | `"github"` |
-| `plugins.required[]`, `plugins.recommended[]` | Plugin cần/nên có; onboard chỉ in lệnh cài | — |
-| `notes` | Khe → ghi chú một dòng; đánh dấu giá trị chưa chắc | `{"cmd.migrate": "Chưa chắc: ..."}` |
-| `packages` | Monorepo: thư mục → profile ghi đè một phần | `{"web": {"stack": "node-ts"}}` |
+| `cmd.typecheck` | Type check | `"mypy src"` |
+| `cmd.format` | Format one file | `"ruff format {file}"` |
+| `cmd.run` | Run the application | `"python -m app"` |
+| `cmd.migrate` | Run migrations | `"alembic upgrade head"` |
+| `formatters_by_ext{}` | Formatter per file extension, applied after every edit | `{".py": "ruff format {file}"}` |
+| `structure.src` | Source directory | `"src"` |
+| `structure.tests` | Test directory, or `"colocated"` | `"tests"` |
+| `structure.docs`, `structure.scripts`, `structure.config[]` | Where docs, scripts and config live | `"docs"`, `"scripts"`, `["pyproject.toml"]` |
+| `structure.allowed_new_file_roots[]` | CLOSED list of places where new files may be created | `["src", "tests", "docs"]` |
+| `naming.file`, `class`, `function`, `constant`, `test_file` | Naming conventions | `"snake_case"`, `"PascalCase"`, `"test_{name}.py"` |
+| `naming.branch` | Branch pattern | `"team/{id}-{slug}"` |
+| `test.skip_markers[]` | Test-skip markers that must not be used to make things green | `["@pytest.mark.skip", "xfail"]` |
+| `protected_paths[]` | No agent may edit these: secrets, lockfiles, vendored libraries, prod config | `[".env*", "poetry.lock", "vendor/**"]` |
+| `ci.provider`, `ci.runner`, `ci.setup[]` | CI platform | `"github"`, `"ubuntu-latest"` |
+| `deploy.staging`, `deploy.smoke`, `deploy.prod_requires_reviewer` | Staging deploy command, smoke test; prod always needs a human | `true` |
+| `ui` | The project has a user interface (turns on qa with Playwright) | `false` |
+| `tracker` | Where issues are managed | `"github"` |
+| `plugins.required[]`, `plugins.recommended[]` | Plugins needed / recommended; onboard only prints the install commands | — |
+| `notes` | Slot → one-line note; flags uncertain values | `{"cmd.migrate": "Unverified: ..."}` |
+| `packages` | Monorepo: directory → partial profile override | `{"web": {"stack": "node-ts"}}` |
 
-## Luật
-- `cmd.test_one` bắt buộc. Mọi lệnh chạy từ gốc repo.
-- `{file}` là chỗ thay duy nhất.
-- `allowed_new_file_roots` là danh sách đóng: ngoài danh sách thì hook chặn tạo file.
-- Monorepo: profile gốc + `packages` ghi đè theo thư mục.
-- Enum: `ci.provider` và `tracker` ∈ `github|gitlab|none`; `deploy.prod_requires_reviewer` chỉ nhận `true`.
-- Không tự thêm khe mới; đề xuất qua `/team:feedback`. Schema có `additionalProperties: false` nên khe lạ bị báo lỗi.
+## Rules
+- `cmd.test_one` is required. Every command runs from the repo root.
+- `{file}` is the only placeholder.
+- `allowed_new_file_roots` is a closed list: outside it, the hook blocks file creation.
+- Monorepo: root profile + `packages` overrides per directory.
+- Enums: `ci.provider` and `tracker` ∈ `github|gitlab|none`; `deploy.prod_requires_reviewer` accepts only `true`; `output_language` (config) ∈ `vi|en`.
+- Do not add new slots yourself; propose them through `/team:feedback`. The schema has `additionalProperties: false`, so unknown slots are reported as errors.
 
-## Thêm profile cho stack mới
-1. Chép `profiles/_template.json` thành `profiles/<stack>.json` (tên tiếng Anh, kebab-case).
-2. Điền mọi khe; khe không áp dụng để rỗng. Lệnh chưa chắc → ghi vào `notes`.
-3. Thêm plugin LSP chính thức của ngôn ngữ (nếu có) vào `plugins.recommended`.
-4. Chạy `scripts/check-profile.py templates/schemas/profile.schema.json profiles/<stack>.json`, rồi `scripts/validate.sh`.
+## Adding a profile for a new stack
+1. Copy `profiles/_template.json` to `profiles/<stack>.json` (English name, kebab-case).
+2. Fill in every slot; leave slots that do not apply empty. Uncertain commands → record them in `notes`.
+3. Add the language's official LSP plugin (if any) to `plugins.recommended`.
+4. Run `scripts/check-profile.py templates/schemas/profile.schema.json profiles/<stack>.json`, then `scripts/validate.sh`.

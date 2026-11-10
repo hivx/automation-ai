@@ -1,49 +1,49 @@
-# 02 — Đội
+# 02 — The team
 
-Nguồn chuẩn: `SPEC.md` §3 và các file `agents/*.md`. Điều chỉnh: ADJ-01, ADJ-02, ADJ-04, ADJ-07, ADJ-10 trong `docs/00-overview.md`.
+Source of truth: `SPEC.md` §3 and the `agents/*.md` files. Adjustments: ADJ-01, ADJ-02, ADJ-04, ADJ-07, ADJ-10 in `docs/00-overview.md`.
 
-## Mười ba vai
-Bảng dưới đây SINH từ frontmatter của `agents/*.md` bằng `scripts/gen-team-table.py`; không sửa tay. Việc làm / không làm, đầu vào, đầu ra của từng vai nằm trong chính file agent.
+## Thirteen roles
+The table below is GENERATED from the frontmatter of `agents/*.md` by `scripts/gen-team-table.py`; do not edit it by hand. What each role does and does not do, its inputs and its outputs live in the agent file itself.
 
 <!-- team-table:start -->
-| Vai | Giao khi | Tools | Model | Effort | maxTurns | Memory | Isolation | Skills nạp sẵn |
+| Role | Delegate when | Tools | Model | Effort | maxTurns | Memory | Isolation | Preloaded skills |
 |---|---|---|---|---|---|---|---|---|
-| [team-leader](../agents/team-leader.md) | người dùng đưa yêu cầu mới, hỏi tiến độ hay duyệt cổng, hoặc khi cần chọn playbook, định cỡ việc và điều phối các vai khác. Chạy làm agent của phiên chính. | Read, Grep, Glob, Bash, Agent, AskUserQuestion, Write, Skill | sonnet | low | 30 | — | — | handbook, using-team |
-| [tech-lead](../agents/tech-lead.md) | một feature đã có spec/design được duyệt và cần lập kế hoạch, chia task, điều phối dev và reviewer, gộp nhánh hoặc mở PR. | Read, Grep, Glob, Bash, Agent, Edit, Write, Skill | sonnet | medium | 60 | — | — | handbook, using-team |
-| [coach](../agents/coach.md) | chạy retro, khi scorecard có bất thường, khi góp ý vượt ngưỡng, hoặc khi cần kiểm toán bộ kit và đề xuất sửa agent/skill có bằng chứng. | Read, Grep, Glob, Bash, Write, Skill | opus | high | 40 | project | — | handbook |
-| [analyst](../agents/analyst.md) | có yêu cầu thô cần biến thành spec có Definition of Done, hoặc khi cần sửa đổi spec đã duyệt (chế độ --amend). | Read, Grep, Glob, Bash, Agent, Write, Skill | opus | high | 40 | — | — | handbook |
-| [researcher](../agents/researcher.md) | spec còn câu hỏi kỹ thuật cần docs chính thức, khi so sánh phương án, nâng cấp phụ thuộc, tích hợp API ngoài, hoặc cần POC. | Read, Grep, Glob, Bash, WebFetch, WebSearch, Agent, Write, Skill | opus | high | 50 | — | — | handbook |
-| [architect](../agents/architect.md) | việc cỡ L cần kiến trúc, khi thay đổi chạm nhiều module hoặc NFR, khi cần quyết định ADR, hoặc khi cần review ba câu cho design.md. | Read, Grep, Glob, Bash, Agent, Write, Skill | opus | high | 40 | — | — | handbook |
-| [designer](../agents/designer.md) | spec đã duyệt cần thiết kế chi tiết trước khi lập kế hoạch: dữ liệu, API, luồng, quyền, migration, touchpoints và test plan. | Read, Grep, Glob, Bash, Agent, Write, Skill | opus | high | 40 | — | — | handbook |
-| [dev](../agents/dev.md) | tech-lead (hoặc team-leader với việc cỡ S) có một task cụ thể với touchpoints và tiêu chí, cần viết test và code trong worktree riêng. | Read, Edit, Write, Grep, Glob, Bash, Skill | sonnet | medium | 60 | — | worktree | handbook |
-| [reviewer](../agents/reviewer.md) | một task đã có commit của dev và cần review độc lập trong ngữ cảnh sạch trước khi gộp, chấm theo Review checklist (10). | Read, Grep, Glob, Bash, Skill | opus | high | 25 | project | — | handbook |
-| [qa](../agents/qa.md) | mọi task của feature đã tick và cần nghiệm thu độc lập từng tiêu chí bằng lệnh chạy thật, theo Acceptance checklist (6). | Read, Grep, Glob, Bash, Write, Skill | opus | high | 40 | project | — | handbook |
-| [writer](../agents/writer.md) | feature đã accepted và cần As-Built, release notes, mục CHANGELOG, cập nhật README hoặc nội dung PR; hoặc khi việc chỉ là tài liệu (docs-only, client-docs). | Read, Grep, Glob, Bash, Write, Skill | sonnet | medium | 30 | — | — | handbook |
-| [maintainer](../agents/maintainer.md) | cần dọn dẹp KHÔNG đổi hành vi: code chết, đổi tên, cấu trúc, phụ thuộc thừa, test mồ côi, đơn giản hóa, ngừng dùng API cũ, bổ sung quan sát. | Read, Edit, Write, Grep, Glob, Bash, Skill | sonnet | medium | 60 | — | worktree | handbook |
-| [devops](../agents/devops.md) | pipeline CI đỏ, khi cần dựng hoặc sửa CI/CD, viết script deploy, rollback, smoke, hoặc khi phát hành lên staging hay prod đã có duyệt G5. | Read, Edit, Write, Grep, Glob, Bash, Skill | sonnet | medium | 60 | — | — | handbook |
+| [team-leader](../agents/team-leader.md) | the user brings a new request, asks about progress or approves a gate, or when a playbook must be chosen, the work sized and the other roles coordinated. Runs as the main-session agent. | Read, Grep, Glob, Bash, Agent, AskUserQuestion, Write, Skill | sonnet | low | 30 | — | — | handbook, using-team |
+| [tech-lead](../agents/tech-lead.md) | a feature has an approved spec/design and needs a plan, a task breakdown, coordination of dev and reviewer, branch merging or a PR. | Read, Grep, Glob, Bash, Agent, Edit, Write, Skill | sonnet | medium | 60 | — | — | handbook, using-team |
+| [coach](../agents/coach.md) | a retro is due, the scorecard shows an anomaly, feedback crosses its threshold, or the kit needs an audit and evidence-backed proposals to fix an agent or skill. | Read, Grep, Glob, Bash, Write, Skill | opus | high | 40 | project | — | handbook |
+| [analyst](../agents/analyst.md) | a raw request must become a spec with a Definition of Done, or when an approved spec must be amended (--amend mode). | Read, Grep, Glob, Bash, Agent, Write, Skill | opus | high | 40 | — | — | handbook |
+| [researcher](../agents/researcher.md) | a spec still has technical questions that need official docs, when options must be compared, a dependency upgraded, an external API integrated, or a POC built. | Read, Grep, Glob, Bash, WebFetch, WebSearch, Agent, Write, Skill | opus | high | 50 | — | — | handbook |
+| [architect](../agents/architect.md) | size-L work needs an architecture, when a change touches several modules or NFRs, when an ADR decision is needed, or when design.md needs the three-sentence review. | Read, Grep, Glob, Bash, Agent, Write, Skill | opus | high | 40 | — | — | handbook |
+| [designer](../agents/designer.md) | an approved spec needs a detailed design before planning: data, API, flows, permissions, migrations, touchpoints and the test plan. | Read, Grep, Glob, Bash, Agent, Write, Skill | opus | high | 40 | — | — | handbook |
+| [dev](../agents/dev.md) | tech-lead (or team-leader for size-S work) has one concrete task with touchpoints and criteria that needs tests and code written in a separate worktree. | Read, Edit, Write, Grep, Glob, Bash, Skill | sonnet | medium | 60 | — | worktree | handbook |
+| [reviewer](../agents/reviewer.md) | a task has dev's commits and needs an independent review in a clean context before merging, scored against the Review checklist (10). | Read, Grep, Glob, Bash, Skill | opus | high | 25 | project | — | handbook |
+| [qa](../agents/qa.md) | every task of a feature is ticked and each criterion needs independent acceptance with real commands, following the Acceptance checklist (6). | Read, Grep, Glob, Bash, Write, Skill | opus | high | 40 | project | — | handbook |
+| [writer](../agents/writer.md) | a feature is accepted and needs As-Built, release notes, a CHANGELOG entry, a README update or the PR body; or when the work is documentation only (docs-only, client-docs). | Read, Grep, Glob, Bash, Write, Skill | sonnet | medium | 30 | — | — | handbook |
+| [maintainer](../agents/maintainer.md) | cleanup must happen WITHOUT changing behavior: dead code, renames, structure, unused dependencies, orphan tests, simplification, deprecating old APIs, adding observability. | Read, Edit, Write, Grep, Glob, Bash, Skill | sonnet | medium | 60 | — | worktree | handbook |
+| [devops](../agents/devops.md) | the CI pipeline is red, when CI/CD must be set up or fixed, deploy, rollback or smoke scripts written, or when releasing to staging or to prod with G5 approved. | Read, Edit, Write, Grep, Glob, Bash, Skill | sonnet | medium | 60 | — | — | handbook |
 <!-- team-table:end -->
 
-Agent tạm: `.claude/agents/<tên>.md` trong dự án, chỉ tạo khi team-leader thấy cần (`/team:make-agent`).
+Temporary agents: `.claude/agents/<name>.md` in the project, created only when team-leader sees the need (`/team:make-agent`).
 
-Trường `tools` chỉ ghi tên tool: docs không cho giới hạn đường dẫn/lệnh ở đó (thử nghiệm: `Bash(git status *)` vẫn cấp cả Bash). Giới hạn của từng vai (ví dụ team-leader chỉ ghi `docs/team/**`) ghi trong thân agent và do hook role-policy thực thi (ADJ-02).
+The `tools` field lists tool names only: the docs do not allow path/command limits there (experiment: `Bash(git status *)` still grants all of Bash). Each role's limits (for example, team-leader writes only `docs/team/**`) are written in the agent body and enforced by the role-policy hook (ADJ-02).
 
-## Ai gọi ai
+## Who calls whom
 ```
-người ⇄ phiên chính = team-leader          (chỉ ở đây có AskUserQuestion)
+human <-> main session = team-leader       (the only place with AskUserQuestion)
           ├─► analyst, researcher, architect, designer, writer, maintainer, devops, coach, qa
-          ├─► dev                            (chỉ việc cỡ S một task)
+          ├─► dev                            (size S single-task work only)
           └─► tech-lead ─► dev, reviewer
-team-leader, tech-lead, analyst, researcher, architect, designer ─► Explore   (chỉ để đọc code)
+team-leader, tech-lead, analyst, researcher, architect, designer ─► Explore   (code reading only)
 ```
-- Chỉ team-leader và tech-lead gọi vai khác. analyst, researcher, architect, designer chỉ được gọi `Explore`; các vai còn lại không gọi ai.
-- Độ sâu tối đa 3 tầng dưới phiên chính (ADJ-04).
-- Bàn giao = MỘT FILE + tin nhắn tự đủ ≤ 10 dòng; người nhận không thấy hội thoại của người gửi.
-- tech-lead → dev: mã task, tiêu chí nghiệm thu, touchpoints, `cmd.test_one`, nhánh, "chỉ sửa trong touchpoints".
-- dev → tech-lead: file đã đổi, test đã chạy kèm đầu ra thật, còn thiếu gì.
+- Only team-leader and tech-lead call other roles. analyst, researcher, architect, designer may call only `Explore`; the remaining roles call no one.
+- Maximum depth is 3 levels below the main session (ADJ-04).
+- A handoff = ONE FILE + a self-contained message of ≤ 10 lines; the receiver does not see the sender's conversation.
+- tech-lead → dev: task ID, acceptance criteria, touchpoints, `cmd.test_one`, branch, "edit only inside the touchpoints".
+- dev → tech-lead: files changed, tests run with their real output, what is still missing.
 
-Chi tiết: `handbook/who-calls-whom.md`.
+Details: `handbook/who-calls-whom.md`.
 
-## Định tuyến model
-- Model mạnh nhất ở nơi sai đắt nhất.
-- haiku: phân loại, việc cơ học. sonnet: điều phối, dev, writer, maintainer, devops. opus: analyst, researcher, architect, designer, reviewer, qa, coach.
-- Không đổi model giữa phiên. Ghi đè trong `.team/config.json → models`.
+## Model routing
+- The strongest model goes where mistakes cost the most.
+- haiku: classification, mechanical work. sonnet: coordination, dev, writer, maintainer, devops. opus: analyst, researcher, architect, designer, reviewer, qa, coach.
+- Do not switch models mid-session. Override in `.team/config.json → models`.

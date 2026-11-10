@@ -1,33 +1,33 @@
-# 08 — Kênh làm việc
+# 08 — Working channels
 
-Nguồn chuẩn: `SPEC.md` §11. Điều chỉnh: ADJ-01, ADJ-03.
+Source of truth: `SPEC.md` §11. Adjustments: ADJ-01, ADJ-03.
 
-| Kênh | Hỏi người bằng | Chế độ | Ghi chú |
+| Channel | Asks the human through | Mode | Notes |
 |---|---|---|---|
-| CLI / Desktop / IDE | `AskUserQuestion` trong phiên chính (team-leader) | `ask` hoặc `decide` | Kênh chính hằng ngày |
-| GitHub Actions | Bình luận issue + nhãn `team:needs-answer` | `ask` hoặc `decide` | Dùng `anthropics/claude-code-action@v1` |
-| Tác vụ định kỳ | Không hỏi | chỉ `decide` | retro, clean-sweep, smoke sau deploy |
-| Headless `claude -p` | Không hỏi | chỉ `decide` | Xem bên dưới |
-| Projects (đám mây) | Như CLI | tùy | Chạy nhiều feature song song |
+| CLI / Desktop / IDE | `AskUserQuestion` in the main session (team-leader) | `ask` or `decide` | The everyday main channel |
+| GitHub Actions | Issue comment + label `team:needs-answer` | `ask` or `decide` | Uses `anthropics/claude-code-action@v1` |
+| Scheduled tasks | Does not ask | `decide` only | retro, clean-sweep, post-deploy smoke |
+| Headless `claude -p` | Does not ask | `decide` only | See below |
+| Projects (cloud) | Like the CLI | either | Runs several features in parallel |
 
 ## GitHub Actions
-- Nhãn `team:intake` trên issue → tiếp nhận; `team:run` → chạy tiếp tới cổng kế.
-- Duyệt cổng bằng bình luận `@claude approve Gn`.
-- Câu hỏi được đăng thành bình luận theo mẫu `templates/artifacts/question-comment.md`; job dừng với `WAITING_FOR_ANSWER`.
-- Workflow mẫu: `templates/project/github/workflows/team-ci.yml`, `team-feature.yml`.
+- Label `team:intake` on an issue → intake; `team:run` → continue to the next gate.
+- Approve a gate with the comment `@claude approve Gn`.
+- Questions are posted as comments following the template `templates/artifacts/question-comment.md`; the job stops with `WAITING_FOR_ANSWER`.
+- Sample workflows: `templates/project/github/workflows/team-ci.yml`, `team-feature.yml`.
 
 ## Headless
-Lệnh cho việc có sửa file (cần hook):
+Command for work that edits files (hooks needed):
 ```
-claude -p "<lệnh /team:...>" \
+claude -p "<command /team:...>" \
   --permission-mode dontAsk \
   --allowedTools "$(jq -r '["Read","Grep","Glob","Edit","Write","Agent","Skill"] + (.permissions.allow // []) | join(",")' .claude/settings.json)" \
   --max-turns <n> --max-budget-usd <usd> --output-format json
 ```
-- `--allowedTools` là bắt buộc: thư mục chưa được tin (runner CI, máy mới) thì `-p` bỏ qua `permissions.allow` của dự án (K-06). Danh sách lấy từ `permissions.allow` mà onboard ghi, nên không phải chép tay lệnh stack.
-- KHÔNG dùng `--bare` cho việc có sửa file: `--bare` tắt mọi hook, kể cả hook của plugin, nên luật máy không chạy (ADJ-03).
-- `--bare` chỉ cho báo cáo chỉ đọc như `/team:status`; khi đó nạp plugin bằng `--plugin-dir` và đặt `ANTHROPIC_API_KEY`.
-- Chế độ `decide` bắt buộc. Kết quả đọc từ JSON đầu ra, đối chiếu `templates/schemas/stage-result.json`.
+- `--allowedTools` is mandatory: in a directory that is not yet trusted (a CI runner, a new machine), `-p` ignores the project's `permissions.allow` (K-06). The list is taken from the `permissions.allow` that onboard wrote, so stack commands never have to be copied by hand.
+- Do NOT use `--bare` for work that edits files: `--bare` turns off every hook, including the plugin's hooks, so the machine rules do not run (ADJ-03).
+- `--bare` is only for read-only reports such as `/team:status`; in that case load the plugin with `--plugin-dir` and set `ANTHROPIC_API_KEY`.
+- `decide` mode is mandatory. Read the result from the JSON output and check it against `templates/schemas/stage-result.json`.
 
-## Tác vụ định kỳ
-Playbook batch trong `workflows/batch/`: `build-all-tasks`, `verify-all`, `weekly-retro`, `clean-sweep`. Chạy ở chế độ `decide`; chạm cổng đang bật thì dừng và báo.
+## Scheduled tasks
+Batch playbooks in `workflows/batch/`: `build-all-tasks`, `verify-all`, `weekly-retro`, `clean-sweep`. They run in `decide` mode; on reaching an enabled gate they stop and report.

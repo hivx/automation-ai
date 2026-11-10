@@ -1,92 +1,93 @@
-# 00 — Tổng quan
+# 00 — Overview
 
-## Là gì, cho ai
-`automation-ai` là plugin `team` cho Claude Code. Cài vào một dự án bất kỳ, nó cho Claude Code một đội IT có vai rõ ràng, quy trình 9 giai đoạn, cổng duyệt và luật máy.
+## What it is, who it is for
+`automation-ai` is the `team` plugin for Claude Code. Install it into any project and it gives Claude Code an IT team with clear roles, a 9-stage process, approval gates and machine-enforced rules.
 
-Dành cho:
-- Trưởng nhóm muốn giao yêu cầu thô và chỉ duyệt tài liệu ở các cổng.
-- Lập trình viên muốn Claude làm có kỷ luật: test trước, review riêng, nghiệm thu bằng đầu ra thật.
-- Người tiếp nhận một dự án cũ, cần biết nhanh dự án đang ở đâu.
+For:
+- Team leads who want to hand over raw requests and only approve documents at the gates.
+- Developers who want Claude to work with discipline: tests first, separate review, acceptance on real output.
+- Whoever takes over a legacy project and needs to learn quickly where it stands.
 
-Không phải là: quy trình cho một stack cụ thể; kho kiến thức nghiệp vụ của dự án; công cụ tự deploy production; nơi viết MCP server hay plugin mới.
+It is not: a process for one specific stack; a store of the project's business knowledge; a tool that deploys to production on its own; a place to write MCP servers or new plugins.
 
-## Bảy nguyên tắc
-| # | Nguyên tắc | Nghĩa là |
+## Seven principles
+| # | Principle | Meaning |
 |---|---|---|
-| P1 | Agent là một con người | Mỗi vai có hợp đồng; không có agent "làm tất". |
-| P2 | Trạng thái nằm trên đĩa | Vị trí hiện tại tính từ artifact trong `docs/team/`. |
-| P3 | Máy trước LLM | Điều không được sai phải do hook/quyền/script chặn. |
-| P4 | Độc lập nền tảng | Lệnh và cấu trúc dự án nằm trong `.team/profile.json`. |
-| P5 | Gọi đúng người, khi cần | Mỗi lần gọi có lý do một câu trong journal. |
-| P6 | Đo rồi mới sửa | Scorecard + journal; thay đổi có eval, canary, rollback. |
-| P7 | Con người quyết định | Cổng là cấu hình; không bao giờ vượt cổng đang bật. |
+| P1 | An agent is a person | Every role has a contract; there is no "does everything" agent. |
+| P2 | State lives on disk | The current position is computed from the artifacts in `docs/team/`. |
+| P3 | Machine before LLM | Anything that must not go wrong is blocked by a hook, a permission or a script. |
+| P4 | Platform independent | Commands and project structure live in `.team/profile.json`. |
+| P5 | Call the right person, when needed | Every call has a one-sentence reason in the journal. |
+| P6 | Measure before you fix | Scorecard + journal; every change has an eval, a canary and a rollback. |
+| P7 | The human decides | Gates are configuration; an enabled gate is never bypassed. |
 
-## Ý tưởng tiếp nhận: ba câu hỏi
-`/team:takeover` chỉ trả lời ba câu, không sửa gì:
-1. Dự án **làm gì**?
-2. Dự án **đã tới đâu**?
-3. **Việc tiếp theo** là gì?
+## The takeover idea: three questions
+`/team:takeover` answers only three questions and changes nothing:
+1. What does the project **do**?
+2. How **far along** is it?
+3. What is the **next piece of work**?
 
-Quét theo 4 tầng, tầng sau chỉ chạy khi tầng trước chưa trả lời được: T0 siêu dữ liệu (cây thư mục, manifest, git log) → T1 tài liệu → T2 đối chiếu tài liệu với code, lấy mẫu → T3 đọc sâu từng module. Báo cáo ghi rõ đã quét gì, chưa quét gì, độ tin cậy. Người duyệt `ai-readiness.md` (cổng G0) rồi mới chạy `/team:onboard`.
+It scans in 4 tiers; a later tier runs only when the earlier one could not answer: T0 metadata (directory tree, manifests, git log) → T1 documentation → T2 documentation checked against the code, by sampling → T3 deep reading module by module. The report states what was scanned, what was not, and the confidence level. The human approves `ai-readiness.md` (gate G0) before running `/team:onboard`.
 
-## Cái gì nằm ở đâu
-| Muốn biết | Xem |
+## Where things are
+| You want to know | Look at |
 |---|---|
-| Đặc tả đầy đủ | `SPEC.md` |
-| Quy trình, cổng, cỡ việc | `docs/01-process.md` |
-| Các vai và ai gọi ai | `docs/02-team.md` |
-| Sổ tay kỹ thuật | `handbook/STD.md` (tóm tắt: `docs/03-handbook.md`) |
-| Khe của profile | `docs/04-profile.md` |
-| Token, memory | `docs/05-tokens-and-memory.md` |
-| Cài đặt, gỡ cài | `docs/06-install.md` |
-| Tự cải tiến | `docs/07-improvement.md` |
-| Kênh (CLI, GitHub, headless) | `docs/08-channels.md` |
-| Vấn đề đã biết của kit, backlog | [`docs/kit-issues.md`](kit-issues.md) |
-| Kiểm định chất lượng skill/agent | [`docs/research/kit-audit-round1.md`](research/kit-audit-round1.md), [`kit-audit-round2.md`](research/kit-audit-round2.md) |
-| Yêu cầu gốc và nghiệm thu | [`docs/requirements/ban-hieu-yeu-cau.md`](requirements/ban-hieu-yeu-cau.md), [`docs/acceptance/acceptance-2026-11-10.md`](acceptance/acceptance-2026-11-10.md) ([ma trận](acceptance/traceability-2026-11-10.md), [sổ yêu cầu](acceptance/requirements-register.md), [đo chất lượng](acceptance/measured-quality.md), [SPEC so với yêu cầu](acceptance/spec-vs-requirements.md)) |
-| Bộ kit tham khảo, so sánh | [`docs/research/reference-kits.md`](research/reference-kits.md) |
-| Ghi công | [`docs/credits.md`](credits.md) |
-| Bắt đầu trong 5 phút | [`docs/guides/5-minute-start.md`](guides/5-minute-start.md) |
-| Muốn X thì gõ Y | [`docs/guides/want-x-type-y.md`](guides/want-x-type-y.md) |
-| Chọn playbook | [`docs/guides/decision-tree.md`](guides/decision-tree.md) |
-| Phiên mẫu | [`docs/guides/sample-sessions.md`](guides/sample-sessions.md) |
-| Đọc `/team:status`, ai chờ ai | [`docs/guides/who-is-waiting-for-what.md`](guides/who-is-waiting-for-what.md) |
-| Khi có sự cố | [`docs/guides/incidents.md`](guides/incidents.md) |
-| Ngày đầu trên dự án có sẵn | [`docs/guides/first-day-on-existing-project.md`](guides/first-day-on-existing-project.md) |
+| The full specification | `SPEC.md` |
+| Process, gates, work size | `docs/01-process.md` |
+| The roles and who calls whom | `docs/02-team.md` |
+| The engineering handbook | `handbook/STD.md` (summary: `docs/03-handbook.md`) |
+| The profile slots | `docs/04-profile.md` |
+| Tokens, memory | `docs/05-tokens-and-memory.md` |
+| Install, uninstall | `docs/06-install.md` |
+| Self-improvement | `docs/07-improvement.md` |
+| Channels (CLI, GitHub, headless) | `docs/08-channels.md` |
+| Known kit issues, backlog | [`docs/kit-issues.md`](kit-issues.md) |
+| Quality audit of skills/agents | [`docs/research/kit-audit-round1.md`](research/kit-audit-round1.md), [`kit-audit-round2.md`](research/kit-audit-round2.md) |
+| Original requirements and acceptance | [`docs/requirements/ban-hieu-yeu-cau.md`](requirements/ban-hieu-yeu-cau.md), [`docs/acceptance/acceptance-2026-11-10.md`](acceptance/acceptance-2026-11-10.md) ([traceability matrix](acceptance/traceability-2026-11-10.md), [requirements register](acceptance/requirements-register.md), [measured quality](acceptance/measured-quality.md), [SPEC vs requirements](acceptance/spec-vs-requirements.md)); these files stay in Vietnamese as historical records |
+| Reference kits, comparison | [`docs/research/reference-kits.md`](research/reference-kits.md) |
+| Credits | [`docs/credits.md`](credits.md) |
+| Start in 5 minutes | [`docs/guides/5-minute-start.md`](guides/5-minute-start.md) |
+| Want X, type Y | [`docs/guides/want-x-type-y.md`](guides/want-x-type-y.md) |
+| Choose a playbook | [`docs/guides/decision-tree.md`](guides/decision-tree.md) |
+| Sample sessions | [`docs/guides/sample-sessions.md`](guides/sample-sessions.md) |
+| Read `/team:status`, who is waiting for whom | [`docs/guides/who-is-waiting-for-what.md`](guides/who-is-waiting-for-what.md) |
+| When something goes wrong | [`docs/guides/incidents.md`](guides/incidents.md) |
+| First day on an existing project | [`docs/guides/first-day-on-existing-project.md`](guides/first-day-on-existing-project.md) |
 
-Trong dự án đã cài: cấu hình ở `.team/`, artifact ở `docs/team/`, quy tắc theo đường dẫn ở `.claude/rules/`.
+In a project where the kit is installed: configuration lives in `.team/`, artifacts in `docs/team/`, path-scoped rules in `.claude/rules/`.
 
-## Điều chỉnh đã chốt (so với SPEC)
-SPEC giữ nguyên văn. Các điểm dưới đây đã được người duyệt ngày 2026-11-09, sau khi đối chiếu với docs chính thức của Claude Code 2.1.319. Chúng thắng SPEC khi khác nhau.
+## Approved adjustments (relative to SPEC)
+SPEC is kept verbatim. The points below were approved by the owner on 2026-11-09, after checking them against the official Claude Code 2.1.319 docs (ADJ-30 was added in P9). Where they differ from SPEC, they win.
 
-| Mã | Điều chỉnh | Lý do (docs) |
+| Code | Adjustment | Reason (docs) |
 |---|---|---|
-| ADJ-01 | `team-leader` chạy làm agent của phiên chính: `/team:onboard` ghi `"agent": "team:team-leader"` vào `.claude/settings.json`. Chỉ phiên chính hỏi người. `analyst` và vai khác trả câu hỏi về dưới dạng file + trạng thái `NEEDS_ANSWER`. | Subagent không bao giờ có `AskUserQuestion`. |
-| ADJ-02 | Giới hạn theo vai (đường dẫn được ghi, lệnh Bash được chạy, agent được gọi) do hook PreToolUse của plugin thực thi, đọc `agent_type` và bảng role-policy. Trường `tools` của agent chỉ ghi tên tool. | `tools` không nhận giới hạn đường dẫn; plugin agent bỏ qua `hooks`, `permissionMode`, `mcpServers`. |
-| ADJ-03 | Chạy headless có sửa file thì KHÔNG dùng `--bare`. `--bare` chỉ cho báo cáo chỉ đọc (status, metrics). | `--bare` tắt mọi hook, kể cả hook của plugin. |
-| ADJ-04 | Độ sâu gọi: phiên chính (team-leader) → tech-lead → dev/reviewer → Explore = 3 tầng, đúng mặc định `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH`. Không hạ giá trị này. | Subagent lồng nhau tối đa 3 tầng mặc định. |
-| ADJ-05 | Mục plugin trong `marketplace.json` không ghi `version`; chỉ `plugin.json` ghi. | Ghi cả hai thì `plugin.json` thắng và validate cảnh báo. |
-| ADJ-06 | `effort` nhận `low|medium|high|xhigh|max`; SessionStart có thêm matcher `fork`. | Docs hiện hành. |
-| ADJ-07 | Bỏ `TaskCreate/TaskUpdate` khỏi tool của team-leader; `tasks.md` là trạng thái. | Hai tool này chỉ mặc định có trên model cũ. |
-| ADJ-08 | Cài cục bộ (`install-local.sh`, `npx skills`) không có namespace: lệnh là `/team-<tên>` (ADJ-22). Hook được nối vào `.claude/settings.json` (P5). `npx skills` chỉ cài skill. | `${CLAUDE_PLUGIN_ROOT}` và `hooks/hooks.json` chỉ có hiệu lực trong plugin. |
-| ADJ-09 | Cổng áp theo cỡ việc: cỡ S không qua G1 theo thiết kế; playbook refactor bật G2b. | Đọc đơn giản nhất của SPEC §4. |
-| ADJ-10 | `designer` mặc định opus; team-leader truyền `model: sonnet` khi gọi cho việc cỡ S/M. | Một file agent chỉ có một `model`. |
-| ADJ-11 | Bổ sung tool so với SPEC §3: `Write` cho tech-lead và qa (phải tạo `plan.md`, `tasks.md`, `review-NN.md`, `acceptance.md`); `Skill` cho mọi vai (dùng skill tạm, `/team:commit`); bỏ `AskUserQuestion` khỏi analyst (ADJ-01). | Edit không tạo được file mới; thiếu `Skill` thì subagent không gọi được skill. |
-| ADJ-12 | Skill `handbook` không dùng `` !`cat` ``; bước 1 của nó là Read `${CLAUDE_PLUGIN_ROOT}/handbook/STD-short.md` (dự phòng `<kit>`). | Thử nghiệm: khi nạp sẵn vào subagent, lệnh `!` đi qua kiểm quyền và subagent KHÔNG khởi động được ở chế độ `dontAsk`, kể cả khi cho phép `Bash(cat *)`. |
-| ADJ-13 | Skill fork sang vai ghi tên có tiền tố plugin: `agent: team:<vai>`; đặt `background: false` để `/team:run` chạy nối tiếp. | Thử nghiệm: tên trần (`analyst`) bị bỏ qua, skill chạy bằng agent chung. Skill fork mặc định chạy nền. |
-| ADJ-14 | `make-skill`, `make-agent` để Claude gọi được (không `disable-model-invocation`): team-leader tạo skill tạm khi cần (SPEC §9). `pr` và `audit-kit` fork sang tech-lead và coach. | Prompt P4 vừa liệt kê hai skill này là "chỉ người gọi" vừa nói team-leader gọi chúng; team-leader chỉ đọc Bash nên không tự mở PR được. |
-| ADJ-15 | Skill không dùng `` !`lệnh` ``; điều kiện trước là một bước chạy `python3 "$(cat .team/plugin_root)/scripts/team.py" status` bằng Bash. | Cùng lý do ADJ-12: lệnh `!` đi qua kiểm quyền và có thể chặn skill khởi động. |
-| ADJ-16 | Playbook `data-migration` bật G2b (duyệt `design.md`), như `refactor`. | SPEC không nói; rủi ro mất dữ liệu. |
-| ADJ-17 | Hook `role-policy.sh` + `hooks/role-policy.json` thực thi ADJ-02. Khi `.team/current.json` có `stage: onboard`, team-leader được ghi thêm `CLAUDE.md`, `.claude/rules/`, `.github/`, `.gitignore`. | Onboard chạy trong phiên chính (team-leader). |
-| ADJ-18 | `scripts/render.py` dựng file dự án từ template (thay `{{…}}`, nở danh sách, gộp không ghi đè); `scripts/teamlib.py` chứa logic chung của hook. | Tránh để LLM tự điền JSON settings. |
-| ADJ-19 | `Read(//<kit>/**)` ghi vào `.claude/settings.local.json`, không phải settings dùng chung. | Đường dẫn kit khác nhau giữa các máy; dry-run P4 cho thấy cần quyền này. |
-| ADJ-20 | `stop-check.sh` chạy cả ở SubagentStop của `team:dev`, `team:maintainer`, `team:researcher`. | Vòng build chạy trong subagent; chỉ Stop của phiên chính thì quá muộn. |
-| ADJ-21 | STD-GIT-3 ở mức máy: chỉ push `team/*` hoặc tag; `--force-with-lease` cũng bị chặn; Edit/Write vào `.claude/settings*.json` bị chặn. | Đơn giản nhất và an toàn nhất. |
-| ADJ-22 | Cài cục bộ: `install-local.sh` bỏ tiền tố `team:` của tên agent, đổi skill thành `team-<tên>` (tránh đụng `/status`, `/run`, `/verify`…), gộp hook vào `.claude/settings.json`; role-policy nhận cả tên không tiền tố. | Không có namespace plugin khi cài cục bộ. |
-| ADJ-23 | coach ghi: `docs/team/retro/**`, `docs/team/proposals/**`, `docs/team/kit-issues.md` (audit-kit), `docs/team/metrics/scorecard.json` (chỉ qua `team.py scorecard`), `.team/current.json`, memory của mình — một danh sách trong `agents/coach.md` = `hooks/role-policy.json`. | SPEC §3 chỉ nêu retro/proposals, nhưng audit-kit phải ghi kit-issues và mọi giai đoạn ghi `current.json` (K-43). |
-| ADJ-24 | Không có khe deploy cho prod hay rollback (SPEC §8 chỉ có `deploy.staging`, `deploy.smoke`, `deploy.prod_requires_reviewer`): lệnh prod và rollback đã kiểm nằm ở `docs/team/ci.md` mục `## Deploy`, do `/team:ci deploy-script` viết qua PR. devops chỉ kích hoạt đúng lệnh/pipeline đó sau `Approved-by-prod:`; ưu tiên job CI có environment bắt người duyệt (STD-OPS-7). | SPEC §13 cấm bịa khe; đề xuất khe mới trong báo cáo. |
-| ADJ-25 | researcher được ghi mọi file trong worktree riêng `.claude/worktrees/<n>/` (POC), không ghi cây chính (`worktree_write` trong role-policy). | SPEC §3 "POC in worktree" không làm được khi role-policy chỉ cho `docs/team/**`. |
-| ADJ-26 | `team.py`: playbook không có analyze (bug-fix, hotfix, refactor, dependency-upgrade, spike, ci-fix, docs-only) không cần `spec.md`; bug-fix, hotfix, refactor không cần `plan.md`; refactor được tính `built` khi `/team:clean` ghi `tasks.md` (T1 tick). | Chuỗi SPEC §5 của các playbook này không có bước đó; trước đây trạng thái kẹt (K-47). |
-| ADJ-27 | analyst, architect, designer, writer có tool `Bash`, chỉ để chạy lệnh chỉ-đọc (`team.py status`, `explore-cache.sh`, `git log`); role-policy giữ `bash: read-only`. | Skill của các vai này cần kiểm trạng thái; eval analyze s1 (2026-11-09) cho thấy analyst bỏ bước vì không có Bash (K-52). |
-| ADJ-28 | `intake` để Claude gọi được (bỏ `disable-model-invocation`): khi người gõ yêu cầu thô, team-leader tự chạy `/team:intake`. | SPEC §3: team-leader làm intake; trước đây `using-team` trỏ tới một skill chỉ người gọi được (K-70). |
-| ADJ-29 | Cỡ S vẫn nghiệm thu bằng `/team:verify` (qa, bước kiểm thu gọn), không phải "verify tự động không có qa riêng"; qa tính trong trần 3 vai của cỡ S (analyst, tech-lead, qa). | SPEC §4 nói "verify (automated, no separate qa)"; kit giữ người nghiệm thu độc lập vì cỡ S cũng có thể sai (K-15, K-78). |
+| ADJ-01 | `team-leader` runs as the main-session agent: `/team:onboard` writes `"agent": "team:team-leader"` into `.claude/settings.json`. Only the main session asks the human. `analyst` and the other roles return their questions as a file + status `NEEDS_ANSWER`. | Subagents never have `AskUserQuestion`. |
+| ADJ-02 | Per-role limits (paths that may be written, Bash commands that may run, agents that may be called) are enforced by the plugin's PreToolUse hook, which reads `agent_type` and the role-policy table. An agent's `tools` field lists tool names only. | `tools` does not accept path limits; plugin agents ignore `hooks`, `permissionMode`, `mcpServers`. |
+| ADJ-03 | Headless runs that edit files do NOT use `--bare`. `--bare` is only for read-only reports (status, metrics). | `--bare` turns off every hook, including the plugin's hooks. |
+| ADJ-04 | Call depth: main session (team-leader) → tech-lead → dev/reviewer → Explore = 3 levels, exactly the default of `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH`. Do not lower this value. | Nested subagents go at most 3 levels deep by default. |
+| ADJ-05 | The plugin entry in `marketplace.json` has no `version`; only `plugin.json` carries it. | If both carry it, `plugin.json` wins and validate warns. |
+| ADJ-06 | `effort` accepts `low|medium|high|xhigh|max`; SessionStart gets an extra `fork` matcher. | Current docs. |
+| ADJ-07 | `TaskCreate/TaskUpdate` removed from team-leader's tools; `tasks.md` is the state. | These two tools are only on by default on older models. |
+| ADJ-08 | A local install (`install-local.sh`, `npx skills`) has no namespace: commands are `/team-<name>` (ADJ-22). Hooks are wired into `.claude/settings.json` (P5). `npx skills` installs skills only. | `${CLAUDE_PLUGIN_ROOT}` and `hooks/hooks.json` only take effect inside a plugin. |
+| ADJ-09 | Gates apply by work size: size S skips G1 by design; the refactor playbook turns on G2b. | The simplest reading of SPEC §4. |
+| ADJ-10 | `designer` defaults to opus; team-leader passes `model: sonnet` when calling it for size S/M work. | An agent file has only one `model`. |
+| ADJ-11 | Tools added relative to SPEC §3: `Write` for tech-lead and qa (they must create `plan.md`, `tasks.md`, `review-NN.md`, `acceptance.md`); `Skill` for every role (temp skills, `/team:commit`); `AskUserQuestion` removed from analyst (ADJ-01). | Edit cannot create a new file; without `Skill` a subagent cannot call a skill. |
+| ADJ-12 | The `handbook` skill does not use `` !`cat` ``; its step 1 is a Read of `${CLAUDE_PLUGIN_ROOT}/handbook/STD-short.md` (fallback `<kit>`). | Experiment: when preloaded into a subagent, a `!` command goes through the permission check and the subagent does NOT start in `dontAsk` mode, even with `Bash(cat *)` allowed. |
+| ADJ-13 | A skill that forks to a role names it with the plugin prefix: `agent: team:<role>`; it sets `background: false` so that `/team:run` runs sequentially. | Experiment: a bare name (`analyst`) is ignored and the skill runs on the general agent. Forked skills run in the background by default. |
+| ADJ-14 | `make-skill` and `make-agent` are callable by Claude (no `disable-model-invocation`): team-leader creates temp skills when needed (SPEC §9). `pr` and `audit-kit` fork to tech-lead and coach. | The P4 prompt both listed these two skills as "human-only" and said team-leader calls them; team-leader has read-only Bash, so it cannot open a PR itself. |
+| ADJ-15 | Skills do not use `` !`command` ``; the precondition is a step that runs `python3 "$(cat .team/plugin_root)/scripts/team.py" status` through Bash. | Same reason as ADJ-12: a `!` command goes through the permission check and can stop the skill from starting. |
+| ADJ-16 | The `data-migration` playbook turns on G2b (approval of `design.md`), like `refactor`. | SPEC is silent; risk of data loss. |
+| ADJ-17 | The `role-policy.sh` hook + `hooks/role-policy.json` enforce ADJ-02. When `.team/current.json` has `stage: onboard`, team-leader may also write `CLAUDE.md`, `.claude/rules/`, `.github/`, `.gitignore`. | Onboard runs in the main session (team-leader). |
+| ADJ-18 | `scripts/render.py` builds project files from templates (replaces `{{…}}`, expands lists, merges without overwriting); `scripts/teamlib.py` holds the shared hook logic. | Avoids having the LLM fill in settings JSON by hand. |
+| ADJ-19 | `Read(//<kit>/**)` is written to `.claude/settings.local.json`, not to the shared settings. | The kit path differs between machines; the P4 dry run showed this permission is needed. |
+| ADJ-20 | `stop-check.sh` also runs on the SubagentStop of `team:dev`, `team:maintainer`, `team:researcher`. | The build loop runs inside a subagent; the main session's Stop alone comes too late. |
+| ADJ-21 | STD-GIT-3 at machine level: only `team/*` or tags may be pushed; `--force-with-lease` is blocked too; Edit/Write on `.claude/settings*.json` is blocked. | Simplest and safest. |
+| ADJ-22 | Local install: `install-local.sh` drops the `team:` prefix from agent names, renames skills to `team-<name>` (avoids clashing with `/status`, `/run`, `/verify`…), merges the hooks into `.claude/settings.json`; role-policy accepts the unprefixed names as well. | There is no plugin namespace in a local install. |
+| ADJ-23 | coach writes: `docs/team/retro/**`, `docs/team/proposals/**`, `docs/team/kit-issues.md` (audit-kit), `docs/team/metrics/scorecard.json` (only through `team.py scorecard`), `.team/current.json`, its own memory — one list in `agents/coach.md` = `hooks/role-policy.json`. | SPEC §3 names only retro/proposals, but audit-kit must write kit-issues and every stage writes `current.json` (K-43). |
+| ADJ-24 | There is no deploy slot for prod or rollback (SPEC §8 has only `deploy.staging`, `deploy.smoke`, `deploy.prod_requires_reviewer`): the checked prod and rollback commands live in `docs/team/ci.md` under `## Deploy`, written by `/team:ci deploy-script` through a PR. devops triggers exactly that command/pipeline, and only after `Approved-by-prod:`; a CI job with an environment that requires a reviewer is preferred (STD-OPS-7). | SPEC §13 forbids inventing slots; new slots are proposed in the report. |
+| ADJ-25 | researcher may write any file in its own worktree `.claude/worktrees/<n>/` (POC), but not the main tree (`worktree_write` in role-policy). | SPEC §3 "POC in worktree" cannot work when role-policy only allows `docs/team/**`. |
+| ADJ-26 | `team.py`: playbooks without analyze (bug-fix, hotfix, refactor, dependency-upgrade, spike, ci-fix, docs-only) do not need `spec.md`; bug-fix, hotfix, refactor do not need `plan.md`; refactor counts as `built` when `/team:clean` writes `tasks.md` (T1 ticked). | The SPEC §5 chain of these playbooks has no such step; the status used to get stuck (K-47). |
+| ADJ-27 | analyst, architect, designer, writer have the `Bash` tool, only to run read-only commands (`team.py status`, `explore-cache.sh`, `git log`); role-policy keeps `bash: read-only`. | These roles' skills need to check status; eval analyze s1 (2026-11-09) showed analyst skipping the step because it had no Bash (K-52). |
+| ADJ-28 | `intake` is callable by Claude (`disable-model-invocation` removed): when the human types a raw request, team-leader runs `/team:intake` itself. | SPEC §3: team-leader does intake; `using-team` used to point at a skill only the human could call (K-70). |
+| ADJ-29 | Size S still gets acceptance through `/team:verify` (qa, a shortened check), not "automated verify without a separate qa"; qa counts toward the 3-role cap of size S (analyst, tech-lead, qa). | SPEC §4 says "verify (automated, no separate qa)"; the kit keeps an independent acceptor because size S work can be wrong too (K-15, K-78). |
+| ADJ-30 | Language zones (P9): AI-facing text English; owner-facing Vietnamese only in GUIDE-VI.md; artifact prose follows config.output_language (vi default); anchors English (scripts/anchors.txt). See SPEC-OVERRIDES.md entry 1. | Decision of the owner in P9; overrides SPEC §0. |

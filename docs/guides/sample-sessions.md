@@ -1,68 +1,68 @@
-# Phiên mẫu (rút gọn từ lần chạy thật)
+# Sample sessions (condensed from a real run)
 
-Ba phiên dưới đây rút từ lần chạy end-to-end ngày 2026-11-09 (Claude Code 2.1.319) trên dự án mẫu `sample-existing`: thư viện Python `inventory` 3 module, 24 commit, README hứa `to_csv` nhưng code chưa có, một test bị skip, CLAUDE.md cũ 120 dòng. Chỉ giữ lệnh, quyết định và phán quyết; bỏ chi tiết gọi tool. Chi phí là con số Claude Code in ra.
+The three sessions below come from the end-to-end run of 2026-11-09 (Claude Code 2.1.319) on the sample project `sample-existing`: a 3-module Python library `inventory`, 24 commits, a README that promises `to_csv` although the code does not have it, one skipped test, an old 120-line CLAUDE.md. Only commands, decisions and verdicts are kept; tool-call details are dropped. Costs are the figures Claude Code printed. The run predates P9, so its artifacts were written in Vietnamese; the excerpts are shown in English.
 
-## 1. Ngày đầu trên dự án có sẵn (takeover → G0 → onboard)
+## 1. First day on an existing project (takeover → G0 → onboard)
 
 ```
-người> /team:takeover
-team-leader: T0 detect-stack.sh --deep (24 commit, 3 tác giả, 1 dấu skip, 1 TODO)
-             T1 README, CLAUDE.md, Makefile, .env.example (4 tài liệu)
-             T2 đọc trực tiếp, < 30 file (11 file theo dõi)
-             T3 không chạy: mâu thuẫn đã giải thích ở T2
-  → docs/team/assessment.md      Làm gì: thư viện tồn kho 3 module.
-                                 Tới đâu: README hứa to_csv — code không có (grep: 0);
-                                          test_remove_unknown_sku bị skip ("flaky on CI", repo không có CI).
-                                 Tiếp theo: viết lại CLAUDE.md; cài to_csv hoặc bỏ khỏi README; ...
-  → ai-readiness.md  Verdict: clean-first — CLAUDE.md mô tả app Django không tồn tại → Viết lại
+human> /team:takeover
+team-leader: T0 detect-stack.sh --deep (24 commits, 3 authors, 1 skip marker, 1 TODO)
+             T1 README, CLAUDE.md, Makefile, .env.example (4 documents)
+             T2 direct reading, < 30 files (11 tracked files)
+             T3 not run: the contradictions were explained at T2
+  → docs/team/assessment.md      Does: a 3-module inventory library.
+                                 How far: README promises to_csv — the code does not have it (grep: 0);
+                                          test_remove_unknown_sku is skipped ("flaky on CI", the repo has no CI).
+                                 Next: rewrite CLAUDE.md; implement to_csv or drop it from the README; ...
+  → ai-readiness.md  Verdict: clean-first — CLAUDE.md describes a Django app that does not exist → Rewrite
   → profile-proposal.md  cmd.test = make test; cmd.test_one = python3 -m unittest {file}; cmd.lint = make lint
-  (35 lượt, $0.27; không file nguồn nào bị sửa)
-người> (thêm "Approved-by: Miyano 2026-11-09" vào ai-readiness.md)
-người> /team:onboard
-team-leader: profile + config (check-profile: hợp lệ); CLAUDE.md: chèn khối 16 dòng, 120 dòng cũ giữ nguyên;
-             .claude/settings.json (agent team:team-leader), settings.local.json (Read kit), 4 rule;
+  (35 turns, $0.27; no source file was modified)
+human> (adds "Approved-by: Miyano 2026-11-09" to ai-readiness.md)
+human> /team:onboard
+team-leader: profile + config (check-profile: valid); CLAUDE.md: 16-line block inserted, the old 120 lines kept;
+             .claude/settings.json (agent team:team-leader), settings.local.json (Read kit), 4 rules;
              make lint → 0; make test → "Ran 4 tests … OK (skipped=1)"
-             Việc tay: viết lại CLAUDE.md; điền approvers; cài security-guidance (chỉ in lệnh)
-  (57 lượt, $0.38)
+             Manual work: rewrite CLAUDE.md; fill in approvers; install security-guidance (command printed only)
+  (57 turns, $0.38)
 ```
 
-## 2. Tính năng cỡ S (intake → run → verify, dừng ở G4)
+## 2. A size S feature (intake → run → verify, stops at G4)
 
 ```
-người> /team:intake "Implement the feature the README promises" --size S --decide
-team-leader: FEAT-001 · playbook new-feature · cỡ S · decide
-             lý do: README.md dòng 8 hứa to_csv, grep "csv" trong inventory/ = 0      ($0.19)
-người> /team:run FEAT-001 --until-blocked
-  analyst  → spec.md: 5 tiêu chí AC-1..AC-5, mỗi cái có lệnh kiểm; DoD gồm CHANGELOG   (SPECIFIED)
+human> /team:intake "Implement the feature the README promises" --size S --decide
+team-leader: FEAT-001 · playbook new-feature · size S · decide
+             reason: README.md line 8 promises to_csv, grep "csv" in inventory/ = 0      ($0.19)
+human> /team:run FEAT-001 --until-blocked
+  analyst  → spec.md: 5 criteria AC-1..AC-5, each with a check command; DoD includes CHANGELOG   (SPECIFIED)
   tech-lead → tasks.md: T1 to_csv + test + README + CHANGELOG
-    dev (worktree)   test hỏng trước → to_csv → make test xanh → commit "feat(report): add to_csv (FEAT-001)"
-    reviewer         request-changes: price âm rất nhỏ in "-0.00" (major)
-    dev (vòng sửa)   "fix(report): normalise negative zero in to_csv (FEAT-001)"
-    reviewer         approve → review-01.md; gộp vào team/FEAT-001; make test: 11 tests OK (skipped=1)
+    dev (worktree)   failing test first → to_csv → make test green → commit "feat(report): add to_csv (FEAT-001)"
+    reviewer         request-changes: a tiny negative price prints "-0.00" (major)
+    dev (rework)     "fix(report): normalise negative zero in to_csv (FEAT-001)"
+    reviewer         approve → review-01.md; merged into team/FEAT-001; make test: 11 tests OK (skipped=1)
   qa       → acceptance.md: "Ran 8 tests … OK"; make test "Ran 11 tests"; make lint 0
              Verdict: accepted
-team-leader: dừng — WAITING_FOR_APPROVAL G4_uat (docs/team/features/FEAT-001/acceptance.md)
+team-leader: stop — WAITING_FOR_APPROVAL G4_uat (docs/team/features/FEAT-001/acceptance.md)
 ```
 
-Nhật ký `docs/team/journal/FEAT-001.md`:
+Journal `docs/team/journal/FEAT-001.md`:
 ```
-- 2026-11-09 intake → team-leader | new-feature, S, decide | intake.md | — | good | README hứa to_csv nhưng code chưa có; cỡ S do người ép
-- 2026-11-09 build → tech-lead | skill team:build (playbook new-feature, S) | tasks.md 1 task | — | good | không có design.md vì cỡ S
-- 2026-11-09 verify → qa | xong | acceptance.md | — | good | accepted; dừng ở G4
+- 2026-11-09 intake → team-leader | new-feature, S, decide | intake.md | — | good | README promises to_csv but the code lacks it; size S forced by the human
+- 2026-11-09 build → tech-lead | skill team:build (playbook new-feature, S) | tasks.md 1 task | — | good | no design.md because size S
+- 2026-11-09 verify → qa | done | acceptance.md | — | good | accepted; stopped at G4
 ```
 
-Lỗi của kit lộ ra trong phiên này (đã sửa trong v0.1.0): status kẹt ở `planned` vì `- [x] **T1**` in đậm (K-11); team-leader dừng ở G1 dù cỡ S bỏ G1 (K-02); ghi journal bằng `printf` bị từ chối (K-12). Xem `docs/kit-issues.md`.
+Kit defects exposed in this session (fixed in v0.1.0): status stuck at `planned` because of the bold `- [x] **T1**` (K-11); team-leader stopped at G1 although size S skips G1 (K-02); writing the journal with `printf` was refused (K-12). See `docs/kit-issues.md`.
 
-## 3. Nhìn lại (retro)
+## 3. Looking back (retro)
 
 ```
-người> /team:retro --decide
-coach: measure.py --since 2026-11-09 → hạng 1 cần chú ý: team:tech-lead (420 s, 46 lượt, cỡ S)
-       Điểm nghẽn: FEAT-001 cỡ S gọi 5 vai / 8 lượt > trần max_agents_per_feature.S = 3;
-                   journal ghi sai "agents 3 trong giới hạn"
-       Chẩn đoán: config (trần 3 < chuỗi tối thiểu 5 vai) + prompt (team-leader không có cách đếm)
+human> /team:retro --decide
+coach: measure.py --since 2026-11-09 → attention rank 1: team:tech-lead (420 s, 46 turns, size S)
+       Bottleneck: FEAT-001 size S called 5 roles / 8 turns > cap max_agents_per_feature.S = 3;
+                   the journal wrongly says "agents 3 within the limit"
+       Diagnosis: config (cap 3 < the minimum chain of 5 roles) + prompt (team-leader has no way to count)
   → docs/team/retro/2026-11-09.md
-  → docs/team/proposals/2026-11-09/team-leader.md: overlay rule "ngân sách agent", eval 5 kịch bản,
-    canary 3 việc cỡ S, rollback; chờ người duyệt
-  (agents/ và skills/ của kit không đổi — kiểm bằng sha256)
+  → docs/team/proposals/2026-11-09/team-leader.md: overlay rule "agent budget", 5-scenario eval,
+    canary on 3 size-S jobs, rollback; waiting for human approval
+  (the kit's agents/ and skills/ unchanged — checked with sha256)
 ```

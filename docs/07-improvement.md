@@ -1,47 +1,47 @@
-# 07 — Tự cải tiến
+# 07 — Self-improvement
 
-Nguồn chuẩn: `SPEC.md` §9 (Journal & self-improvement, Temp skills). Skill liên quan: `/team:retro`, `/team:feedback`, `/team:audit-kit`, `/team:make-skill`, `/team:make-agent`.
+Source of truth: `SPEC.md` §9 (Journal & self-improvement, Temp skills). Related skills: `/team:retro`, `/team:feedback`, `/team:audit-kit`, `/team:make-skill`, `/team:make-agent`.
 
-## Journal (định tính)
-`docs/team/journal/<feature>.md`. Sau mỗi lần bàn giao, team-leader hoặc tech-lead viết 3–5 dòng:
-- giao cho ai, việc gì;
-- kết quả, thời gian / số vòng;
-- nhận xét về agent/skill: tốt / chậm / sai + nguyên nhân sơ bộ;
-- ý tưởng cải tiến.
+## Journal (qualitative)
+`docs/team/journal/<feature>.md`. After each handoff, team-leader or tech-lead writes 3–5 lines:
+- who it was handed to, and what;
+- the result, time taken / number of rounds;
+- a remark on the agent/skill: good / slow / wrong + a first guess at the cause;
+- an improvement idea.
 
-Mẫu: `templates/artifacts/journal-entry.md`. Trần: `journal.max_lines_per_entry` trong config.
+Template: `templates/artifacts/journal-entry.md`. Cap: `journal.max_lines_per_entry` in the config.
 
-## Scorecard (định lượng)
-Mỗi agent/skill: số lần gọi, số lượt, thời gian, rework/bị từ chối, vi phạm STD gây ra, token (từ log cục bộ của Claude Code), số lần người phải can thiệp. So với trung vị của việc cùng cỡ. Hook SubagentStop ghi vào `docs/team/metrics/`.
+## Scorecard (quantitative)
+Per agent/skill: number of calls, turns, time, rework/rejections, STD violations caused, tokens (from Claude Code's local logs), number of times the human had to step in. Compared with the median of work of the same size. The SubagentStop hook writes to `docs/team/metrics/`.
 
-`scripts/measure.py` chạy định kỳ, không dùng LLM: điểm hiệu quả, xu hướng, bất thường, xếp hạng cần chú ý → đưa cho coach và journal. Góp ý của người: `docs/team/metrics/feedback.jsonl`; báo động sau 2 lần vượt ngưỡng. Chỉ số gọi thừa: số agent gọi mỗi feature so với `max_agents_per_feature`.
+`scripts/measure.py` runs periodically, without an LLM: efficiency score, trends, anomalies, an attention ranking → handed to coach and the journal. Human feedback: `docs/team/metrics/feedback.jsonl`; an alert after 2 threshold breaches. Over-calling indicator: agents called per feature versus `max_agents_per_feature`.
 
-## Vòng của coach
-1. Đọc scorecard + journal → tìm điểm nghẽn.
-2. Chẩn đoán 5 nguyên nhân, có bằng chứng: prompt · model/effort · đầu vào (lỗi từ khâu trước) · profile/config · cỡ task.
-3. Viết đề xuất vào `docs/team/proposals/`: diff dạng overlay (`# Overlay from retro <date>: <reason>`, có phiên bản) + eval trước/sau.
-4. Người duyệt → canary trên N việc cỡ S.
-5. Giữ / rollback / thay / bỏ.
+## The coach loop
+1. Read the scorecard + journal → find the bottlenecks.
+2. Diagnose among 5 causes, with evidence: prompt · model/effort · input (a defect from an earlier stage) · profile/config · task size.
+3. Write a proposal in `docs/team/proposals/`: a diff in overlay form (`# Overlay from retro <date>: <reason>`, versioned) + a before/after eval.
+4. The human approves → canary on N size-S pieces of work.
+5. Keep / roll back / replace / drop.
 
-coach không tự áp thay đổi và không sửa bản gốc của kit.
+coach never applies a change itself and never edits the kit's originals.
 
-## Skill và agent tạm
-Chỉ tạo khi cần, không tạo sẵn lúc cài.
-1. Ở intake/plan, team-leader thấy task cần chuyên môn kit chưa có, hoặc sẽ lặp lại.
-2. Kiểm tra cái đã có: kit, `.claude/skills/` của dự án, plugin.
-3. Giao `/team:make-skill` (researcher gom mẫu và docs trong repo trước nếu cần).
-4. Skill nằm ở `.claude/skills/<tên>/`: mục đích, khi nào dùng, vào/ra, các bước, tool, mẫu tham khảo, tiêu chí xong, 1–2 ca thử; nhãn `temp`; ghi vào `docs/team/skills-registry.md`.
-5. Giao cho subagent kiểu "dùng /<tên> cho bước X"; dùng ngay; ghi journal.
-6. Theo dõi: `temp` → `project` (ổn định, người duyệt) → đề xuất đưa vào kit (≥ 2 dự án) hoặc `retired` (30 ngày không dùng). Có trần số skill tạm đang hoạt động.
+## Temp skills and agents
+Create them only when needed; nothing is pre-created at install time.
+1. At intake/plan, team-leader sees that a task needs expertise the kit does not have, or that it will recur.
+2. Check what already exists: the kit, the project's `.claude/skills/`, plugins.
+3. Hand off `/team:make-skill` (researcher first gathers examples and in-repo docs if needed).
+4. The skill lives in `.claude/skills/<name>/`: purpose, when to use, inputs/outputs, steps, tools, reference examples, done criteria, 1–2 test cases; label `temp`; recorded in `docs/team/skills-registry.md`.
+5. Hand it to a subagent as "use /<name> for step X"; use it right away; record it in the journal.
+6. Follow-up: `temp` → `project` (stable, approved by the human) → proposed for the kit (≥ 2 projects) or `retired` (unused for 30 days). There is a cap on the number of active temp skills.
 
-`/team:make-agent` theo cùng vòng đời. Lỗi của chính kit ghi vào `docs/team/kit-issues.md`.
+`/team:make-agent` follows the same lifecycle. Defects of the kit itself go into `docs/team/kit-issues.md`.
 
-## Script đo
-| Việc | Lệnh |
+## Measurement scripts
+| Job | Command |
 |---|---|
-| Ghi một lần chạy agent | tự động: hook SubagentStop → `scripts/scorecard.sh` |
-| Ghi kết quả một giai đoạn | `scripts/log-run.sh --skill <x> --result <y>` (skill `run` gọi) |
-| Gộp theo agent/skill/cỡ | `python3 scripts/team.py metrics`; ghi `docs/team/metrics/scorecard.json` bằng `team.py scorecard` |
-| Điểm hiệu quả, xu hướng, bất thường, xếp hạng | `python3 scripts/measure.py [--since <date>] [--logs ~/.claude/projects/<slug>/] [--json]` |
+| Record one agent run | automatic: SubagentStop hook → `scripts/scorecard.sh` |
+| Record the result of one stage | `scripts/log-run.sh --skill <x> --result <y>` (called by the `run` skill) |
+| Aggregate per agent/skill/size | `python3 scripts/team.py metrics`; write `docs/team/metrics/scorecard.json` with `team.py scorecard` |
+| Efficiency score, trends, anomalies, ranking | `python3 scripts/measure.py [--since <date>] [--logs ~/.claude/projects/<slug>/] [--json]` |
 
-Trọng số của điểm hiệu quả nằm ở đầu `scripts/measure.py` (`WEIGHTS`). Test: `scripts/tests/test_measure.py`.
+The efficiency-score weights sit at the top of `scripts/measure.py` (`WEIGHTS`). Tests: `scripts/tests/test_measure.py`.

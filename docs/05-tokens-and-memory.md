@@ -1,38 +1,38 @@
-# 05 — Token và memory
+# 05 — Tokens and memory
 
-Nguồn chuẩn: `SPEC.md` §9 (Memory). Trang này giải thích lý do.
+Source of truth: `SPEC.md` §9 (Memory). This page explains the reasoning.
 
-## Năm tầng
-| Tầng | Là gì | Nằm ở đâu | Ai ghi |
+## Five tiers
+| Tier | What it is | Where it lives | Who writes it |
 |---|---|---|---|
-| 0 Ngân sách ngữ cảnh | Nạp lười: rule theo đường dẫn, skill khi cần, handbook nạp sẵn; khám phá bằng `Explore`; một feature mỗi phiên; cảnh báo khi vượt `context_warn_pct` | — | `/team:session plan` đặt điểm nén theo giai đoạn (mức 1: không hook nào đọc được % ngữ cảnh); hook SessionStart nhắc luật sau khi nén |
-| 1 Trạng thái phiên | Bàn giao ≤ 40 dòng, chỉ phần khác so với artifact | `.team/session/<id>.md` (gitignore) | hook PreCompact, SessionEnd; nạp ở SessionStart |
-| 2 Artifact feature | spec, design, plan, review, acceptance... | `docs/team/features/<ID>/` | các vai |
-| 3 Kiến thức dự án | Chia hai: auto memory của Claude Code (máy cục bộ: thói quen, đặc điểm máy) và `docs/team/` (dùng chung, CI đọc được: ADR, cache research theo phiên bản, As-Built, glossary, cache explore có hash) | `~/.claude/projects/...` và `docs/team/` | các vai, theo rule |
-| 4 Memory của agent | `memory: project` cho reviewer, qa, coach; nhỏ, có ngày | thư mục memory của agent | chính agent đó |
+| 0 Context budget | Lazy loading: path-scoped rules, skills on demand, handbook preloaded; exploration through `Explore`; one feature per session; a warning when `context_warn_pct` is exceeded | — | `/team:session plan` sets the compaction points per stage (level 1: no hook can read the context %); the SessionStart hook restates the rules after compaction |
+| 1 Session state | A handoff of ≤ 40 lines, only what differs from the artifacts | `.team/session/<id>.md` (gitignored) | PreCompact, SessionEnd hooks; loaded at SessionStart |
+| 2 Feature artifacts | spec, design, plan, review, acceptance... | `docs/team/features/<ID>/` | the roles |
+| 3 Project knowledge | Split in two: Claude Code's auto memory (local machine: habits, machine quirks) and `docs/team/` (shared, readable by CI: ADRs, versioned research cache, As-Built, glossary, hashed explore cache) | `~/.claude/projects/...` and `docs/team/` | the roles, following the rules |
+| 4 Agent memory | `memory: project` for reviewer, qa, coach; small, dated | the agent's memory directory | that agent itself |
 
-## Phép thử "có đáng lưu không"
-Lưu khi: dùng lại ≥ 2 lần HOẶC tạo lại tốn kém. Khi lưu:
-- Lưu kết luận, không lưu quá trình.
-- Ghi ngày hoặc phiên bản để biết lúc hết hạn.
-- Có trần kích thước và số file.
-- coach dọn định kỳ.
+## The "is it worth keeping?" test
+Keep it when: it is reused ≥ 2 times OR it is expensive to recreate. When keeping it:
+- Keep the conclusion, not the process.
+- Record a date or version so you know when it expires.
+- Have a cap on size and number of files.
+- coach cleans up periodically.
 
-## Giữ cache prompt
-- Phần đầu prompt ổn định; không chèn dữ liệu thay đổi vào đầu.
-- Không đổi model giữa phiên.
-- Khi chia việc song song: cùng model, cùng bộ tool.
-- Nén chủ động ở ranh giới giai đoạn, không đợi đầy.
+## Keeping the prompt cache
+- The start of the prompt stays stable; do not inject changing data at the top.
+- Do not switch models mid-session.
+- When splitting work in parallel: same model, same tool set.
+- Compact proactively at stage boundaries; do not wait until the context is full.
 
-## Mẹo cho người dùng
-- Một feature mỗi phiên. Xong giai đoạn thì `/team:session` rồi mở phiên mới cũng được: trạng thái nằm trên đĩa.
-- Ngữ cảnh đầy: xem `docs/guides/incidents.md`.
+## Tips for users
+- One feature per session. After finishing a stage you may run `/team:session` and open a new session: the state is on disk.
+- Context full: see `docs/guides/incidents.md`.
 
-## Script và hook làm việc này
-| Việc | Ở đâu |
+## Scripts and hooks that do this
+| Job | Where |
 |---|---|
-| Ghi bàn giao ≤ `memory.handoff_max_lines` dòng trước khi nén và khi kết thúc phiên | `scripts/handoff.sh` (hook PreCompact, SessionEnd) → `.team/session/<session_id>.md` |
-| Nạp lại: tóm tắt trạng thái, bàn giao mới nhất, nhắc 6 luật sau khi nén | `scripts/session-start.sh` (hook SessionStart, `additionalContext`) |
-| Đếm số lần nén theo phiên/feature | `scripts/log-session.sh` (hook PostCompact, SessionEnd) → `docs/team/metrics/sessions.jsonl` |
-| Cache khám phá theo hash thư mục | `scripts/explore-cache.sh <dir>` → `HIT`/`MISS` với `docs/team/explore/<slug>.md` (dòng `hash:`) |
-| Trạng thái tính từ artifact (không con trỏ) | `scripts/team.py status` |
+| Write a handoff of ≤ `memory.handoff_max_lines` lines before compaction and at session end | `scripts/handoff.sh` (PreCompact, SessionEnd hooks) → `.team/session/<session_id>.md` |
+| Reload: status summary, latest handoff, restating the 6 rules after compaction | `scripts/session-start.sh` (SessionStart hook, `additionalContext`) |
+| Count compactions per session/feature | `scripts/log-session.sh` (PostCompact, SessionEnd hooks) → `docs/team/metrics/sessions.jsonl` |
+| Explore cache keyed by directory hash | `scripts/explore-cache.sh <dir>` → `HIT`/`MISS` with `docs/team/explore/<slug>.md` (`hash:` line) |
+| Status computed from artifacts (no pointer) | `scripts/team.py status` |

@@ -1,32 +1,32 @@
-# Ngày đầu trên dự án có sẵn
+# First day on an existing project
 
-Mục tiêu: trước khi đội sửa một dòng code, bạn và đội cùng biết dự án làm gì, đã tới đâu, việc tiếp theo là gì.
+Goal: before the team changes a single line of code, you and the team both know what the project does, how far along it is, and what the next piece of work is.
 
-## Trước khi bắt đầu
-- Cài plugin (`docs/06-install.md`).
-- Làm việc trên nhánh sạch. takeover không sửa file của dự án; nó chỉ ghi vào `docs/team/`.
+## Before you start
+- Install the plugin (`docs/06-install.md`).
+- Work on a clean branch. takeover does not modify the project's files; it only writes into `docs/team/`.
 
-## Bước 1 — `/team:takeover`
-- Đội quét theo tầng: T0 siêu dữ liệu → T1 tài liệu → T2 đối chiếu lấy mẫu → T3 chỉ khi cần (hoặc `--full`).
-- Kết quả trong `docs/team/`:
-  - `assessment.md` — ba câu trả lời + phụ lục sức khỏe stack (build/test có chạy không, lint, coverage, phụ thuộc lỗi thời/CVE, secret lộ, test chập chờn).
-  - `ai-readiness.md` — CLAUDE.md, `.claude/`, plugin, MCP, AGENTS.md hiện có: giữ / cắt / viết lại; kết luận: sẵn sàng / chỉnh profile / dọn trước.
-  - `profile-proposal.md` — profile đề xuất, mỗi khe có bằng chứng.
-  - `debt.md` — nợ kỹ thuật: chặn / nên làm / để sau.
-  - `open-questions.md` — tối đa 10 câu.
+## Step 1 — `/team:takeover`
+- The team scans in tiers: T0 metadata → T1 documentation → T2 sampled cross-check → T3 only when needed (or `--full`).
+- Results in `docs/team/`:
+  - `assessment.md` — the three answers + a stack-health appendix (do build/test run, lint, coverage, outdated/CVE dependencies, leaked secrets, flaky tests).
+  - `ai-readiness.md` — existing CLAUDE.md, `.claude/`, plugins, MCP, AGENTS.md: keep / cut / rewrite; verdict: ready / adjust profile / clean first.
+  - `profile-proposal.md` — the proposed profile, with evidence for every slot.
+  - `debt.md` — technical debt: blocking / should do / later.
+  - `open-questions.md` — at most 10 questions.
 
-## Bước 2 — Đọc và duyệt (cổng G0)
-1. Đọc mục "đã quét / chưa quét / độ tin cậy" trước.
-2. Kiểm `profile-proposal.md`: nhất là `cmd.test_one`, `protected_paths`, `allowed_new_file_roots`.
-3. Trả lời `open-questions.md` ngay trong file.
-4. Thêm `Approved-by: <tên> <YYYY-MM-DD>` lên đầu `ai-readiness.md`.
+## Step 2 — Read and approve (gate G0)
+1. Read the "scanned / not scanned / confidence" section first.
+2. Check `profile-proposal.md`, especially `cmd.test_one`, `protected_paths`, `allowed_new_file_roots`.
+3. Answer `open-questions.md` directly in the file.
+4. Add `Approved-by: <name> <YYYY-MM-DD>` at the top of `ai-readiness.md`.
 
-## Bước 3 — `/team:onboard`
-- Ghi `.team/profile.json`, `.team/config.json`, `.claude/settings.json` (quyền, nhánh bảo vệ, team-leader làm agent phiên chính), `.claude/rules/`, khối `team` trong `CLAUDE.md`.
-- In lệnh cài plugin khuyên dùng; bạn tự quyết cài.
-- Commit các file này.
+## Step 3 — `/team:onboard`
+- Writes `.team/profile.json`, `.team/config.json`, `.claude/settings.json` (permissions, protected branches, team-leader as the main-session agent), `.claude/rules/`, the `team` block in `CLAUDE.md`.
+- Prints the install commands for the recommended plugins; you decide whether to install them.
+- Commit these files.
 
-## Bước 4 — Việc đầu tiên
-- Chọn việc nhỏ (cỡ S) để đo đội: một lỗi trong `debt.md` hoặc `open-questions.md`.
-- `/team:intake --type bug "<mô tả>"`, theo dõi bằng `/team:status`.
-- Cuối ngày: đọc `docs/team/journal/`. Thấy đội chậm/sai ở đâu → `/team:feedback`.
+## Step 4 — The first piece of work
+- Pick something small (size S) to gauge the team: a defect from `debt.md` or `open-questions.md`.
+- `/team:intake --type bug "<description>"`, then follow it with `/team:status`.
+- At the end of the day: read `docs/team/journal/`. Where the team was slow or wrong → `/team:feedback`.

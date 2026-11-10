@@ -1,56 +1,58 @@
-# 01 — Quy trình
+# 01 — Process
 
-Nguồn chuẩn: `SPEC.md` §4–§5. Trang này là bản đọc nhanh cho người. Điều chỉnh: `docs/00-overview.md` (ADJ-09).
+Source of truth: `SPEC.md` §4–§5. This page is the quick read for humans. Adjustments: `docs/00-overview.md` (ADJ-09).
 
-## Chín giai đoạn và cổng
-Artifact nằm ở `docs/team/features/<ID>/` trừ khi ghi khác.
+## Nine stages and their gates
+Artifacts live in `docs/team/features/<ID>/` unless stated otherwise.
 
-| # | Giai đoạn | Lệnh | Vai | Artifact | Cổng mặc định |
+| # | Stage | Command | Role | Artifact | Default gate |
 |---|---|---|---|---|---|
-| G0 | Tiếp nhận dự án | `/team:takeover` | team-leader (+Explore, researcher) | `docs/team/assessment.md`, `ai-readiness.md`, ... | G0 bật với dự án có sẵn |
-| 0 | Tiếp nhận yêu cầu | `/team:intake` | team-leader | `intake.md` | — |
-| 1 | Phân tích | `/team:analyze` | analyst | `spec.md` (có DoD) | G1 bật |
-| 2 | Nghiên cứu | `/team:research` | researcher | `research.md` + cache `docs/team/research/` | — |
-| 3 | Kiến trúc | `/team:architect` | architect | `docs/team/architecture.md` hoặc `arch-impact.md`, `adr/` | G2 bật |
-| 4 | Thiết kế chi tiết | `/team:design` | designer | `design.md` | G2b tắt |
-| 5 | Lập kế hoạch | `/team:plan` | tech-lead | `plan.md`, `tasks.md` | G3 bật |
-| 6 | Xây dựng | `/team:build` | tech-lead → dev, reviewer | code, commit, `review-NN.md` | — |
-| 7 | Nghiệm thu | `/team:verify` | qa | `acceptance.md` | G4 bật |
-| 8 | Phát hành | `/team:asbuilt`, `/team:pr`, `/team:release` | writer, tech-lead, devops | `asbuilt.md`, CHANGELOG, PR | G5 luôn là người |
-| 9 | Vận hành | `/team:intake --type bug`, `/team:clean`, `/team:ci`, `/team:retro` | team-leader, maintainer, devops, coach | `defects.md`, `debt.md`, `retro/` | — |
+| G0 | Project takeover | `/team:takeover` | team-leader (+Explore, researcher) | `docs/team/assessment.md`, `ai-readiness.md`, ... | G0 on for existing projects |
+| 0 | Request intake | `/team:intake` | team-leader | `intake.md` | — |
+| 1 | Analysis | `/team:analyze` | analyst | `spec.md` (with DoD) | G1 on |
+| 2 | Research | `/team:research` | researcher | `research.md` + cache `docs/team/research/` | — |
+| 3 | Architecture | `/team:architect` | architect | `docs/team/architecture.md` or `arch-impact.md`, `adr/` | G2 on |
+| 4 | Detailed design | `/team:design` | designer | `design.md` | G2b off |
+| 5 | Planning | `/team:plan` | tech-lead | `plan.md`, `tasks.md` | G3 on |
+| 6 | Build | `/team:build` | tech-lead → dev, reviewer | code, commits, `review-NN.md` | — |
+| 7 | Acceptance | `/team:verify` | qa | `acceptance.md` | G4 on |
+| 8 | Release | `/team:asbuilt`, `/team:pr`, `/team:release` | writer, tech-lead, devops | `asbuilt.md`, CHANGELOG, PR | G5 always a human |
+| 9 | Operations | `/team:intake --type bug`, `/team:clean`, `/team:ci`, `/team:retro` | team-leader, maintainer, devops, coach | `defects.md`, `debt.md`, `retro/` | — |
 
-**Duyệt cổng:** thêm dòng `Approved-by: <tên> <YYYY-MM-DD>` lên đầu artifact (G5 dùng `Approved-by-prod:`), hoặc bình luận `@claude approve Gn` trên issue. Cổng đặt `false` trong `.team/config.json` thì không chặn.
+**Approving a gate:** add the line `Approved-by: <name> <YYYY-MM-DD>` at the top of the artifact (G5 uses `Approved-by-prod:`), or comment `@claude approve Gn` on the issue. A gate set to `false` in `.team/config.json` does not block.
 
-**Trạng thái được tính, không lưu:** `/team:status` đọc artifact và cho biết feature đang ở đâu. Một cổng đang bật mà chưa duyệt sẽ chặn mọi giai đoạn sau, kể cả khi artifact sau đã có.
+**Status is computed, not stored:** `/team:status` reads the artifacts and tells you where a feature is. An enabled gate that is not yet approved blocks every later stage, even when the later artifacts already exist.
 
-## Cỡ việc
-| Cỡ | Dấu hiệu | Chuỗi |
+**Artifact language:** artifact prose is written in `config.output_language` (`vi` by default, or `en`); machine-read anchors (`Approved-by:`, `## Definition of Done`, `Verdict: …`, statuses) stay in English. See `docs/04-profile.md`.
+
+## Work size
+| Size | Signals | Chain |
 |---|---|---|
-| S | Mô tả diff bằng một câu; ≤ 3 file; không đổi schema/API | intake → analyze ngắn (không G1) → build (1 dev + reviewer) → verify (qa, bước kiểm thu gọn; tính trong trần 3 vai: analyst, tech-lead, qa — K-15) → release |
-| M | Một module; đổi dữ liệu hoặc API; 1–5 người-ngày | intake → analyze → [research] → design → plan → build → verify → release |
-| L | Nhiều module; NFR mới; > 5 người-ngày | đủ 9 giai đoạn; kiến trúc bắt buộc; task đầu là walking skeleton |
+| S | The diff can be described in one sentence; ≤ 3 files; no schema/API change | intake → short analyze (no G1) → build (1 dev + reviewer) → verify (qa, shortened check; counts toward the 3-role cap: analyst, tech-lead, qa — K-15) → release |
+| M | One module; changes data or an API; 1–5 person-days | intake → analyze → [research] → design → plan → build → verify → release |
+| L | Several modules; new NFRs; > 5 person-days | all 9 stages; architecture is mandatory; the first task is a walking skeleton |
 
-team-leader định cỡ ở intake. Ép cỡ bằng `--size S|M|L` hoặc nhãn `team:size:*`. Đổi cỡ giữa chừng được ghi lý do vào `intake.md`.
+team-leader sets the size at intake. Force a size with `--size S|M|L` or the label `team:size:*`. A size change midway is recorded with its reason in `intake.md`.
 
-## Hỏi hay tự quyết
-- **`ask` (mặc định):** chỉ hỏi điều chưa rõ mà hậu quả LỚN hoặc KHÔNG ĐẢO NGƯỢC được (xóa/di trú dữ liệu, đổi API công khai, đổi luật nghiệp vụ, chi phí). Tối đa 5 câu/vòng, 2 vòng; mỗi câu 2–4 lựa chọn, có khuyến nghị và hậu quả. Việc nhỏ ghi vào `## Assumptions decided by the team`.
-- **`decide`:** không hỏi; mọi quyết định ghi: chọn gì / vì sao / phương án khác / sửa thế nào nếu sai. Bật bằng `--decide`, nhãn `team:decide` hoặc `default_mode`.
-- **Trong CI:** câu hỏi thành bình luận issue + nhãn `team:needs-answer`, dừng với `WAITING_FOR_ANSWER`.
-- Chỉ phiên chính (team-leader) hỏi người; vai khác trả câu hỏi về cho team-leader (ADJ-01).
+## Ask or decide
+- **`ask` (default):** ask only about unclear points whose consequences are LARGE or IRREVERSIBLE (deleting/migrating data, changing a public API, changing a business rule, cost). At most 5 questions per round, 2 rounds; each question has 2–4 options, a recommendation and the consequences. Small matters go into `## Assumptions decided by the team`.
+- **`decide`:** no questions; every decision is recorded: what was chosen / why / the alternatives / how to fix it if wrong. Turn it on with `--decide`, the label `team:decide` or `default_mode`.
+- **In CI:** questions become an issue comment + the label `team:needs-answer`, and the run stops with `WAITING_FOR_ANSWER`.
+- Only the main session (team-leader) asks the human; other roles return their questions to team-leader (ADJ-01).
 
-## Vòng xây dựng
-1. tech-lead chọn task chưa bị chặn trong `tasks.md`.
-2. dev (worktree riêng): viết test hỏng trước → làm → `cmd.test_one` → `cmd.lint` → commit.
-3. reviewer (ngữ cảnh mới): tầng 1 khớp spec → tầng 2 chất lượng; phát hiện có mã STD.
-4. dev sửa blocker/major (≤ `max_rework` vòng).
-5. tech-lead tick task, viết `review-NN.md`, gộp vào `team/<ID>`, chạy `cmd.test`.
-6. Hết task → `/team:verify`.
+## The build loop
+1. tech-lead picks an unblocked task from `tasks.md`.
+2. dev (own worktree): write a failing test first → implement → `cmd.test_one` → `cmd.lint` → commit.
+3. reviewer (fresh context): tier 1 matches the spec → tier 2 quality; every finding carries an STD code.
+4. dev fixes blockers/majors (≤ `max_rework` rounds).
+5. tech-lead ticks the task, writes `review-NN.md`, merges into `team/<ID>`, runs `cmd.test`.
+6. No tasks left → `/team:verify`.
 
-Task dài 2–5 phút, có đường dẫn file cụ thể. Hai task chạm cùng file không chạy song song. Không ai nói "xong" khi chưa dán đầu ra.
+A task takes 2–5 minutes and names concrete file paths. Two tasks that touch the same file never run in parallel. Nobody says "done" before pasting the output.
 
-## Dừng và leo thang
-Đội dừng khi: task BLOCKED sau `max_attempts`; vượt `max_rework`; gặp `DESIGN_CONFLICT` hoặc phán quyết design-defect; cổng bật chưa duyệt; vượt `feature_budget_usd`; chạm `protected_paths`; hai vòng sửa cùng một lỗi.
-Mỗi lần dừng nói rõ: lý do, việc nào, ai phải làm gì, lệnh để chạy tiếp. Xử lý: `docs/guides/incidents.md`.
+## Stopping and escalation
+The team stops when: a task is BLOCKED after `max_attempts`; `max_rework` is exceeded; it hits `DESIGN_CONFLICT` or a design-defect verdict; an enabled gate is not approved; `feature_budget_usd` is exceeded; it touches `protected_paths`; two rework rounds hit the same error.
+Every stop states: the reason, which piece of work, who must do what, and the command to resume. Handling: `docs/guides/incidents.md`.
 
-## Playbook
-16 playbook trong `workflows/`, chọn theo loại việc rồi theo cỡ: xem `docs/guides/decision-tree.md`.
+## Playbooks
+16 playbooks in `workflows/`, chosen by type of work and then by size: see `docs/guides/decision-tree.md`.
