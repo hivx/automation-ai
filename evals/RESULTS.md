@@ -1,55 +1,55 @@
-# Kết quả eval
+# Eval results
 
-Cách chạy: `evals/run-eval.sh <skill> <n> --project <dự án mẫu>`; cấu hình `evals/config.json` (model sonnet cho phiên chính, `--max-turns 40`, `--max-budget-usd 2.0`; agent con dùng model trong frontmatter). Dự án mẫu: bản sao `sample-existing` sau P6 (FEAT-001 đã verify, chờ G4). Chi phí là `total_cost_usd` Claude Code in ra.
+How to run: `evals/run-eval.sh <skill> <n> --project <sample project>`; configuration in `evals/config.json` (model sonnet for the main session, `--max-turns 40`, `--max-budget-usd 2.0`; subagents use the model in their frontmatter). Sample project: a copy of `sample-existing` after P6 (FEAT-001 verified, waiting for G4). Cost is the `total_cost_usd` that Claude Code prints.
 
 ## Round 0 — v0.1.0 (2026-11-09, Claude Code 2.1.319)
 
-| Skill / kịch bản | Chế độ | Kết quả | Lượt | Chi phí | Ghi chú |
+| Skill / scenario | Mode | Result | Turns | Cost | Notes |
 |---|---|---|---|---|---|
-| verify s1 | baseline (bỏ `skills/verify`) | 3/4 — FAIL `^Verdict:` | 7 | $0.89 | Có `acceptance.md` và đầu ra `Ran N tests`, nhưng không có dòng `Verdict:` → `team.py` không nhận giai đoạn verified. |
-| verify s1 | with-skill | **4/4** | 0* | $0.69 | `Verdict: accepted`, đầu ra lệnh thật, không sửa code. |
-| using-team s1 | baseline (bỏ `skills/using-team`) | 2/3 — FAIL grep OUTPUT | 15 | $0.34 | Tạo FEAT-002 intake.md, giao thẳng dev; không review. |
-| using-team s1 | with-skill | 2/3 — FAIL grep OUTPUT | 2 | $0.31 | Như baseline. Không phân biệt được hai chế độ. |
+| verify s1 | baseline (without `skills/verify`) | 3/4 — FAIL `^Verdict:` | 7 | $0.89 | Has `acceptance.md` and `Ran N tests` output, but no `Verdict:` line → `team.py` does not recognize the verified stage. |
+| verify s1 | with-skill | **4/4** | 0* | $0.69 | `Verdict: accepted`, real command output, no code edits. |
+| using-team s1 | baseline (without `skills/using-team`) | 2/3 — FAIL grep OUTPUT | 15 | $0.34 | Creates the FEAT-002 intake.md and hands straight to dev; no review. |
+| using-team s1 | with-skill | 2/3 — FAIL grep OUTPUT | 2 | $0.31 | Same as baseline. The two modes cannot be told apart. |
 
-\* `num_turns` của phiên chính; công việc chạy trong subagent fork nên không tính vào đây.
+\* `num_turns` of the main session; the work runs in a forked subagent, so it is not counted here.
 
-Kết luận:
-- `verify`: skill tạo khác biệt đo được (dòng `Verdict:` mà máy đọc được).
-- `using-team` s1: **không kết luận được.** Check grep OUTPUT quá hẹp (cả hai chế độ đều nêu FEAT-002 nhưng không viết `/team:intake`); check `unchanged inventory` yếu vì dev commit trong worktree. Agent team-leader vẫn mang các luật của using-team trong thân agent nên baseline gần giống. Viết lại kịch bản ở vòng sau (K-33).
-- Cả hai chế độ của using-team đều cho dev làm cỡ S mà không có reviewer → K-34.
+Conclusions:
+- `verify`: the skill makes a measurable difference (the machine-readable `Verdict:` line).
+- `using-team` s1: **inconclusive.** The OUTPUT grep check is too narrow (both modes name FEAT-002 but neither writes `/team:intake`); the `unchanged inventory` check is weak because dev commits in a worktree. The team-leader agent still carries the using-team rules in its own body, so the baseline is nearly identical. Rewrite the scenario in the next round (K-33).
+- Both modes of using-team let dev do a size S task with no reviewer → K-34.
 
-Lần chạy đầu (cùng ngày) bị loại: bản sao dự án nằm trong thư mục plugin nên mọi lệnh ghi bị từ chối ở chế độ with-skill (K-20). Đã sửa `run-eval.sh` và chạy lại; bảng trên là lần chạy lại.
+The first run (same day) was discarded: the project copy sat inside the plugin folder, so every write was refused in with-skill mode (K-20). `run-eval.sh` was fixed and the run repeated; the table above is the repeated run.
 
-Các kịch bản khác (analyze, build, commit, pr, takeover, make-skill; s2–s3 của verify, using-team) chưa chạy; lệnh xem bằng `--dry-run`.
+The other scenarios (analyze, build, commit, pr, takeover, make-skill; s2–s3 of verify and using-team) have not been run; see their commands with `--dry-run`.
 
 ## Round 1 — P7 (2026-11-09, Claude Code 2.1.319)
 
-BEFORE = `pre-p7-round1` (= v0.1.0) chạy qua `EVAL_KIT=<worktree của tag>`; AFTER = cây hiện tại. Cùng dự án mẫu, cùng kịch bản, cùng `run-eval.sh`, chế độ with-skill; chỉ kit khác nhau.
+BEFORE = `pre-p7-round1` (= v0.1.0) run through `EVAL_KIT=<worktree of the tag>`; AFTER = the current tree. Same sample project, same scenarios, same `run-eval.sh`, with-skill mode; only the kit differs.
 
-| Kịch bản | BEFORE | AFTER | Chi phí B → A | Khác biệt thật |
+| Scenario | BEFORE | AFTER | Cost B → A | Real difference |
 |---|---|---|---|---|
-| using-team s1 (3 check gốc) | 3/3 | 3/3 | $0.36 → $1.57 | — |
-| using-team s1 (+2 check mới, chấm lại trên cùng thư mục làm việc) | 3/5 — FAIL `spec.md`, FAIL `review-*.md` | **5/5** | — | BEFORE: team-leader giao thẳng dev, bỏ analyze và reviewer, rồi tự đọc diff (trái hợp đồng). AFTER: analyze → `/team:build` (tech-lead → dev + reviewer), `review-01.md`, journal đếm "2/3 vai". Chi phí cao hơn là phần review mà v0.1.0 bỏ qua (K-34, K-15). |
-| verify s1 | 4/4 (80 dòng, 8 dòng bảng) | 4/4 (72 dòng, 6 dòng bảng) | $0.94 → $0.87 | Tương đương; AFTER rẻ hơn 8%. |
-| analyze s1 | 4/4 (115 dòng) | 4/4 (88 dòng) | $0.68 → $0.83 | Tương đương; spec AFTER ngắn hơn, cùng số tiêu chí. |
+| using-team s1 (3 original checks) | 3/3 | 3/3 | $0.36 → $1.57 | — |
+| using-team s1 (+2 new checks, re-scored on the same working directory) | 3/5 — FAIL `spec.md`, FAIL `review-*.md` | **5/5** | — | BEFORE: team-leader hands straight to dev, skips analyze and the reviewer, then reads the diff itself (against the contract). AFTER: analyze → `/team:build` (tech-lead → dev + reviewer), `review-01.md`, the journal counts "2/3 roles". The higher cost is the review that v0.1.0 skipped (K-34, K-15). |
+| verify s1 | 4/4 (80 lines, 8 table rows) | 4/4 (72 lines, 6 table rows) | $0.94 → $0.87 | Equivalent; AFTER is 8% cheaper. |
+| analyze s1 | 4/4 (115 lines) | 4/4 (88 lines) | $0.68 → $0.83 | Equivalent; the AFTER spec is shorter, with the same number of criteria. |
 
-Ghi chú trung thực:
-- Hai check mới của using-team s1 được thêm SAU khi chạy và chấm lại trên thư mục làm việc đã lưu của cả hai lần chạy; các check gốc không phân biệt được hai bản (K-33). Từ vòng sau, kịch bản dùng 5 check.
-- Không eval nào xấu đi theo check; chi phí using-team tăng có giải thích (quy trình đúng hơn), không phải hồi quy.
-- `num_turns` của phiên chính là 0–2 vì việc chạy trong subagent fork; không dùng để so.
+Honest notes:
+- The two new using-team s1 checks were added AFTER the run and re-scored on the saved working directories of both runs; the original checks could not tell the two versions apart (K-33). From the next round on, the scenario uses 5 checks.
+- No eval got worse by its checks; the higher using-team cost is explained (a more correct process), not a regression.
+- `num_turns` of the main session is 0–2 because the work runs in a forked subagent; do not use it for comparison.
 
-## Round 2 — P7 vòng 2 (2026-11-10, Claude Code 2.1.319)
+## Round 2 — P7 round 2 (2026-11-10, Claude Code 2.1.319)
 
-BEFORE = `pre-p7-round2` (= v0.2.1) qua `EVAL_KIT=<worktree của tag>`; AFTER = cây hiện tại (v0.3.0). Cùng dự án mẫu (`eval-project`: FEAT-001 đã accepted, chờ G4), cùng `run-eval.sh`, chế độ with-skill. Kịch bản đã sửa TRƯỚC khi chạy: make-skill s1 (check phân biệt), asbuilt s1 (mới).
+BEFORE = `pre-p7-round2` (= v0.2.1) through `EVAL_KIT=<worktree of the tag>`; AFTER = the current tree (v0.3.0). Same sample project (`eval-project`: FEAT-001 accepted, waiting for G4), same `run-eval.sh`, with-skill mode. Scenarios fixed BEFORE the run: make-skill s1 (discriminating checks), asbuilt s1 (new).
 
-| Kịch bản | BEFORE | AFTER | Chi phí B → A | Ghi chú |
+| Scenario | BEFORE | AFTER | Cost B → A | Notes |
 |---|---|---|---|---|
-| using-team s1 (5 check) | 5/5 | lần 1: 2/5 → sửa K-70 → lần 2: 3/5 → sửa K-73 → lần 3: **5/5** | $1.71 → $0.14 / $0.17 / $1.76 | Hai file liên quan (intake, team-leader) GIỐNG nhau ở hai bản lúc chạy lần 1: khác biệt là dao động giữa các lần chạy, lộ ra hai lỗi thật của kit. Lần 1: intake chỉ người gọi được (`disable-model-invocation`) mà using-team trỏ tới nó → team-leader dừng, bắt người gõ lệnh (K-70). Lần 2: intake chạy, rồi dừng in `/team:analyze` vì "in lệnh tiếp theo" mơ hồ (K-73). Lần 3: intake → analyze → build (dev + reviewer), như BEFORE. |
-| verify s1 (4 check) | 4/4 | **4/4** | $0.90 → $1.05 | Tương đương. |
-| make-skill s1 (6 check) | 0/6 | 0/6 | $0.33 → $0.16 | Không kết luận được. BEFORE: mọi lần ghi `.claude/skills/**` bị Claude Code từ chối ở `-p` (K-72, thử 4 dạng `--allowedTools`, đều từ chối). AFTER: từ chối ĐÚNG theo hợp đồng mới — nhu cầu không có bằng chứng (chỉ một export CSV, không task lặp); không ghi file nào. Nhánh "tạo skill" chỉ thử được ở phiên tương tác. |
-| asbuilt s1 (7 check, chấm lại) | 6/7 | **7/7** | $0.23 → $0.30 | Check CHANGELOG ban đầu trỏ nhầm `CHANGELOG.md` ở gốc (dự án dùng `docs/CHANGELOG.md`) và check `^## Đổi gì` thêm SAU khi chạy; cả hai thư mục làm việc được chấm lại. BEFORE: `pr-body.md` có 3/4 tiêu đề mà `/team:pr` grep (thiếu "Đổi gì"), không có mục nợ sau G4. AFTER: 4/4 tiêu đề, `## Nợ sau G4` 3/3 đóng, bảng 17 dòng so từng tiêu chí/touchpoint. |
+| using-team s1 (5 checks) | 5/5 | run 1: 2/5 → fix K-70 → run 2: 3/5 → fix K-73 → run 3: **5/5** | $1.71 → $0.14 / $0.17 / $1.76 | The two relevant files (intake, team-leader) were IDENTICAL in both versions at run 1: the difference is run-to-run variance, which exposed two real kit bugs. Run 1: intake could only be invoked by the human (`disable-model-invocation`) while using-team pointed to it → team-leader stopped and made the human type the command (K-70). Run 2: intake ran, then stopped and printed `/team:analyze` because "print the next command" was ambiguous (K-73). Run 3: intake → analyze → build (dev + reviewer), as in BEFORE. |
+| verify s1 (4 checks) | 4/4 | **4/4** | $0.90 → $1.05 | Equivalent. |
+| make-skill s1 (6 checks) | 0/6 | 0/6 | $0.33 → $0.16 | Inconclusive. BEFORE: every write to `.claude/skills/**` was refused by Claude Code under `-p` (K-72; 4 forms of `--allowedTools` tried, all refused). AFTER: refuses CORRECTLY per the new contract — the need has no evidence (a single CSV export, no recurring task); writes no file. The "create the skill" branch can only be tested in an interactive session. |
+| asbuilt s1 (7 checks, re-scored) | 6/7 | **7/7** | $0.23 → $0.30 | The CHANGELOG check first pointed by mistake at `CHANGELOG.md` in the root (the project uses `docs/CHANGELOG.md`), and the "What changed" heading check (then in its Vietnamese form) was added AFTER the run; both working directories were re-scored. BEFORE: `pr-body.md` had 3/4 of the headings that `/team:pr` greps (missing "What changed"), and no post-G4 debt section. AFTER: 4/4 headings, the post-G4 debt section has 3/3 closed, and a 17-row table compares each criterion/touchpoint. |
 
-Ghi chú trung thực:
-- Không eval nào xấu đi sau khi sửa; lần chạy xấu (using-team lần 1, 2) có nguyên nhân, có sửa (K-70, K-73) và chạy lại.
-- Chi phí using-team AFTER lần 3 ≈ BEFORE: cùng chuỗi vai.
-- make-skill cần một kịch bản có bằng chứng thật (task lặp) và phiên tương tác; ghi ở backlog vòng sau.
+Honest notes:
+- No eval got worse after the fixes; the bad runs (using-team runs 1 and 2) have a cause, a fix (K-70, K-73) and a rerun.
+- The using-team AFTER run 3 cost ≈ BEFORE: same chain of roles.
+- make-skill needs a scenario with real evidence (a recurring task) and an interactive session; recorded in the next round's backlog.

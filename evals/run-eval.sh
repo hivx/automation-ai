@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
-# run-eval.sh — chạy một kịch bản eval của skill kỷ luật, hai chế độ: baseline (không skill) và with-skill.
-# Dùng: evals/run-eval.sh <skill> <n> [--project DIR] [--mode both|baseline|with-skill] [--dry-run]
-#   --project  dự án mẫu đã onboard (mặc định: "project" trong evals/config.json hoặc $EVAL_PROJECT).
-#   Mỗi chế độ chạy trên BẢN SAO của dự án; kit cho baseline là bản sao bỏ thư mục skills/<skill>.
-#   model, max_turns, max_budget_usd, allowed_tools lấy từ evals/config.json. EVAL_KIT=<thư mục kit> để chạy bản kit khác.
-#   Kết quả: evals/<skill>/out/<YYYY-MM-DD>/s<n>-<mode>/{result.json,stderr.txt,output.txt,workdir.txt}; in PASS/FAIL từng check.
-#   Bản sao dự án nằm NGOÀI kit: $EVAL_WORK_ROOT (mặc định $TMPDIR/team-evals) — Claude Code từ chối ghi trong thư mục plugin.
-# Định dạng kịch bản (evals/<skill>/scenarios.md): "## Scenario <n> — …", các dòng "- Setup: `…`",
-#   "- Input: `…`", "- Baseline input: `…`", và dưới "- Checks:" các dòng
+# run-eval.sh — run one eval scenario of a discipline skill in two modes: baseline (without the skill) and with-skill.
+# Usage: evals/run-eval.sh <skill> <n> [--project DIR] [--mode both|baseline|with-skill] [--dry-run]
+#   --project  onboarded sample project (default: "project" in evals/config.json, or $EVAL_PROJECT).
+#   Each mode runs on a COPY of the project; the baseline kit is a copy without the skills/<skill> folder.
+#   model, max_turns, max_budget_usd and allowed_tools come from evals/config.json. EVAL_KIT=<kit dir> runs another kit version.
+#   Results: evals/<skill>/out/<YYYY-MM-DD>/s<n>-<mode>/{result.json,stderr.txt,output.txt,workdir.txt}; prints PASS/FAIL per check.
+#   The project copy lives OUTSIDE the kit: $EVAL_WORK_ROOT (default $TMPDIR/team-evals) — Claude Code refuses writes inside a plugin folder.
+# Scenario format (evals/<skill>/scenarios.md): "## Scenario <n> — …", the lines "- Setup: `…`",
+#   "- Input: `…`", "- Baseline input: `…`", and under "- Checks:" the lines
 #   "grep: `<regex>` in `<file|OUTPUT>`", "absent: `<regex>` in `<file|OUTPUT>`", "exists: `<path>`", "unchanged: `<path>`".
 set -uo pipefail
 [[ ${1:-} == --help || ${1:-} == -h || $# -lt 2 ]] && { sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'; exit 0; }
-EVALS="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; KIT="${EVAL_KIT:-$(dirname "$EVALS")}"  # EVAL_KIT: chạy với một bản kit khác (so sánh trước/sau)
+EVALS="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; KIT="${EVAL_KIT:-$(dirname "$EVALS")}"  # EVAL_KIT: run with another kit version (before/after comparison)
 skill=$1; n=$2; shift 2
 mode=both; dry=0; project="${EVAL_PROJECT:-$(jq -r '.project // ""' "$EVALS/config.json")}"
 while (( $# )); do case "$1" in --project) project="$2"; shift 2 ;; --mode) mode="$2"; shift 2 ;; --dry-run) dry=1; shift ;; *) shift ;; esac; done
-[[ -f $EVALS/$skill/scenarios.md ]] || { echo "run-eval: không có evals/$skill/scenarios.md" >&2; exit 64; }
+[[ -f $EVALS/$skill/scenarios.md ]] || { echo "run-eval: no evals/$skill/scenarios.md" >&2; exit 64; }
 cfg() { jq -r ".$1" "$EVALS/config.json"; }
 parse() { python3 -I - "$EVALS/$skill/scenarios.md" "$n" <<'PY'
 import json, re, sys
@@ -45,7 +45,7 @@ for m in "${modes[@]}"; do
     printf '  run:'; printf ' %q' "${cmd[@]}"; echo
     jq -r '.checks[] | "  check: \(.kind) \(.pattern) \(.target)"' <<<"$spec"; continue
   fi
-  [[ -d $project ]] || { echo "run-eval: --project không hợp lệ: '$project'" >&2; exit 64; }
+  [[ -d $project ]] || { echo "run-eval: invalid --project: '$project'" >&2; exit 64; }
   rm -rf "$out" "$work" "$work.kit"; mkdir -p "$out" "$(dirname "$work")"; cp -a "$project" "$work"; echo "$work" >"$out/workdir.txt"
   if [[ $m == baseline ]]; then mkdir -p "$work.kit"; (cd "$KIT" && tar --exclude="./skills/$skill" --exclude=./evals --exclude=./.git -cf - .) | tar -xf - -C "$work.kit"; fi
   echo "$kitdir" >"$work/.team/plugin_root" 2>/dev/null || true

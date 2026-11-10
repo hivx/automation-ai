@@ -1,37 +1,37 @@
 # Eval: analyze
 
-Dự án mẫu: dự án đã onboard có FEAT-001 (CSV export) — xem `evals/RESULTS.md`.
+Sample project: an onboarded project with FEAT-001 (CSV export) — see `evals/RESULTS.md`.
 
-## Scenario 1 — Spec cỡ S ở chế độ decide
-- Situation: spec cỡ s ở chế độ decide.
+## Scenario 1 — Size S spec in decide mode
+- Situation: size S spec in decide mode.
 - Setup: `rm -f docs/team/features/FEAT-001/spec.md docs/team/features/FEAT-001/questions.md`
 - Input: `/team:analyze FEAT-001 --decide`
-- Baseline input: `Viết spec có Definition of Done cho docs/team/features/FEAT-001/intake.md, chế độ tự quyết.`
-- Good: `spec.md` có 7 mục, `## Assumptions decided by the team`, `## Definition of Done`, tiêu chí đo được.
-- Bad: Spec không có DoD, tiêu chí kiểu 'chạy tốt', hoặc chọn thư viện.
+- Baseline input: `Write a spec with a Definition of Done for docs/team/features/FEAT-001/intake.md, deciding open points yourself.`
+- Good: `spec.md` has 7 sections, `## Assumptions decided by the team`, `## Definition of Done`, and measurable criteria.
+- Bad: The spec has no DoD, criteria like "works well", or it picks a library.
 - Checks:
   - exists: `docs/team/features/FEAT-001/spec.md`
   - grep: `^## Definition of Done` in `docs/team/features/FEAT-001/spec.md`
   - grep: `^## Assumptions decided by the team` in `docs/team/features/FEAT-001/spec.md`
   - unchanged: `inventory`
 
-## Scenario 2 — Chế độ ask với điểm lớn chưa rõ
-- Situation: chế độ ask với điểm lớn chưa rõ.
-- Setup: `rm -f docs/team/features/FEAT-001/spec.md; sed -i 's/Chế độ: decide.*/Chế độ: ask/' docs/team/features/FEAT-001/intake.md`
+## Scenario 2 — Ask mode with a major unclear point
+- Situation: ask mode with a major unclear point.
+- Setup: `rm -f docs/team/features/FEAT-001/spec.md; sed -E -i 's/(Mode|Ch[^:]*): decide.*/\1: ask/' docs/team/features/FEAT-001/intake.md`
 - Input: `/team:analyze FEAT-001`
-- Baseline input: `Viết spec cho docs/team/features/FEAT-001/intake.md; hỏi nếu có điều lớn chưa rõ.`
-- Good: Hoặc spec đủ DoD, hoặc `questions.md` ≤ 5 câu có lựa chọn + khuyến nghị và trạng thái NEEDS_ANSWER; không hỏi điều code đã trả lời.
-- Bad: Hỏi > 5 câu, hỏi điều README/code đã nói rõ (header CSV).
+- Baseline input: `Write a spec for docs/team/features/FEAT-001/intake.md; ask if anything major is unclear.`
+- Good: Either a spec with a full DoD, or a `questions.md` with ≤ 5 questions, each with options + a recommendation, and status NEEDS_ANSWER; no question the code already answers.
+- Bad: Asks > 5 questions, or asks something the README/code already states clearly (the CSV header).
 - Checks:
-  - absent: `(header|tiêu đề cột).*\?` in `docs/team/features/FEAT-001/questions.md`
+  - absent: `(header|ti.{1,3}u .{1,3} c.{1,3}t).*\?` in `docs/team/features/FEAT-001/questions.md`
 
-## Scenario 3 — Amend spec đã duyệt
-- Situation: amend spec đã duyệt.
+## Scenario 3 — Amend an approved spec
+- Situation: amend an approved spec.
 - Setup: `printf '\n' >> docs/team/features/FEAT-001/spec.md`
-- Input: `/team:analyze FEAT-001 --amend "Thêm cột currency"`
-- Baseline input: `Sửa spec docs/team/features/FEAT-001/spec.md: thêm cột currency.`
-- Good: Thêm `## Amendment 1`, đánh dấu [changed]; tiêu chí cũ vẫn còn.
-- Bad: Sửa thẳng tiêu chí cũ, không có mục amendment.
+- Input: `/team:analyze FEAT-001 --amend "Add a currency column"`
+- Baseline input: `Edit the spec docs/team/features/FEAT-001/spec.md: add a currency column.`
+- Good: Adds `## Amendment 1` and marks [changed]; the old criteria are still there.
+- Bad: Edits the old criteria in place, no amendment section.
 - Checks:
   - grep: `^## Amendment` in `docs/team/features/FEAT-001/spec.md`
   - grep: `\[changed\]` in `docs/team/features/FEAT-001/spec.md`
