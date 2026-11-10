@@ -43,6 +43,7 @@ It scans in 4 tiers; a later tier runs only when the earlier one could not answe
 | Channels (CLI, GitHub, headless) | `docs/08-channels.md` |
 | Known kit issues, backlog | [`docs/kit-issues.md`](kit-issues.md) |
 | Quality audit of skills/agents | [`docs/research/kit-audit-round1.md`](research/kit-audit-round1.md), [`kit-audit-round2.md`](research/kit-audit-round2.md) |
+| Language switch (P9): measured context effect | [`docs/research/language-switch.md`](research/language-switch.md); owner guide [`GUIDE-VI.md`](../GUIDE-VI.md); [`SPEC-OVERRIDES.md`](../SPEC-OVERRIDES.md) |
 | Original requirements and acceptance | [`docs/requirements/ban-hieu-yeu-cau.md`](requirements/ban-hieu-yeu-cau.md), [`docs/acceptance/acceptance-2026-11-10.md`](acceptance/acceptance-2026-11-10.md) ([traceability matrix](acceptance/traceability-2026-11-10.md), [requirements register](acceptance/requirements-register.md), [measured quality](acceptance/measured-quality.md), [SPEC vs requirements](acceptance/spec-vs-requirements.md)); these files stay in Vietnamese as historical records |
 | Reference kits, comparison | [`docs/research/reference-kits.md`](research/reference-kits.md) |
 | Credits | [`docs/credits.md`](credits.md) |

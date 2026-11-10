@@ -53,3 +53,19 @@ Honest notes:
 - No eval got worse after the fixes; the bad runs (using-team runs 1 and 2) have a cause, a fix (K-70, K-73) and a rerun.
 - The using-team AFTER run 3 cost ≈ BEFORE: same chain of roles.
 - make-skill needs a scenario with real evidence (a recurring task) and an interactive session; recorded in the next round's backlog.
+
+## Language switch — P9 (2026-11-10, Claude Code 2.1.322)
+
+BEFORE = `pre-p9` (Vietnamese AI-facing text) via `EVAL_KIT=<worktree of the tag>`; AFTER = the P9 tree (English AI-facing text). Same sample project (`eval-project`: FEAT-001 accepted, waiting for G4), same `run-eval.sh`, with-skill mode, the same (English) scenario inputs for both kits.
+
+| Scenario | BEFORE | AFTER | Cost B → A | Turns B → A (main session) | Note |
+|---|---|---|---|---|---|
+| using-team s1 (5 checks) | 4/5 — FAIL `review-*.md` | **5/5** | $1.22 → $1.39 | 2 → 33 | BEFORE stopped after build without a review file this run (variance; Round 2 BEFORE was 5/5). AFTER: intake → analyze → build with reviewer. No regression. |
+| verify s1 (4 checks) | 4/4 | **4/4** | $0.87 → $0.84 | 0 → 0 (forked) | Equivalent. |
+| analyze s1 (4 checks) | 4/4 | **4/4** | $0.70 → $0.56 | 0 → 0 (forked) | Equivalent; AFTER 20% cheaper. |
+| asbuilt s1 (8 checks) | 5/8 — FAIL `## Why`, `## What changed`, `## How verified` | **8/8** | $0.33 → $0.33 | 0 → 0 (forked) | The three failures are the PR-body headings, which P9 changed to English on purpose (the pr skill greps them); not a language-quality difference. |
+
+Honest notes:
+- No eval got worse. The using-team difference is run-to-run variance in BEFORE, not an improvement caused by the language.
+- `num_turns` of the main session is 0–2 when the work runs in a forked subagent; not comparable across those rows.
+- End-to-end with `output_language: vi` and `en` on fresh copies of the sample project: see `docs/research/language-switch.md` and the P9 CHANGELOG entry. The `vi` run exposed one regression (journal lines written in English); fixed in commit `e6c00b1` and re-run.

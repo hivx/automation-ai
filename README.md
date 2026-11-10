@@ -4,7 +4,7 @@ Tiếng Việt: see [GUIDE-VI.md](GUIDE-VI.md)
 
 `automation-ai` is an installable set of AGENTS + SKILLS + RULES + GUIDES + PROCESSES for Claude Code. Install it into any software project (any language, any platform) and Claude Code becomes a professional IT team: it takes over the project and reports on its current state, takes a raw request and carries it all the way from analysis to release, stops only at the approval gates you turn on, and measures itself to propose improvements to itself. Each project's commands, structure and conventions live in `.team/profile.json`, not in the core.
 
-**Status: v0.3.0 — usable; two quality rounds done, every skill (26) and agent (13) meets the bar (see [`docs/research/kit-audit-round1.md`](docs/research/kit-audit-round1.md), [`kit-audit-round2.md`](docs/research/kit-audit-round2.md)); known limitations in [`CHANGELOG.md`](CHANGELOG.md).**
+**Status: v0.4.0 — usable; AI-facing text in English, artifacts in the language set by `output_language` (default Vietnamese; see [`GUIDE-VI.md`](GUIDE-VI.md)); two quality rounds done, every skill (26) and agent (13) meets the bar (see [`docs/research/kit-audit-round1.md`](docs/research/kit-audit-round1.md), [`kit-audit-round2.md`](docs/research/kit-audit-round2.md)); known limitations in [`CHANGELOG.md`](CHANGELOG.md).**
 
 Full specification: [`SPEC.md`](SPEC.md). Documentation: [`docs/`](docs/00-overview.md).
 

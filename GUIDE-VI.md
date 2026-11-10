@@ -138,7 +138,8 @@ Anh viết tiếng Việt; Claude dịch sang đúng skill/khái niệm theo b�
 ## 9. QUYẾT ĐỊNH & YÊU CẦU CỦA CHỦ REPO
 Nhật ký chỉ thêm, mới nhất ở trên. Anh viết yêu cầu ở đây bằng tiếng Việt; mọi phiên sau của Claude đọc mục này trước khi làm. Mẫu: `- YYYY-MM-DD | <quyết định hoặc yêu cầu> | <ai ghi> | <trạng thái: mới / đang làm / xong / bỏ>`
 
-- 2026-11-10 | Chuyển ngôn ngữ (P9): chỉ dẫn cho AI bằng tiếng Anh; chỉ file này bằng tiếng Việt; artifact theo `output_language` (mặc định `vi`); mốc máy đọc luôn tiếng Anh | Claude (theo prompt P9 của chủ repo) | đang làm
+- 2026-11-10 | Việc của anh: thay bản gốc `automation-ai_ban-hieu-yeu-cau.md` bằng `docs/requirements/ban-hieu-yeu-cau.md` (đã thêm sửa đổi A5), rồi chạy lại P8 | Claude (P9) | mới
+- 2026-11-10 | Chuyển ngôn ngữ (P9, v0.4.0): chỉ dẫn cho AI bằng tiếng Anh; chỉ file này bằng tiếng Việt; artifact theo `output_language` (mặc định `vi`); mốc máy đọc luôn tiếng Anh | Claude (theo prompt P9 của chủ repo) | xong
 - 2026-11-10 | Nghiệm thu theo tài liệu yêu cầu (P8): TỪ CHỐI, 11 yêu cầu `must` trượt — xem `docs/acceptance/acceptance-2026-11-10.md` | Claude (theo prompt P8) | xong
 
 ## 10. Chưa làm / dự kiến bản sau
@@ -485,9 +486,9 @@ Các mốc sau do script và cổng đọc bằng máy: **không bao giờ dịc
 
 ## Số liệu
 <!-- gen:stats -->
-- Phiên bản kit: 0.3.0
+- Phiên bản kit: 0.4.0
 - Skill: 26 · agent: 13 · playbook: 16 (+ 4 lô) · script: 30
 - Số từ trung vị (tiếng Anh): skill nạp thường xuyên 347.5, skill khác 1509.0, agent 918
-- Commit: 7c9f5d5
+- Commit: e6c00b1
 - Ngày sinh file: 2026-11-10
 <!-- /gen:stats -->
