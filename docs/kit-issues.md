@@ -146,3 +146,111 @@ coach chạy trên dự án mẫu (kit ngoài gốc dự án → K-44 cho ghi fi
 | Audit-kit | 11 phát hiện | hết lượt ở S13 trước khi ghi (K-74); 7 phát hiện mới lấy từ bản ghi (K-75..K-80) | sửa K-74, K-75 trong vòng |
 | Chi phí | intake→verify $3.29 | intake $0.20 + run $2.25 = $2.45; cả chuỗi $6.50 | — |
 
+
+## Nghiệm thu theo tài liệu yêu cầu (2026-11-10, v0.3.0) — FAIL và PARTIAL
+Phán quyết: TỪ CHỐI (`docs/acceptance/acceptance-2026-11-10.md`). Mỗi dòng một yêu cầu; bằng chứng đầy đủ trong `docs/acceptance/traceability-2026-11-10.md`.
+
+- REQ-A2-2 (must, PARTIAL): Không tự deploy production khi cổng bật — Chỉ là hướng dẫn + team.py; không hook nào chặn lệnh deploy prod; role-policy devops `"write":["*"],"bash":"any"`
+- REQ-A3-6 (must, PARTIAL): Việc nhỏ team-leader tự xử hoặc giao MỘT agent duy nhất — Cỡ S = analyst + tech-lead + qa (+dev, reviewer): theo ADJ-29/K-15, khác "một agent duy nhất"
+- REQ-A3-9 (must, PARTIAL): Không lách cổng đang bật (điều không được sai phải là máy) — Tự duyệt cổng chỉ bị cấm bằng lời (team-leader.md:61); máy không chặn
+- REQ-A4-6 (must, PARTIAL): Coach đầy đủ từ bản 1: đo bằng thuật toán, chẩn đoán 5 nguyên nhân, đề xuất có diff + eval, canary cỡ S; áp d… — Đề xuất là toàn văn overlay, không có diff; coach không chạy được eval (retro SKILL.md:15)
+- REQ-B1-2 (must, PARTIAL): team-leader tools = Read, Grep, Glob, Bash(đọc), Agent, TaskCreate/Update, AskUserQuestion, Write(docs/team/*… — Thiếu TaskCreate/Update (ADJ-07), thêm Skill (ADJ-11); vùng ghi rộng hơn docs/team/**
+- REQ-B1-4 (must, PARTIAL): team-leader: được làm (intake, playbook & cỡ, hỏi/quyết, gọi có lý do, giữ cổng, leo thang, journal, điều phố… — Thân không nói nâng/hạ cỡ giữa chừng (chỉ ở docs/01-process.md:33); skill tạm chỉ qua using-team/SKILL.md:18
+- REQ-B1-5 (must, PARTIAL): tech-lead tools = Read, Grep, Glob, Bash(git, test), Agent, Edit(docs/team/**) — Thêm Write, Skill (ADJ-11); Bash giới hạn đúng tinh thần (git + cmd.*), thêm gh pr
+- REQ-B1-8 (must, PARTIAL): coach tools = Read, Grep, Glob, Bash(đọc), Write(retro/**, proposals) — Thêm Skill và memory; vùng ghi mở rộng theo ADJ-23
+- REQ-B1-11 (must, PARTIAL): analyst tools = Read, Grep, Glob, Agent(Explore), AskUserQuestion, Write(docs/team/**) — Bỏ AskUserQuestion (ADJ-01), thêm Bash (ADJ-27) và Skill; giới hạn Explore do hook giữ
+- REQ-B1-14 (must, PARTIAL): researcher tools = Read, Grep, Glob, Bash, WebFetch, WebSearch, Agent, Write(docs/team/**) — Thêm Skill; Bash bị hẹp hơn bảng; ghi worktree POC (ADJ-25)
+- REQ-B1-17 (must, PARTIAL): architect tools = Read, Grep, Glob, Agent, Write(docs/team/**) — Thêm Bash (ADJ-27) và Skill
+- REQ-B1-20 (must, PARTIAL): designer tools = Read, Grep, Glob, Agent, Write(docs/team/**) — Thêm Bash (ADJ-27) và Skill
+- REQ-B1-21 (must, PARTIAL): designer opus / high (sonnet cỡ S/M) / 40 — Không có bước nào (team-leader, using-team, design) truyền model sonnet: cỡ S/M vẫn chạy opus
+- REQ-B1-23 (must, PARTIAL): dev tools = Read, Edit, Write, Grep, Glob, Bash — Chỉ thêm Skill (ADJ-11); isolation: worktree
+- REQ-B1-26 (must, PARTIAL): reviewer tools = Read, Grep, Glob, Bash(đọc); memory: project — Chỉ thêm Skill; test_hooks.sh:77-108 nhiều ca chặn lệnh ghi của reviewer
+- REQ-B1-29 (must, PARTIAL): qa tools = Read, Grep, Glob, Bash; memory: project — Thêm Write, Skill (ADJ-11); bash any nên lệnh shell có thể sửa code (chỉ văn bản cấm)
+- REQ-B1-32 (must, PARTIAL): writer tools = Read, Grep, Glob, Write(docs/**, CHANGELOG) — Thêm Bash (ADJ-27), Skill; README thêm hợp lý vì có trong "Được làm"
+- REQ-B1-35 (must, PARTIAL): maintainer tools = Read, Edit, Write, Grep, Glob, Bash — Chỉ thêm Skill (ADJ-11)
+- REQ-B1-38 (must, PARTIAL): devops tools = Read, Edit, Write, Grep, Glob, Bash(gh, ci) — Giới hạn Bash(gh, ci) không được máy thực thi; "chỉ sửa workflow CI" chỉ là văn bản
+- REQ-B1-40 (must, PARTIAL): devops: dựng CI/CD, chẩn đoán đỏ (phân loại trước), script deploy/rollback/smoke, docs/team/ci.md / không xoá… — Thân tốt (838 chữ, 7 dòng); việc cấm deploy prod chỉ là văn bản, hook không chặn
+- REQ-B2-3 (should, PARTIAL): Ma trận ai gọi ai viết rõ và nhất quán — Mâu thuẫn nội bộ; hook không chặn đường team-leader→dev
+- REQ-B2-6 (must, PARTIAL): dev → tech-lead: file đã sửa, test kèm output thật, gì còn thiếu — Trường "còn thiếu gì" không nằm trong hợp đồng của dev
+- REQ-B3-2 (must, PARTIAL): haiku cho triage / việc cơ học — Chỉ Explore có sẵn dùng haiku; không có đường haiku nào trong kit
+- REQ-B3-5 (must, FAIL): Ghi đè models trong config có hiệu lực — Khóa trang trí: đổi config không đổi model nào
+- REQ-C1-1 (must, PARTIAL): Tiếp nhận dự án: `/team:takeover`, team-leader (+Explore, researcher), 5 artifact assessment/ai-readiness/pro… — researcher không có vai nào trong skill (chỉ Explore); G0 không có trong team.py nên `/team:status` không hiện "chờ G0".
+- REQ-C1-10 (must, PARTIAL): Phát hành: `/team:asbuilt`, `/team:pr`, `/team:release`; writer, tech-lead, devops; asbuilt/CHANGELOG/PR/depl… — G5 chỉ do skill/agent giữ (LLM); máy (team.py, hook) không chặn `Released:` khi thiếu duyệt prod.
+- REQ-C1-11 (must, PARTIAL): Vận hành: `/team:intake --type bug`, `/team:clean`, `/team:ci`, `/team:retro`; team-leader, maintainer, devop… — clean/ci/retro có fork đúng vai; defects.md không có mẫu và không skill nào tạo.
+- REQ-C3-1 (must, PARTIAL): S: diff một câu, ≤ 3 file, không đổi schema/API; intake → analyze rút gọn bỏ G1 → build 1 dev → verify tự độn… — Lệch tài liệu theo ADJ-29 (S vẫn fork qa); playbook new-feature/bug-fix vẫn ghi "không gọi qa riêng" → lệch nội bộ.
+- REQ-C3-3 (must, PARTIAL): L: nhiều module, NFR mới, > 5 ngày; đủ 9 giai đoạn; kiến trúc bắt buộc; task đầu walking skeleton — Kiến trúc chỉ "bắt buộc" trong next_cmd; trạng thái cho đi qua và bỏ luôn G2; research cũng bị bỏ ở L (team.py:205).
+- REQ-C3-6 (must, PARTIAL): Nâng/hạ cỡ giữa chừng ghi lý do vào `intake.md` — agents/team-leader.md không có bước áp dụng đổi cỡ và ghi vào intake.md; chỉ có chỗ trống trong mẫu.
+- REQ-C4-6 (must, PARTIAL): Mục nhỏ → ghi `## Giả định tự quyết` — Đúng hành vi, sai tên tiêu đề so với tài liệu (S3 trong docs/acceptance/spec-vs-requirements.md).
+- REQ-C4-10 (must, PARTIAL): Trong CI: câu hỏi → comment issue theo mẫu, label `team:needs-answer`, dừng `WAITING_FOR_ANSWER` — CI mặc định decide (chỉ ask khi có nhãn team:ask) nên đường hỏi trong CI hiếm khi chạy; live UNVERIFIED.
+- REQ-C5-10 (must, FAIL): Hành vi: feature cỡ S chạy analyze → build (dev worktree, test hỏng trước, reviewer, finding có mã STD) → ver… — Nguyên nhân: REQ-E1-9
+- REQ-C6-5 (must, PARTIAL): Dừng khi vượt `feature_budget_usd` — Không chỗ nào ghi chi phí theo feature, nên điều kiện không đo được; chỉ batch có `--max-budget-usd`.
+- REQ-C7-4 (must, PARTIAL): Quét 4 tầng → báo cáo 3 câu → G0 → onboard; cỡ L; cổng G0 — Cỡ lệch (tài liệu: L).
+- REQ-C7-6 (must, PARTIAL): intake → analyze → [research] → design → plan → build → verify → asbuilt → pr → release; M; G1, G3, G4 — Cỡ mặc định không phải M; dòng verify mâu thuẫn ADJ-29/verify skill.
+- REQ-C7-7 (must, PARTIAL): analyze --amend → architect (impact) → plan (chèn) → build…; M; G1, G3 — team.py dẫn sang design, không sang architect impact rồi plan --insert như playbook; cổng thêm G2, G4.
+- REQ-C7-8 (must, PARTIAL): intake(bug) → test fail trước → build (1 task) → verify → pr; S; G4 nếu M — G4 áp cả ở cỡ S (tài liệu: chỉ khi M); intake không tạo defects.md như bước 0 ghi.
+- REQ-C7-9 (must, PARTIAL): intake(hotfix) → build tối thiểu từ prod → verify nhanh → pr → release prod (người duyệt) → bug-fix đầy đủ sa… — Tài liệu chỉ có G5; repo chặn thêm ở G4.
+- REQ-C7-13 (must, FAIL): research (API, auth, giới hạn) → architect (impact) → design (contract, retry, idempotent) → plan → build → v… — team.py:89 thiếu integration trong NO_SPEC_PLAYBOOKS: không có spec.md thì kẹt ở intaken, `/team:run` lặp research.
+- REQ-C7-16 (must, PARTIAL): analyze (đối tượng, phạm vi) → writer → review nội dung → pr; S/M; G1 rút gọn — Cỡ S mặc định làm mất G1 và team.py dẫn sang build thay vì writer (kiểm cỡ S ở team.py:203 trước client-docs ở :207).
+- REQ-C8-14 (must, PARTIAL): Ghi rõ đã quét gì / chưa / độ tin cậy — Theo mẫu thì bước kiểm "grep -c 'Đã quét' ... mỗi file ≥ 1" của chính skill sẽ trượt.
+- REQ-D1-3 (must, PARTIAL): Quy tắc ghi mức 3 thật sự do máy chặn — docs/03-handbook.md:39 tự đặt luật "mức 3 phải có hook thật"; 5 quy tắc vi phạm luật đó
+- REQ-D1-4 (must, PARTIAL): Quy tắc mức 1 vi phạm ≥ 2 lần → coach đề xuất nâng mức — Không có cách đếm vi phạm theo từng mã/mức; một dòng, không phương pháp
+- REQ-D2-2 (must, PARTIAL): STRUCT: file mới trong allowed_new_file_roots; test theo quy ước; không commit file sinh bởi tool; artifact đ… — Thiếu "artifact đúng tên"; "file sinh bởi tool" nằm ở GIT
+- REQ-D2-3 (must, PARTIAL): NAME: theo profile + codebase; tên nói ý định; nhánh team/<ID>-<slug>; commit type(scope): mô tả (<ID>); test… — NAME-3 chỉ là tên file test
+- REQ-D2-4 (must, PARTIAL): STYLE: formatter quyết; linter là luật; hàm ≤ 50 dòng, ≤ 4 tham số; không code chết; TODO có ID; comment nói … — Thiếu giới hạn hàm 50 dòng / 4 tham số và TODO có ID
+- REQ-D2-5 (must, PARTIAL): DESIGN: phụ thuộc đi vào từ ngoài; không sửa thư viện bên thứ ba; không global state ẩn; đổi API/schema có de… — Thiếu "phụ thuộc vào từ ngoài" (DI) và "không global state ẩn"
+- REQ-D2-6 (must, PARTIAL): TEST: fail trước (bug bắt buộc); một hành vi một test; không mock cái đang kiểm; không skip/xfail/only (block… — Thiếu "một hành vi một test", "không mock cái đang kiểm"; "mỗi task có test" chỉ gián tiếp
+- REQ-D2-7 (must, PARTIAL): ERR: không nuốt exception; thông điệp hành động được; log có ngữ cảnh không bí mật; validate ở biên — "Lỗi có thông điệp hành động được" không có thành quy tắc
+- REQ-D2-8 (must, PARTIAL): GIT: một task một PR nhỏ theo template; chỉ push team/*; không force-push; squash merge; commit không chứa fi… — Thiếu squash merge
+- REQ-D2-9 (must, PARTIAL): CI: lint → typecheck → test → build → staging → smoke; đỏ không merge; prod cần người; không bí mật trong fil… — Thứ tự đủ 6 bước và "job có timeout" không là quy tắc STD; chỉ có trong template
+- REQ-D2-12 (must, PARTIAL): DEP: ưu tiên thư viện đã có; pin + lockfile; không thêm thư viện cho việc < 50 dòng — Thiếu "ưu tiên thư viện đã có" thành quy tắc riêng
+- REQ-D2-17 (must, PARTIAL): Hai checklist "dùng nguyên văn" — Mẫu PR là bản diễn lại, không nguyên văn, viết hai lần
+- REQ-D2-18 (must, PARTIAL): Finding = mức / STD / file:line / mô tả / cách sửa; chỉ blocker/major; minor gộp 1 dòng — Định dạng chuẩn đúng; agent thêm cột thứ 6 và viết dòng minor khác mẫu
+- REQ-D4-2 (must, PARTIAL): docs/ chỉ gồm tổng quan, cách cài, bản đồ việc → skill, lý do thiết kế; không viết tri thức hai lần — Tri thức quy trình chỉ có ở docs/ và nhiều đoạn viết hai lần
+- REQ-E1-2 (must, PARTIAL): `test_one` bắt buộc — Khóa bắt buộc nhưng chuỗi rỗng vẫn qua; profiles/_template.json có test_one rỗng; build/handbook chỉ dừng bằng chữ
+- REQ-E1-3 (must, PARTIAL): `{file}` là placeholder DUY NHẤT — Không cấm placeholder khác; stop-check chỉ thay `{file}` nên `{path}` sẽ lọt nguyên văn
+- REQ-E1-4 (must, PARTIAL): protected_paths luôn có bí mật, lockfile, vendored, cấu hình prod — Mẫu tốt nhưng không có kiểm máy; teamlib.py:22 mặc định chỉ `.env`,`.env.*` khi thiếu profile; `.git/**` được nối thêm …
+- REQ-E1-5 (must, PARTIAL): allowed_new_file_roots là danh sách đóng (doc gồm src, tests, docs, scripts, .github, .claude, .team) — Profiles bỏ `.github/` khỏi roots (doc có); onboard chỉ chạy được vì ghi qua `render.py`/`cp` bằng Bash mà hook không t…
+- REQ-E1-7 (must, PARTIAL): Monorepo: profile gốc + `packages` ghi đè theo thư mục — Khai được nhưng không script/hook nào áp ghi đè theo thư mục
+- REQ-E1-9 (must, FAIL): Hành vi: profile do takeover đề xuất và onboard ghi phải dùng được với script của kit (`naming.test_file` the… — Cùng lớp với K-01; schema không bắt mẫu
+- REQ-E1-10 (must, PARTIAL): Hành vi: protected_paths của profile onboard có bí mật (`.env*`, thư mục secrets), lockfile, vendored, cấu hì… — Dự án mẫu không có lockfile/vendored
+- REQ-E2-3 (must, FAIL): protected_branches = main, master, develop, release — Thiếu `develop`; `release` thành `release/*`
+- REQ-E2-6 (must, FAIL): approvers mỗi cổng `["@owner"]` — Rỗng = không kiểm tên (release/SKILL.md:55 chỉ kiểm khi không rỗng)
+- REQ-E4-2 (must, PARTIAL): deny: push nhánh bảo vệ, force-push, rm -rf, Edit protected_paths, Read .env* — Không có deny cho push nhánh bảo vệ; việc đó chỉ do hook check-git.sh chặn
+- REQ-E4-4 (should, FAIL): `~/.claude/settings.json`: autoMemoryEnabled, plugin cá nhân — Không có hướng dẫn nào nói bật auto memory
+- REQ-E4-5 (must, PARTIAL): Permission mode: plan ở phân tích/kiến trúc, acceptEdits ở build, dontAsk + allowlist ở CI/headless — Phần lớn chỉ có trong docs; plugin agent bỏ qua permissionMode
+- REQ-E5-5 (should, PARTIAL): Theo nhu cầu: Playwright MCP (qa, ui), docs MCP (researcher), Sentry/Slack (devops, team-leader), tracker (in… — intake chỉ dùng gh
+- REQ-E5-6 (should, PARTIAL): Không cài plugin trùng (superpowers, commit-commands, pr-review-toolkit), ẩn bằng skillOverrides; superpowers… — Thiếu câu về plugin-dev
+- REQ-E5-7 (must, PARTIAL): Rule theo path nói khi nào dùng tool nào; skill nêu tool từng bước; agent chỉ tool của vai — Bảng tool có nhưng không gắn theo path
+- REQ-F1-7 (must, PARTIAL): Mệnh lệnh: MỌI agent kiểm playbook/skill trước khi làm — Lệch "mọi agent"
+- REQ-F1-8 (must, PARTIAL): Chấm artifact, gắn agent/skill → feedback.jsonl; mọi vai trò và người — reviewer/qa/coach không dùng được
+- REQ-F1-18 (must, PARTIAL): Điều kiện → PR → CI → merge → staging → smoke → prod (G5); tech-lead, devops — Đủ quy trình; vai điều phối là team-leader chứ không phải tech-lead
+- REQ-F1-28 (must, PARTIAL): description không tóm tắt quy trình — 2/26 kể chuỗi bước
+- REQ-F1-30 (must, PARTIAL): Mỗi bước có checkpoint và điều kiện thoát — Có điều kiện dừng rải rác, không đều theo bước
+- REQ-F1-31 (must, PARTIAL): Bảng anti-rationalization + red flags — 6 skill nạp thường xuyên không có red flags
+- REQ-F1-33 (must, FAIL): Ngân sách chữ: skill hay nạp < 200 từ, khác < 500 — Repo theo P7 (CLAUDE.md luật 6), gấp 2–5 lần trần của tài liệu
+- REQ-F1-35 (must, FAIL): Mỗi skill có eval baseline → with-skill trước khi phát hành — 17 skill không có eval; build, commit, pr, takeover chỉ có README chưa chạy
+- REQ-F2-5 (must, FAIL): Hành vi: yêu cầu cần chuyên môn lặp ("6 màn hình CRUD giống nhau") → team-leader điều phối `/team:make-skill`… — team-leader coi là new-feature M, dừng G1
+- REQ-F3-5 (must, PARTIAL): Phải có `## Nguồn` có URL — Hành vi có, nhưng tiêu đề là `## Sources` chứ không phải `## Nguồn`
+- REQ-F5-1 (must, PARTIAL): Nạp lười, Explore, một phiên một feature, cảnh báo > context_warn_pct — Không có cảnh báo tự động
+- REQ-F5-4 (must, PARTIAL): Dùng lại ≥ 2 hoặc đắt; kết luận không quá trình; ngày/version; trần kích thước và số file — Trần số file không được áp
+- REQ-F5-5 (should, PARTIAL): Coach dọn định kỳ; prompt cache: prefix ổn định, không đổi model giữa phiên, fan-out cùng model/tool — Việc dọn memory/cache của coach không có trong agent hay skill
+- REQ-F5-6 (must, PARTIAL): Hành vi: PreCompact/SessionEnd ghi `.team/session/<id>.md` ≤ handoff_max_lines, chỉ thông tin ngoài artifact;… — Nội dung bàn giao mỏng
+- REQ-F6-2 (must, PARTIAL): gọi, turn, thời gian, rework/bác, STD vi phạm, token (log local), lần người can thiệp; so trung vị cùng cỡ — Không ai ghi std_violations/human_interventions vào runs.jsonl → luôn 0
+- REQ-F6-4 (must, PARTIAL): Feedback tại chỗ; cảnh báo khi vượt ngưỡng 2 lần — Cảnh báo chỉ bằng chữ; 3 vai không ghi được feedback
+- REQ-F6-6 (should, PARTIAL): Overlay header `# Overlay từ retro <date>: <lý do>` + version — Có header + version nhưng chữ là tiếng Anh, khác tài liệu
+- REQ-F6-8 (must, PARTIAL): Số đo gọi thừa: agent/feature theo cỡ so max_agents_per_feature; retro định kỳ, kit-issues, audit-kit — Không có số đo tính bằng máy; retro/audit-kit có
+- REQ-F6-9 (must, PARTIAL): Hành vi: `/team:retro` ra `retro/<date>.md` với ≥ 1 đề xuất có diff + eval + canary; không sửa agent/skill; d… — Định dạng đề xuất chưa kiểm được trên thực tế
+- REQ-F6-10 (must, PARTIAL): Hành vi: lần chạy ghi `runs.jsonl` và `scorecard.json` — —
+- REQ-G1-4 (must, PARTIAL): workflows/ 16 playbook + `lot/` (3–4 workflow kịch bản hoá) — Tên `batch/` theo SPEC.md:108, khác `lot/` của tài liệu
+- REQ-G1-10 (must, PARTIAL): docs/00-tong-quan.md … 08-kenh-kich-hoat.md và docs/huong-dan/ (bat-dau-5-phut, muon-gi-go-gi, cay-quyet-dinh… — Nội dung khớp 1–1 nhưng tên tiếng Anh: theo A5 và SPEC.md:168, trái G1
+- REQ-H1-3 (must, PARTIAL): Scheduled task: retro, clean-sweep định kỳ; webhook sau deploy → smoke; chỉ decide — Không có cơ chế/mẫu webhook sau deploy → smoke
+- REQ-H1-4 (must, PARTIAL): Headless `claude -p` với `--bare --max-turns --max-budget-usd --output-format json`; bắt buộc decide — Lệch có chủ đích theo ADJ-03 (--bare tắt hook)
+- REQ-H1-5 (must, PARTIAL): Projects (cloud): nhiều feature song song, duyệt ở "Waiting on you", hỏi trong thread — Không mô tả cách duyệt hay hỏi trong thread
+- REQ-H3-1 (must, PARTIAL): Cú pháp Claude Code đổi: bắt tra docs + xác nhận phiên bản; phụ lục cú pháp dự phòng — Không kiểm phiên bản lúc chạy; phụ lục cú pháp chỉ trong automation-ai_prompts.md:217 (chưa track)
+- REQ-H3-3 (must, PARTIAL): Khó kiểm hành vi: repo mẫu ở P6; evals skill kỷ luật; canary cỡ S — Repo mẫu không nằm trong kit; kết quả eval là lời khai chưa chạy lại
+- REQ-H3-7 (must, PARTIAL): Memory tràn: tiêu chí đáng lưu; trần; coach dọn — Khóa explore_cache_max_files là cấu hình chết; coach chỉ dọn memory của chính mình, không dọn cache explore/research
+- REQ-H3-8 (must, FAIL): Định danh tiếng Việt làm script lỗi: quy định ngôn ngữ; validate kiểm — Quy định có (CLAUDE.md luật 4) nhưng validate không kiểm ngôn ngữ định danh; key bị bắt chỉ nhờ additionalProperties
+- REQ-I-3 (should, PARTIAL): Viết skill như TDD: baseline không skill → ghi lý do viện nguyên văn → skill tối thiểu → chạy lại; `evals/` — Không lưu lý do viện nguyên văn từ baseline; make-skill:13 mô tả cách viết kiểu kiểm thử
+- REQ-I-5 (must, FAIL): Ngân sách chữ 200/500 — CHANGELOG.md:69 "Bỏ ngân sách cũ 200/500 chữ" (chuẩn P7); không có ADJ ghi điều này; cũng lệch SPEC.md:143
+- REQ-J-5 (must, PARTIAL): Coach đầy đủ; evals cho skill kỷ luật; hướng dẫn người dùng; GitHub Actions template — Một phần do coach (REQ-A4-6)
+- REQ-J-6 (should, PARTIAL): GitLab CI để bản 2 (không làm ở bản 1) — Lan phạm vi nhỏ: khung 15 dòng đã phát hành, có đánh dấu v2; tracker/ci enum có gitlab

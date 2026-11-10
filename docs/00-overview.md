@@ -43,6 +43,7 @@ Quét theo 4 tầng, tầng sau chỉ chạy khi tầng trước chưa trả l�
 | Kênh (CLI, GitHub, headless) | `docs/08-channels.md` |
 | Vấn đề đã biết của kit, backlog | [`docs/kit-issues.md`](kit-issues.md) |
 | Kiểm định chất lượng skill/agent | [`docs/research/kit-audit-round1.md`](research/kit-audit-round1.md), [`kit-audit-round2.md`](research/kit-audit-round2.md) |
+| Yêu cầu gốc và nghiệm thu | [`docs/requirements/ban-hieu-yeu-cau.md`](requirements/ban-hieu-yeu-cau.md), [`docs/acceptance/acceptance-2026-11-10.md`](acceptance/acceptance-2026-11-10.md) ([ma trận](acceptance/traceability-2026-11-10.md), [sổ yêu cầu](acceptance/requirements-register.md), [đo chất lượng](acceptance/measured-quality.md), [SPEC so với yêu cầu](acceptance/spec-vs-requirements.md)) |
 | Bộ kit tham khảo, so sánh | [`docs/research/reference-kits.md`](research/reference-kits.md) |
 | Ghi công | [`docs/credits.md`](credits.md) |
 | Bắt đầu trong 5 phút | [`docs/guides/5-minute-start.md`](guides/5-minute-start.md) |

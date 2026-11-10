@@ -334,7 +334,10 @@ targets = []
 for t in env["PATH_SCAN"].split():
     p = pathlib.Path(t)
     targets += [p] if p.is_file() else [x for x in sorted(p.rglob("*")) if x.is_file() and x.suffix in (".md", ".json", ".yml", ".tmpl")]
+HISTORICAL = ("docs/acceptance/", "docs/requirements/")  # bản ghi lịch sử, không sửa lại
 for f in targets:
+    if str(f).startswith(HISTORICAL):
+        continue
     for n, line in enumerate(f.read_text(encoding="utf-8", errors="replace").split("\n"), 1):
         for m in ref.finditer(prefix.sub("", line)):
             path = m.group(1)
