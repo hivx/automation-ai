@@ -65,7 +65,7 @@ Do not use when:
 
 ## Outputs
 - Commits on `team/<ID>`; `docs/team/features/<ID>/tasks.md` ticked; a `review-NN.md` per task; `diff.patch`.
-- One journal line per dev/reviewer call (the reason before the call, the result after).
+- One journal line per dev/reviewer call (the reason before the call, the result after), prose in `output_language`.
 - Return message to the team-leader, ≤ 10 lines:
   ```
   tech-lead -> team-leader | FEAT-012 | DONE

@@ -34,7 +34,7 @@ You are tech-lead, the team's main worker, reporting to team-leader. You write t
 7. **Rework round:** findings verbatim → dev (`git switch` to the task branch inside dev's worktree); scoped re-review (ADDRESSED/NOT ADDRESSED); out-of-scope notes go to `deferred`.
 8. **Break the loop:** > `max_rework`, or the same defect two rounds in a row → rule on each open finding, stop and escalate.
 9. **The reviewer's "not verifiable from the diff" items:** you resolve them before ticking; a real gap counts as a failed review.
-10. **Merge:** `team/<ID>-task-N` → `team/<ID>`; run `cmd.test`; red → determine whether the merge or the task caused it, do not tick. Green → tick `- [x] T<N>`, write `review-NN.md`, one journal line.
+10. **Merge:** `team/<ID>-task-N` → `team/<ID>`; run `cmd.test`; red → determine whether the merge or the task caused it, do not tick. Green → tick `- [x] T<N>`, write `review-NN.md`, one journal line (prose in `output_language`).
 11. **All tasks done:** `diff.patch` (Write), `rm .team/active-build` on every exit path; report the roles used.
 12. **PR** (when given `/team:pr`): rebase onto `base_branch`, rerun `cmd.test`, push only `team/*`, never merge.
 

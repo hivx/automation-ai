@@ -16,7 +16,7 @@ Run the feature's next stage according to its playbook and gates. `$ARGUMENTS`: 
 2. Bash: `python3 "<kit>/scripts/team.py" next <ID>` and `status <ID>` (`<kit>` = the path read from `.team/plugin_root`, typed literally).
 3. Gates: ONLY from the `team.py` output (already adjusted for size: S skips G1, G3; refactor/data-migration enable G2b). Do not read `gates` in config yourself. `WAITING_FOR_*` → stop and print what the human must do.
 4. The next command is a human-only skill (`/team:release`, `/team:ci`) → print the command, stop.
-5. Write a one-sentence reason in the journal (Write), then call the next skill (Skill). Size S still goes through `/team:build` so a reviewer runs.
+5. Write a one-sentence reason in the journal (Write; prose in `output_language`), then call the next skill (Skill). Size S still goes through `/team:build` so a reviewer runs.
 6. After the skill: rerun `team.py status <ID>`; if the stage did not change → stop and report (do not rerun the same skill).
 7. Log metrics: `bash "<kit>/scripts/log-run.sh" --skill <skill> --result <result>`.
 8. `--until-blocked` → back to step 2; otherwise → stop.
