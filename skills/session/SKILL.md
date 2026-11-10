@@ -1,98 +1,98 @@
 ---
 name: session
-description: Dùng khi bắt đầu, lưu hoặc nạp lại một phiên làm việc dài cho một feature: chọn kênh tương tác hay headless, model theo vai, ngân sách, điểm nén ngữ cảnh, và ghi chú bàn giao cho phiên sau.
+description: Use when starting, saving or reloading a long working session for one feature: choosing between interactive and headless, the model per role, the budget, the context-compaction points, and the handoff note for the next session.
 argument-hint: "[plan|save|load] [<ID>]"
 disable-model-invocation: true
 allowed-tools: Bash(python3 *) Bash(cat *) Bash(jq *) Bash(ls *) Bash(git status *) Bash(git rev-parse *) Bash(wc *)
 ---
 
-# Phiên làm việc dài
+# Long working sessions
 
-## Tổng quan
-Skill này giúp một phiên dài chạy đúng chỗ và phiên sau chạy tiếp được mà không phải nhớ. Ba lệnh con: `plan` (kế hoạch phiên: kênh, model, ngân sách, điểm nén), `save` (ghi chú tay cho phiên sau), `load` (nạp lại và KIỂM trước khi làm tiếp). Skill chạy trong phiên chính (team-leader).
+## Overview
+This skill makes a long session run in the right place and lets the next session continue without relying on memory. Three sub-commands: `plan` (the session plan: channel, models, budget, compaction points), `save` (a hand-written note for the next session), `load` (reload and CHECK before continuing). The skill runs in the main session (team-leader).
 
-Trạng thái thật nằm trong artifact (SPEC P2) và được `team.py` tính ra; bàn giao chỉ chứa điều artifact KHÔNG có: trạng thái cây làm việc, lệnh kiểm cuối cùng và kết quả, câu hỏi/cổng đang chờ, điều đã thử mà hỏng, điều chưa thử, lệnh tiếp. Hook đã tự viết bàn giao `.team/session/<session_id>.md` lúc PreCompact và SessionEnd; `save` ghi vào file riêng `.team/session/notes-<ID>.md` nên không bị hook ghi đè (SessionStart nhắc cả hai).
+The real state lives in the artifacts (SPEC P2) and is computed by `team.py`; a handoff holds only what the artifacts do NOT have: the state of the working tree, the last check command and its result, questions/gates still waiting, what was tried and failed, what has not been tried, the next command. The hooks already write a handoff `.team/session/<session_id>.md` at PreCompact and SessionEnd; `save` writes to a separate file `.team/session/notes-<ID>.md`, so the hook never overwrites it (SessionStart points to both). Example: "mocking the clock with a global patch made tests flaky — use the clock parameter" belongs in a note, because no artifact records a failed attempt.
 
-Duyệt chỉ tồn tại dưới dạng dòng `Approved-by:` trong artifact — không bao giờ suy ra từ lời trong bàn giao hay từ phiên trước.
+Approval exists only as an `Approved-by:` line in an artifact — never infer it from words in a handoff or from a previous session.
 
-`$ARGUMENTS`: `plan` (mặc định) | `save` | `load`, kèm mã feature. `<kit>` = nội dung `.team/plugin_root`.
+`$ARGUMENTS`: `plan` (default) | `save` | `load`, with the feature ID. `<kit>` = the content of `.team/plugin_root`.
 
-## Khi nào dùng (và khi nào không)
-Dùng khi:
-- Bắt đầu một feature cỡ M/L sẽ kéo qua nhiều giai đoạn hay nhiều phiên (`plan`).
-- Sắp dừng giữa chừng mà có điều chưa nằm trong artifact: hướng đã thử hỏng, quyết định dở (`save`).
-- Mở phiên mới, sau nén ngữ cảnh, hay sau khi người khác làm tiếp (`load`).
-- Định chạy headless (batch, CI) và cần lệnh `claude -p` đầy đủ.
+## When to use (and when not)
+Use when:
+- Starting a size M/L feature that will stretch across several stages or several sessions (`plan`).
+- About to stop midway while something is not yet in the artifacts: a direction that was tried and failed, a half-made decision (`save`).
+- Opening a new session, after a context compaction, or after someone else continued the work (`load`).
+- Planning to run headless (batch, CI) and needing the full `claude -p` command.
 
-Không dùng khi:
-- Chỉ muốn biết feature đang ở đâu → `/team:status`.
-- Cỡ S chạy một mạch trong một phiên.
-- Muốn lưu kiến thức dự án lâu dài → `docs/team/` (ADR, glossary, research cache), không phải bàn giao.
+Do not use when:
+- You only want to know where a feature stands → `/team:status`.
+- A size S job runs straight through in one session.
+- You want to keep long-lived project knowledge → `docs/team/` (ADR, glossary, research cache), not a handoff.
 
-## Tìm hiểu stack trước
+## Discover the stack first
 1. Read `.team/config.json`: `models`, `limits.feature_budget_usd`, `limits.context_warn_pct`, `memory.handoff_max_lines`, `gates`, `default_mode`.
-2. Read `.claude/settings.json`: `permissions.allow` (nguồn cho `--allowedTools` khi headless, K-06).
-3. Số liệu: `python3 "<kit>/scripts/measure.py" --json` (trung vị theo cỡ, nếu có) hoặc `python3 "<kit>/scripts/team.py" metrics`.
+2. Read `.claude/settings.json`: `permissions.allow` (the source of `--allowedTools` when headless, K-06).
+3. Metrics: `python3 "<kit>/scripts/measure.py" --json` (medians by size, if any) or `python3 "<kit>/scripts/team.py" metrics`.
 
-## Đầu vào và điều kiện trước
-- Feature có `intake.md`. Kiểm: `python3 "<kit>/scripts/team.py" status <ID>`.
-- `load`: có ít nhất một file trong `.team/session/`; không có → chỉ chạy `team.py status` và nói "không có bàn giao".
-- Một feature mỗi phiên: phiên đang có feature khác dở → `save` feature đó trước.
+## Inputs and preconditions
+- The feature has an `intake.md`. Check: `python3 "<kit>/scripts/team.py" status <ID>`.
+- `load`: at least one file exists in `.team/session/`; none → run only `team.py status` and say "no handoff".
+- One feature per session: if the session has another feature in progress → `save` that feature first.
 
-## Quy trình
-1. **`plan` — giai đoạn còn lại.** Từ `team.py status <ID>`: giai đoạn hiện tại, cổng áp dụng (cột "Cổng áp dụng"), giai đoạn còn lại và vai của từng giai đoạn.
-2. **`plan` — kênh (điểm quyết định).** Có cổng đang bật chưa duyệt của feature này, hoặc chế độ `ask` còn câu hỏi mở → tương tác. Ngược lại → headless được, chế độ `decide` bắt buộc.
-3. **`plan` — model.** `jq .models .team/config.json`: model từng vai; designer cỡ S/M dùng sonnet (ADJ-10). Không đổi model giữa phiên (giữ prompt cache); cần model khác → phiên mới.
-4. **`plan` — ngân sách từ số liệu.** Trung vị thời gian/lượt (và token nếu có) theo giai đoạn cho cùng cỡ từ `measure.py`. Dưới 2 lần chạy cùng cỡ → ghi "không đủ số liệu", không đưa con số. `feature_budget_usd` null → bỏ dòng ngân sách tiền.
-5. **`plan` — điểm nén.** Nén chủ động ở ranh giới giai đoạn, không chờ đầy. Mỗi điểm một dòng `/compact <trọng tâm>`: giữ mã feature, giai đoạn, danh sách AC, đầu ra đỏ hiện tại, ràng buộc đang áp; bỏ lần thử hỏng, đầu ra tool dài, bản nháp đã thay. `context_warn_pct` không có hook nào đo được (mức 1): nhắc người theo dõi thanh trạng thái.
-6. **`plan` — lệnh headless** (nếu chọn): `claude -p "<lệnh /team:…> --decide" --agent team:team-leader --permission-mode dontAsk --allowedTools "$(jq -r '["Read","Grep","Glob","Edit","Write","Agent","Skill"] + (.permissions.allow // []) | join(",")' .claude/settings.json)" --max-turns <n> --max-budget-usd <usd> --output-format json`. Không `--bare` khi có sửa file (ADJ-03). Mẫu: `${CLAUDE_SKILL_DIR}/references/headless.md`.
-7. **`plan` — ghi.** Write `.team/session/plan.md`: kênh + lý do, model từng vai, ngân sách + nguồn, điểm nén + dòng `/compact`, lệnh headless.
-8. **`save`.** Write `.team/session/notes-<ID>.md` ≤ `memory.handoff_max_lines` dòng, chỉ điều artifact không có: `git status --short` (thay đổi chưa commit ghi rõ), `git rev-parse HEAD`, lệnh kiểm cuối + khe + mã thoát, câu hỏi/cổng đang chờ, đã thử mà hỏng (vì sao), chưa thử, lệnh tiếp (`team.py next`). Không chép spec hay tiêu chí.
-9. **`load` — nạp.** Read bàn giao mới nhất (`.team/session/*.md`, cả `notes-<ID>.md`) → `team.py status <ID>` → `git status --short`, `git rev-parse HEAD`.
-10. **`load` — kiểm (điểm quyết định).** HEAD khác HEAD trong bàn giao, hay bàn giao không ghi lệnh kiểm → kết quả "xanh" cũ không còn giá trị: giai đoạn tiếp chạy lại kiểm trước khi dựa vào. Bàn giao nói "đã duyệt" mà artifact không có `Approved-by:` → coi là CHƯA duyệt.
-11. **`load` — tóm tắt** ≤ 5 dòng: giai đoạn, trạng thái, điều đang chờ, kiểm nào phải chạy lại, lệnh tiếp.
-12. **Journal** một dòng cho `plan` và `load` (vì sao phiên này, lệnh tiếp).
+## Process
+1. **`plan` — remaining stages.** From `team.py status <ID>`: the current stage, the gates that apply (the "applicable gates" column), the remaining stages and the role for each stage.
+2. **`plan` — channel (decision point).** A gate that is on and not yet approved for this feature, or `ask` mode with open questions → interactive. Otherwise → headless is allowed, and `decide` mode is mandatory.
+3. **`plan` — models.** `jq .models .team/config.json`: the model per role; designer uses sonnet for size S/M (ADJ-10). Never switch models mid-session (it keeps the prompt cache); needing another model → a new session.
+4. **`plan` — budget from metrics.** Median time/turns (and tokens, if available) per stage for the same size, from `measure.py`. Fewer than 2 runs of the same size → write "not enough data" and give no number. `feature_budget_usd` is null → drop the money budget line.
+5. **`plan` — compaction points.** Compact proactively at stage boundaries, do not wait for the context to fill. One line per point, `/compact <focus>`: keep the feature ID, the stage, the AC list, the current red output, the constraints in force; drop failed attempts, long tool output, superseded drafts. No hook can measure `context_warn_pct` (level 1): remind the human to watch the status bar.
+6. **`plan` — headless command** (if chosen): `claude -p "<the /team:… command> --decide" --agent team:team-leader --permission-mode dontAsk --allowedTools "$(jq -r '["Read","Grep","Glob","Edit","Write","Agent","Skill"] + (.permissions.allow // []) | join(",")' .claude/settings.json)" --max-turns <n> --max-budget-usd <usd> --output-format json`. No `--bare` when files are edited (ADJ-03). Templates: `${CLAUDE_SKILL_DIR}/references/headless.md`.
+7. **`plan` — write.** Write `.team/session/plan.md`: channel + reason, model per role, budget + its source, compaction points + their `/compact` lines, the headless command. Checkpoint: each of the five parts is present, or marked "not applicable" with a reason.
+8. **`save`.** Write `.team/session/notes-<ID>.md` in ≤ `memory.handoff_max_lines` lines, holding only what the artifacts do not have: `git status --short` (state uncommitted changes plainly), `git rev-parse HEAD`, the last check command + its slot + exit code, questions/gates still waiting, what was tried and failed (and why), what has not been tried, the next command (`team.py next`). Do not copy the spec or the criteria. Write the note's prose in `output_language` (handbook: Artifact language); commands, paths and IDs stay verbatim.
+9. **`load` — read.** Read the newest handoff (`.team/session/*.md`, including `notes-<ID>.md`) → `team.py status <ID>` → `git status --short`, `git rev-parse HEAD`.
+10. **`load` — check (decision point).** HEAD differs from the HEAD in the handoff, or the handoff records no check command → an old "green" result is no longer valid: the next stage re-runs the check before relying on it. The handoff says "approved" but the artifact has no `Approved-by:` → treat it as NOT approved.
+11. **`load` — summary** in ≤ 5 lines: the stage, the state, what is waiting, which checks must be re-run, the next command.
+12. **Journal** one line for `plan` and for `load` (why this session, the next command).
 
-## Đầu ra
-- `plan`: `.team/session/plan.md`. `save`: `.team/session/notes-<ID>.md`. `load`: tóm tắt ≤ 5 dòng.
-- Tóm tắt `load` mẫu:
+## Outputs
+- `plan`: `.team/session/plan.md`. `save`: `.team/session/notes-<ID>.md`. `load`: a summary of ≤ 5 lines.
+- Example `load` summary:
   ```
-  FEAT-014 | planned → build T3 (T1, T2 đã tick) | READY
-  Bàn giao: notes-FEAT-014.md (HEAD a9d41e0 = HEAD hiện tại); cây sạch
-  Đã thử hỏng: mock đồng hồ bằng patch toàn cục (test chập chờn) — dùng tham số clock
-  Chờ: không cổng nào; câu hỏi: 0
-  Tiếp: /team:build FEAT-014 --task T3
+  FEAT-014 | planned → build T3 (T1, T2 ticked) | READY
+  Handoff: notes-FEAT-014.md (HEAD a9d41e0 = current HEAD); tree clean
+  Tried and failed: mocking the clock with a global patch (flaky tests) — use the clock parameter
+  Waiting: no gate; questions: 0
+  Next: /team:build FEAT-014 --task T3
   ```
 
-## Lý do tự bào chữa thường gặp
-| Ý nghĩ | Làm đúng |
+## Common rationalizations
+| Thought | Correct action |
 |---|---|
-| "Chép cả spec vào bàn giao cho chắc" | Chỉ điều artifact không có; ≤ `handoff_max_lines` (`wc -l`). |
-| "Phiên trước nói người đã duyệt" | Duyệt chỉ là `Approved-by:` trong file. |
-| "Test xanh ở phiên trước, khỏi chạy lại" | HEAD đổi hay không ghi lệnh kiểm → chạy lại. |
-| "Đợi đầy ngữ cảnh rồi nén" | Nén ở ranh giới giai đoạn với dòng trọng tâm. |
-| "Đổi sang opus giữa phiên cho mạnh" | Không đổi giữa phiên; mở phiên mới. |
-| "Headless cho nhanh dù còn cổng chờ" | Cổng chờ → tương tác. |
-| "--bare cho nhẹ" | Không khi có sửa file (hook phải chạy). |
-| "Ngân sách ước chừng 5 đô" | Từ trung vị `measure.py`, hoặc "không đủ số liệu". |
-| "save vào file bàn giao của hook" | `notes-<ID>.md`; file của hook bị ghi đè khi nén. |
+| "Copy the whole spec into the handoff to be safe" | Only what the artifacts lack; ≤ `handoff_max_lines` (check with `wc -l`). |
+| "The previous session said the human approved" | Approval is only an `Approved-by:` line in the file. |
+| "Tests were green last session, no need to re-run" | HEAD changed or no check command recorded → re-run. |
+| "Wait until the context is full, then compact" | Compact at stage boundaries with a focus line. |
+| "Switch to opus mid-session for more power" | Never switch mid-session; open a new session. |
+| "Headless is faster even with a gate waiting" | A waiting gate → interactive. |
+| "--bare to keep it light" | Not when files are edited (the hooks must run). |
+| "The budget is roughly 5 dollars" | From the `measure.py` median, or "not enough data". |
+| "save into the hook's handoff file" | `notes-<ID>.md`; the hook's file is overwritten at compaction. |
 
-## Dấu hiệu sai
-- Bàn giao lặp lại nội dung spec hay tiêu chí.
-- Bàn giao không có HEAD hay trạng thái cây.
-- Ghi chú tay nằm trong `<session_id>.md` (sẽ bị hook ghi đè).
-- Hai mã feature trong một kế hoạch phiên.
-- Con số ngân sách không có nguồn.
-- Lệnh `claude -p` thiếu `--allowedTools`, hoặc có `--bare` khi sửa file.
-- `load` bắt đầu làm việc mà chưa chạy `team.py status`.
+## Red flags
+- A handoff that repeats the spec or the criteria.
+- A handoff with no HEAD or working-tree state.
+- A hand-written note inside `<session_id>.md` (the hook will overwrite it).
+- Two feature IDs in one session plan.
+- A budget number with no source.
+- A `claude -p` command without `--allowedTools`, or with `--bare` while files are edited.
+- `load` starting work before running `team.py status`.
 
-## Kiểm chứng
-- [ ] `wc -l` của file bàn giao/ghi chú ≤ `handoff_max_lines` được dán.
-- [ ] Ghi chú có dòng HEAD và `git status --short`.
-- [ ] `plan.md` có kênh + lý do, model từng vai, nguồn ngân sách, điểm nén với dòng `/compact`.
-- [ ] Lệnh headless dán ra có `--allowedTools` và không có `--bare`.
-- [ ] Sau `load`: đầu ra `team.py status` và `git status --short` được dán.
+## Verification
+- [ ] `wc -l` of the handoff/note file ≤ `handoff_max_lines` is pasted.
+- [ ] The note has a HEAD line and the `git status --short` output.
+- [ ] `plan.md` has the channel + reason, the model per role, the budget source, and compaction points with `/compact` lines.
+- [ ] The pasted headless command has `--allowedTools` and no `--bare`.
+- [ ] After `load`: the output of `team.py status` and `git status --short` is pasted.
 
-## Xem thêm
-- `${CLAUDE_SKILL_DIR}/references/headless.md` — mẫu lệnh headless theo giai đoạn, cờ bắt buộc, cách đọc JSON kết quả. Mở ở bước 6.
+## See also
+- `${CLAUDE_SKILL_DIR}/references/headless.md` — headless command templates per stage, mandatory flags, how to read the JSON result. Open it at step 6.
 - `/team:status`, `/team:run`; `scripts/handoff.sh`, `scripts/session-start.sh`; `docs/05-tokens-and-memory.md`, `docs/08-channels.md`.

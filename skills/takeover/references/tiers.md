@@ -1,19 +1,19 @@
-# Ngân sách các tầng quét
+# Scan tier budgets
 
-| Tầng | Đọc gì | Ngân sách | Trả lời câu nào | Dừng khi |
+| Tier | Reads | Budget | Answers | Stops when |
 |---|---|---|---|---|
-| T0 | Cây thư mục, manifest, `git log --stat`, tag, issue/PR mở, CHANGELOG (chỉ tên và số liệu) | ≈ 0 token nội dung; ≤ 10 lệnh | Đã tới đâu (sơ bộ) | Đủ để biết stack, nhịp commit, vùng nóng |
-| T1 | README, `docs/`, ADR, CLAUDE.md, spec/plan | ≤ 15 tài liệu; mục lục trước | Làm gì (theo lời tài liệu) | Có mô tả tính năng chính |
-| T2 | Module chính + vùng nóng: tính năng ↔ code/test, TODO/FIXME, test skip, nhánh chưa gộp, migration chưa chạy | ≤ 10 module, qua Explore | Đã tới đâu (thật), việc tiếp theo | Không mâu thuẫn mới |
-| T3 | Đọc sâu từng module | Chỉ khi T2 mâu thuẫn, module không tài liệu, hoặc `--full` | Làm rõ mâu thuẫn | Mâu thuẫn được giải thích |
+| T0 | Directory tree, manifests, `git log --stat`, tags, open issues/PRs, CHANGELOG (names and figures only) | ≈ 0 content tokens; ≤ 10 commands | How far has it got (first pass) | Enough to know the stack, commit cadence, hot spots |
+| T1 | README, `docs/`, ADRs, CLAUDE.md, specs/plans | ≤ 15 documents; table of contents first | What does it do (in the documents' words) | The main features are described |
+| T2 | Main modules + hot spots: feature ↔ code/test, TODO/FIXME, skipped tests, unmerged branches, unapplied migrations | ≤ 10 modules, through Explore | How far has it got (really), what comes next | No new contradiction |
+| T3 | Deep read of each module | Only on a T2 contradiction, an undocumented module, or `--full` | Clear up the contradiction | The contradiction is explained |
 
-## Repo nhỏ
-Repo < 30 file được theo dõi: T2 được đọc file trực tiếp thay vì Explore; ghi rõ "đọc trực tiếp, < 30 file" trong bảng Đã quét. T3 vẫn chỉ chạy khi có mâu thuẫn hoặc `--full`.
+## Small repo
+A repo with < 30 tracked files: T2 may read files directly instead of using Explore; record "read directly, < 30 files" in the Scanned table. T3 still runs only on a contradiction or with `--full`.
 
-## AI-readiness — điều cần xét
-- CLAUDE.md hiện có: số dòng, nội dung, độ cũ, mâu thuẫn với code.
-- `.claude/`, plugin, MCP, AGENTS.md: giữ / cắt / viết lại.
-- Kết luận một trong ba: `ready` / `adjust profile` / `clean first`.
+## AI-readiness — what to examine
+- The existing CLAUDE.md: line count, content, staleness, contradictions with the code.
+- `.claude/`, plugins, MCP, AGENTS.md: keep / cut / rewrite.
+- Conclude with one of three: `ready` / `adjust-profile` / `clean-first`.
 
-## Phụ lục sức khỏe trong assessment.md
-Build/test có chạy được (lệnh đề xuất), lint, coverage nếu có số liệu, phụ thuộc lỗi thời/CVE, secret lộ, test chập chờn.
+## Health appendix in assessment.md
+Can build/test run (proposed commands), lint, coverage if figures exist, outdated dependencies/CVEs, exposed secrets, flaky tests.

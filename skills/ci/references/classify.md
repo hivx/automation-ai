@@ -1,17 +1,17 @@
-# Phân loại CI đỏ (STD-CI-4)
+# Classifying a red CI run (STD-CI-4)
 
-| Loại | Dấu hiệu trong log | Bằng chứng cần trước khi kết luận | Hành động | Không làm |
+| Kind | Signs in the log | Evidence needed before concluding | Action | Do not |
 |---|---|---|---|---|
-| code | assertion sai, exception trong code dự án, lỗi kiểu/lint ở file vừa đổi | chạy khe `cmd.*` tương ứng trên cùng SHA tại chỗ → cùng lỗi | trả team-leader: `/team:intake --type bug` | sửa code, sửa test |
-| test chập chờn | lỗi thời gian chờ, thứ tự, cổng mạng bận; cùng test lúc đỏ lúc xanh | cùng SHA: đỏ → chạy lại một lần (`gh run rerun <id> --failed`) → xanh | dòng `debt.md` (tên test, hai run-id, số lần); báo team-leader | tắt test, thêm retry vào test, chạy lại nhiều lần |
-| môi trường | runner hết đĩa, hạn mức API, DNS, dịch vụ ngoài sập | diff không đổi gì liên quan; lỗi nằm ngoài bước của dự án | chờ/chạy lại một lần; lặp lại → đổi runner/bước chuẩn bị trên PR riêng | đổi code |
-| cấu hình | YAML sai, action sai bản, `ci.setup` lệch profile, biến môi trường thiếu | đọc file workflow + profile; chỉ ra dòng sai | sửa workflow trên `team/ci-<slug>` | nới bước kiểm |
-| phụ thuộc | không phân giải được gói, lockfile lệch manifest, bản thượng nguồn mới hỏng | so lockfile với manifest; changelog thượng nguồn | `cmd.install` trên nhánh riêng; lỗi do bản mới → playbook dependency-upgrade | sửa tay lockfile |
+| code | a failing assertion, an exception in project code, a type/lint error in a file just changed | run the matching `cmd.*` slot locally on the same SHA → same failure | hand back to team-leader: `/team:intake --type bug` | fix the code, edit the test |
+| flaky test | timeouts, ordering, a busy network port; the same test red one time and green the next | same SHA: red → one rerun (`gh run rerun <id> --failed`) → green | a `debt.md` row (test name, both run-ids, count); tell team-leader | disable the test, add retries to the test, rerun many times |
+| environment | runner out of disk, API quota, DNS, an external service down | the diff changes nothing related; the failure is outside the project's steps | wait/rerun once; if it recurs → change the runner/setup step on a separate PR | change code |
+| configuration | wrong YAML, wrong action version, `ci.setup` out of line with the profile, a missing environment variable | read the workflow file + profile; point to the wrong line | fix the workflow on `team/ci-<slug>` | loosen a check step |
+| dependency | a package fails to resolve, the lockfile disagrees with the manifest, a new upstream release is broken | compare lockfile with manifest; the upstream changelog | `cmd.install` on a separate branch; caused by a new release → playbook dependency-upgrade | hand-edit the lockfile |
 
-## Thứ tự đọc log
-1. Job nào đỏ đầu tiên (`--json jobs`), bước nào.
-2. Dòng lỗi đầu tiên trong bước đó (bỏ qua các dòng "exit code 1", "Process completed" ở cuối).
-3. SHA và nhánh; có trùng một lần đỏ trước trên nhánh nền không (`gh run list --branch <base> --limit 5`).
+## Order for reading the log
+1. Which job went red first (`--json jobs`), and which step.
+2. The first error line in that step (skip the trailing "exit code 1", "Process completed" lines).
+3. The SHA and branch; does it match an earlier red run on the base branch (`gh run list --branch <base> --limit 5`)?
 
-## Lỗi đã có trên nhánh nền
-Nhánh nền cũng đỏ cùng lỗi → không phải do PR. Ghi rõ "đã đỏ trên `<base>` từ run <id>"; loại vẫn là một trong năm loại trên; PR đang xét không bị chặn vì lỗi này nhưng người phải được báo.
+## Failures already on the base branch
+The base branch is red with the same failure too → it is not caused by the PR. State "already red on `<base>` since run <id>"; the kind is still one of the five above; the PR under review is not blocked by this failure, but the human must be told.

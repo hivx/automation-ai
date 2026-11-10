@@ -1,45 +1,45 @@
-# Mẫu tin bàn giao trong vòng build
+# Handoff templates in the build loop
 
-## Trạng thái dev (dòng đầu tin trả)
-| Trạng thái | Nghĩa | tech-lead làm |
+## Dev status (first line of the return message)
+| Status | Meaning | What the tech-lead does |
 |---|---|---|
-| DONE | Xong, có đỏ rồi xanh, lint sạch | Kiểm bằng chứng → gói review |
-| DONE_WITH_CONCERNS | Xong nhưng có lo ngại | Lo ngại về tính đúng/phạm vi → giải quyết trước review |
-| NEEDS_CONTEXT | Thiếu thông tin để làm đúng | Bổ sung, gọi lại (không gửi lại tin cũ) |
-| BLOCKED | Thử nhiều lần vẫn không qua | Đổi một điều; sau max_attempts → dừng |
-| DESIGN_CONFLICT | Phải sửa ngoài touchpoints / đổi hợp đồng | Dừng, báo team-leader |
+| DONE | Done, with red then green, lint clean | Check the evidence → review package |
+| DONE_WITH_CONCERNS | Done, but with a concern | Concern about correctness/scope → resolve it before review |
+| NEEDS_CONTEXT | Missing information to do it right | Add it, call again (never resend the old message) |
+| BLOCKED | Several attempts and still not passing | Change one thing; after max_attempts → stop |
+| DESIGN_CONFLICT | Would have to modify outside the touchpoints / change a contract | Stop, report to the team-leader |
 
-## Gọi dev (lần đầu)
+## Calling the dev (first time)
 ```
-Task FEAT-012 T3 — Từ chối mã OTP hết hạn
-Tiêu chí: AC-2 (mã quá 5 phút trả 401)
-Touchpoints: src/auth/otp.py, tests/auth/test_otp.py — CHỈ sửa trong touchpoints
-Test: cmd.test_one với {file}=tests/auth/test_otp.py
-Nhánh: team/FEAT-012-task-3 (tạo từ team/FEAT-012)
-Ràng buộc chung: docs/team/features/FEAT-012/plan.md#ràng-buộc-chung
-Báo cáo chi tiết: docs/team/features/FEAT-012/dev-T3.md; tin trả ≤ 10 dòng, dòng đầu là trạng thái
-```
-
-## Gọi reviewer
-```
-Review FEAT-012 T3 — chấm theo Review checklist (10)
-Gói review: docs/team/features/FEAT-012/review-pkg-T3.md (BASE 9f8e7d..a1b2c3d)
-Thiết kế: docs/team/features/FEAT-012/design.md (mục 7, 8)
-Tiêu chí task: AC-2
-Trả: phán quyết + phát hiện `severity | STD | file:line | description | fix` + mục "không kiểm chứng được từ diff"
+Task FEAT-012 T3 — Reject expired OTP codes
+Criterion: AC-2 (a code older than 5 minutes returns 401)
+Touchpoints: src/auth/otp.py, tests/auth/test_otp.py — modify ONLY inside the touchpoints
+Test: cmd.test_one with {file}=tests/auth/test_otp.py
+Branch: team/FEAT-012-task-3 (created from team/FEAT-012)
+Shared constraints: docs/team/features/FEAT-012/plan.md#shared-constraints
+Detailed report: docs/team/features/FEAT-012/dev-T3.md; return message ≤ 10 lines, first line is the status
 ```
 
-## Vòng sửa
+## Calling the reviewer
 ```
-Sửa FEAT-012 T3 vòng 2/3
-Phát hiện (nguyên văn): docs/team/features/FEAT-012/review-03.md#vòng-1
-Trong worktree của bạn: git switch team/FEAT-012-task-3 (không trỏ git vào worktree khác)
-Báo cáo sửa: phát hiện → thay đổi → test phủ → lệnh + đầu ra
+Review FEAT-012 T3 — grade against the Review checklist (10)
+Review package: docs/team/features/FEAT-012/review-pkg-T3.md (BASE 9f8e7d..a1b2c3d)
+Design: docs/team/features/FEAT-012/design.md (sections 7, 8)
+Task criterion: AC-2
+Return: verdict + findings `severity | STD | file:line | description | fix` + a "cannot verify from the diff" section
 ```
-Xem lại có phạm vi: reviewer nhận `FIX_BASE..HEAD` và danh sách phát hiện cũ; trả `ADDRESSED`/`NOT ADDRESSED` từng mục.
 
-## Dòng tiến độ trong tasks.md (để chạy tiếp sau khi nén)
+## Rework round
+```
+Fix FEAT-012 T3 round 2/3
+Findings (verbatim): docs/team/features/FEAT-012/review-03.md#round-1
+In your worktree: git switch team/FEAT-012-task-3 (never point git at another worktree)
+Fix report: finding → change → covering test → command + output
+```
+Scoped re-review: the reviewer receives `FIX_BASE..HEAD` and the list of old findings; it returns `ADDRESSED`/`NOT ADDRESSED` for each item.
+
+## Progress line in tasks.md (to resume after compaction)
 ```
 - [ ] T3 — … — files: … — test: … — depends: T2
-  - tiến độ: BASE=9f8e7d · dev gọi lần 1 · review vòng 1 request-changes · vòng 2 …
+  - progress: BASE=9f8e7d · dev call 1 · review round 1 request-changes · round 2 …
 ```

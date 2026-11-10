@@ -1,37 +1,37 @@
-# Phép thử ngưỡng kiến trúc
+# Architecture threshold test
 
-Một quyết định được chốt ở tầng kiến trúc (thành ADR) khi đủ ba điều:
-1. **Có thể lệch:** hai phần được làm độc lập (hai task, hai dev, hai feature) có thể chọn khác nhau.
-2. **Không hiển nhiên:** người làm giỏi không tự chọn giống nhau nếu không được nói.
-3. **Đánh đổi thật:** mỗi phương án có cái mất đo được (hiệu năng, chi phí, độ phức tạp, khả năng đảo ngược).
+A decision is settled at the architecture level (as an ADR) when all three conditions hold:
+1. **Can diverge:** two independently built parts (two tasks, two devs, two features) could choose differently.
+2. **Not obvious:** a competent builder would not pick the same thing unless told.
+3. **Real trade-off:** each option has a measurable cost (performance, money, complexity, reversibility).
 
-Thiếu một điều → không phải ADR. Ghi vào `## Để designer quyết` với lý do ("chỉ một module dùng", "dự án đã có quy ước").
+Missing one → not an ADR. Record it under `## Left to the designer` with the reason ("only one module uses it", "the project already has a convention").
 
-## Ví dụ
-| Ứng viên | 1 | 2 | 3 | Kết luận |
+## Examples
+| Candidate | 1 | 2 | 3 | Conclusion |
 |---|---|---|---|---|
-| Ai được ghi bảng `invoices` | có (billing và notify) | không | có | ADR: chỉ billing ghi; notify nghe event |
-| Định dạng lỗi API | có | có nếu dự án chưa có | thấp | dự án đã có `{code, message}` → theo quy ước, không ADR |
-| Hàng đợi hay gọi đồng bộ khi gửi email | có | có | có (độ trễ vs độ phức tạp) | ADR |
-| Tên trường `created_at` hay `createdAt` | có | không (theo `naming.*`) | không | để designer |
-| Cache Redis "cho nhanh sau này" | — | — | — | không có NFR → bỏ (STD-DESIGN-5) |
+| Who may write the `invoices` table | yes (billing and notify) | no | yes | ADR: only billing writes; notify listens to an event |
+| API error format | yes | yes if the project has none yet | low | the project already has `{code, message}` → follow the convention, no ADR |
+| Queue or synchronous call when sending email | yes | yes | yes (latency vs complexity) | ADR |
+| Field name `created_at` or `createdAt` | yes | no (follows `naming.*`) | no | left to the designer |
+| Redis cache "for speed later" | — | — | — | no NFR → dropped (STD-DESIGN-5) |
 
-## Ràng buộc kiểm được
-Mỗi ADR có ít nhất một dòng reviewer kiểm được trên diff:
-- "Chỉ `src/billing/**` ghi bảng invoices" → grep câu lệnh ghi trong module khác.
-- "Mọi lời gọi ra ngoài qua `src/clients/` và có timeout" → grep import HTTP client ngoài thư mục đó.
-- "Không module nào dưới `src/domain/` import `src/api/`" → chiều phụ thuộc.
+## Checkable constraints
+Every ADR has at least one line reviewer can check on a diff:
+- "Only `src/billing/**` writes the invoices table" → grep for write statements in other modules.
+- "Every outbound call goes through `src/clients/` and has a timeout" → grep HTTP client imports outside that directory.
+- "No module under `src/domain/` imports `src/api/`" → dependency direction.
 
-Ràng buộc mơ hồ ("code phải sạch", "dễ mở rộng") không phải ràng buộc.
+A vague constraint ("code must be clean", "easy to extend") is not a constraint.
 
-## Chiều cần quét
-| Chiều | Câu hỏi |
+## Dimensions to sweep
+| Dimension | Question |
 |---|---|
-| Môi trường và deploy | Mấy môi trường? Đơn vị deploy nào? Lệnh nằm ở `deploy.*`/`docs/team/ci.md`? |
-| Chủ sở hữu dữ liệu | Mỗi thực thể một module chủ? Ai chỉ đọc? |
-| Đường ghi trạng thái | Ghi đồng bộ, qua event, hay job? Thứ tự và trùng lặp? |
-| Lỗi, log, cấu hình | Một kiểu lỗi? Log có ngữ cảnh, không dữ liệu nhạy cảm? Cấu hình đọc ở đâu? |
-| Xác thực, phân quyền | Kiểm ở đâu (phía server)? Ai cấp quyền? |
-| Tích hợp ngoài | Timeout, retry, idempotency (từ research `--integration`) |
+| Environments and deploy | How many environments? Which deploy units? Are the commands in `deploy.*`/`docs/team/ci.md`? |
+| Data ownership | One owning module per entity? Who only reads? |
+| State write paths | Written synchronously, through events, or by jobs? Ordering and duplicates? |
+| Errors, logs, configuration | One error style? Logs with context and no sensitive data? Where is configuration read? |
+| Authentication, authorization | Where is it checked (server side)? Who grants permissions? |
+| External integration | Timeout, retry, idempotency (from research `--integration`) |
 
-Mỗi chiều kết thúc bằng một trong: **quyết** (dẫn ADR), **để designer** (lý do), **câu hỏi mở** (vào `questions.md` hoặc `## Assumptions decided by the team` ở chế độ decide).
+Every dimension ends with one of: **decided** (cite the ADR), **left to the designer** (reason), **open question** (goes to `questions.md`, or `## Assumptions decided by the team` in decide mode).

@@ -1,6 +1,6 @@
 ---
 name: architect
-description: Dùng khi việc cỡ L hay dự án mới cần kiến trúc hệ thống, khi thay đổi chạm nhiều module, hợp đồng hay NFR cần đánh giá tác động, hoặc khi design.md cần review ba câu về độ khớp kiến trúc.
+description: Use when size-L work or a new project needs a system architecture, when a change touching several modules, contracts or NFRs needs an impact assessment, or when a design.md needs a three-sentence review of architectural fit.
 argument-hint: "<ID> [system|impact|review]"
 context: fork
 agent: team:architect
@@ -8,98 +8,98 @@ background: false
 allowed-tools: Bash(python3 *) Bash(cat *) Bash(ls *)
 ---
 
-# Kiến trúc và ADR
+# Architecture and ADRs
 
-## Tổng quan
-Skill này chốt những quyết định cấu trúc mà các phần làm độc lập có thể chọn khác nhau và đụng nhau — rồi ghi mỗi quyết định thành ADR có một ràng buộc kiểm được. Skill chạy trong ngữ cảnh `architect` (fork). architect không viết code, không quyết luật nghiệp vụ, không đi vào chi tiết trường dữ liệu hay endpoint (việc của designer).
+## Overview
+This skill settles the structural decisions that independently built parts could make differently and collide over — then records each decision as an ADR with a checkable constraint. It runs in the `architect` context (fork). architect does not write code, does not decide business rules, and does not go down to field or endpoint detail (that is designer's job).
 
-Phép thử trung tâm: một quyết định thuộc tầng kiến trúc chỉ khi (1) hai phần được làm riêng có thể chọn khác nhau và xung đột, (2) lựa chọn không hiển nhiên, (3) có đánh đổi thật. Thiếu một điều → ghi "để designer quyết". Phép thử này chống cả thiết kế thiếu lẫn thiết kế thừa (STD-DESIGN-5).
+The central test: a decision belongs at the architecture level only when (1) two parts built separately could choose differently and conflict, (2) the choice is not obvious, (3) there is a real trade-off. Missing one → write "left to the designer". This test guards against both under-design and over-design (STD-DESIGN-5). For example, "only billing writes the `invoices` table" passes all three when billing and notify both touch invoices; "use `created_at` rather than `createdAt`" fails the second, because `naming.*` already answers it.
 
-Ba chế độ: `system` (chưa có kiến trúc), `impact` (hệ thống đang chạy), `review` (ba câu cho một `design.md`). `$ARGUMENTS`: mã `<ID>` và chế độ. `<kit>` = nội dung `.team/plugin_root`.
+Three modes: `system` (no architecture yet), `impact` (a running system), `review` (three sentences on one `design.md`). `$ARGUMENTS`: the `<ID>` and the mode. `<kit>` = the content of `.team/plugin_root`.
 
-## Khi nào dùng (và khi nào không)
-Dùng khi:
-- Cỡ L (bắt buộc), playbook `new-project`, `integration`, `change-request` chạm nhiều module.
-- NFR mới (hiệu năng, sẵn sàng, bảo mật) mà kiến trúc hiện có chưa trả lời.
-- team-leader cần một lượt review độc lập cho `design.md` (`review`).
+## When to use (and when not)
+Use when:
+- Size L (mandatory), playbook `new-project`, `integration`, a `change-request` touching several modules.
+- A new NFR (performance, availability, security) that the existing architecture does not answer.
+- team-leader needs an independent review of a `design.md` (`review`).
 
-Không dùng khi:
-- Cỡ S, hoặc cỡ M gói trong một module và không đổi hợp đồng → `/team:design` thẳng.
-- Câu hỏi là "thư viện nào hỗ trợ X" → `/team:research` trước; architect không có WebFetch.
-- Muốn đổi luật nghiệp vụ → analyst (`--amend`).
+Do not use when:
+- Size S, or size M contained in one module with no contract change → `/team:design` directly.
+- The question is "which library supports X" → `/team:research` first; architect has no WebFetch.
+- You want to change a business rule → analyst (`--amend`).
 
-## Tìm hiểu stack trước
-1. Read `.team/profile.json`: `structure.*` (gốc module), `structure.config`, `ci.*`, `deploy.*` (bao ngoài vận hành: môi trường, đơn vị deploy).
-2. Read `docs/team/architecture.md`, Glob `docs/team/adr/ADR-*.md` (ADR `accepted` là ràng buộc bắt buộc, chỉ đọc), `docs/team/assessment.md` (quy ước đo từ code khi takeover).
-3. Explore: ranh giới module thật, chiều phụ thuộc, đơn vị deploy (file cấu hình build/CI). Container lấy từ thực tế deploy, không từ nhóm logic.
-4. Dự án đã có ADR ở chỗ khác (takeover T1 thấy) → đọc như ràng buộc và dẫn trong Bối cảnh; không đánh số lại, không lập dãy số thứ hai.
+## Discover the stack first
+1. Read `.team/profile.json`: `structure.*` (module roots), `structure.config`, `ci.*`, `deploy.*` (the operational envelope: environments, deploy units).
+2. Read `docs/team/architecture.md`, Glob `docs/team/adr/ADR-*.md` (an `accepted` ADR is a binding constraint, read-only), `docs/team/assessment.md` (conventions measured from the code at takeover).
+3. Explore: the real module boundaries, dependency direction, deploy units (build/CI config files). Containers come from how the system is actually deployed, not from logical grouping.
+4. The project already has ADRs elsewhere (found by takeover T1) → read them as constraints and cite them in Context; do not renumber them, do not start a second numbering sequence.
 
-## Đầu vào và điều kiện trước
-- `docs/team/features/<ID>/spec.md` có bảng NFR (mã NFR-n); `research.md` nếu có; `design.md` khi `review`.
-- Kiểm: `python3 "<kit>/scripts/team.py" status <ID>`; G1 bật mà chưa duyệt → dừng.
-- Chọn chế độ: chưa có `docs/team/architecture.md` → `system`; đã có → `impact`; được gọi trên `design.md` → `review`. Chế độ được giao không khớp artifact → `NEEDS_CONTEXT`.
+## Inputs and preconditions
+- `docs/team/features/<ID>/spec.md` with an NFR table (IDs NFR-n); `research.md` if present; `design.md` for `review`.
+- Check: `python3 "<kit>/scripts/team.py" status <ID>`; G1 on but not approved → stop.
+- Pick the mode: no `docs/team/architecture.md` yet → `system`; it exists → `impact`; called on a `design.md` → `review`. The assigned mode does not match the artifacts → `NEEDS_CONTEXT`.
 
-## Quy trình
-1. **Ghi vị trí.** Write `.team/current.json` {feature, stage: "architect", agent: "architect", started_at}.
-2. **Đọc đủ, thừa kế im lặng.** Spec (NFR, phạm vi), research, kiến trúc và ADR đã accepted. Không quyết lại điều ADR đã chốt; muốn đổi → ADR mới thay thế (STD-DESIGN-2) và một dòng trong `## Quyết định`.
-3. **Thực tế trước (hệ thống đang chạy).** Explore với câu hỏi cụ thể: module nào sở hữu dữ liệu nào, ai gọi ai, đơn vị deploy nào. Dán tóm tắt Explore làm căn cứ. Phê chuẩn cái code đang có trước khi đề xuất cái mới.
-4. **Danh sách quyết định ứng viên** từ spec + NFR. Mỗi ứng viên qua phép thử ba điều (Tổng quan). Đạt → ADR. Không đạt → `## Để designer quyết` kèm lý do. Chi tiết và ví dụ: `${CLAUDE_SKILL_DIR}/references/decision-test.md`.
-5. **Quét NFR.** Mỗi NFR-n → giải pháp + ADR, hoặc "bỏ: lý do". Một NFR không có dòng là lỗi.
-6. **Quét chiều.** Môi trường và deploy, chủ sở hữu dữ liệu (mỗi thực thể một chủ), đường ghi trạng thái, quy ước lỗi/log/cấu hình, xác thực/phân quyền. Mỗi chiều: "quyết" / "để designer" / "câu hỏi mở". Cả một chiều im lặng là một phát hiện.
-7. **Công nghệ.** Mọi tên thư viện, dịch vụ, phiên bản phải có nguồn trong `research.md`. Thiếu → trả `NEEDS_CONTEXT` với câu "cần researcher: <câu hỏi>" (team-leader gọi researcher). Ưu tiên công nghệ dự án đã dùng (STD-DEP-3).
-8. **Viết artifact.**
-   - `system`: Write `docs/team/architecture.md` từ `<kit>/templates/artifacts/architecture.md` (bối cảnh, thành phần, luồng dữ liệu, NFR → giải pháp, ranh giới và phụ thuộc, rủi ro, sơ đồ Mermaid). VÀ Write `docs/team/features/<ID>/arch-impact.md` ngắn (mục `## Chế độ system`: trỏ `architecture.md`, liệt kê ADR mới). `team.py` đọc cổng G2 của feature từ `arch-impact.md`; thiếu file này thì feature kẹt ở G2 (K-46).
-   - `impact`: Write `docs/team/features/<ID>/arch-impact.md` từ mẫu: module bị chạm, hợp đồng đổi (tương thích ngược hay phiên bản mới), NFR bị ảnh hưởng, quyết định, để designer quyết, rủi ro.
-9. **Sơ đồ phụ thuộc.** Mermaid một chiều, không vòng (STD-DESIGN-6); mỗi cạnh ghi giao thức; hệ thống ngoài hiện rõ.
-10. **ADR.** Số kế tiếp từ Glob `docs/team/adr/ADR-*.md`. Write từ `<kit>/templates/artifacts/adr.md`: bối cảnh, quyết định, `## Ràng buộc` (luật reviewer kiểm được trên diff), phương án đã xét, hệ quả. Trạng thái `proposed`; thành `accepted` khi G2 duyệt. Không xóa ADR; thay thế = ADR mới + chỉ sửa dòng trạng thái của ADR cũ.
-11. **Tự phản biện.** Thử dựng hai task cùng tuân mọi ADR mà vẫn xung đột (hai chủ ghi một bảng, hai kiểu lỗi). Tìm được → siết ràng buộc của ADR. Ghi "đã thử: …" trong `## Rủi ro`.
-12. **Chế độ `review`.** Đúng ba câu, mỗi câu dẫn mã ADR/NFR hoặc file: khớp kiến trúc không; rủi ro lớn nhất; phải sửa gì. Dòng đầu `REVIEW: ok` hoặc `REVIEW: fix`. Không viết lại design.
-13. **Trả** team-leader ≤ 10 dòng, dòng đầu `architect -> team-leader | <ID> | ARCHITECTED (<chế độ>)` (hoặc `REVIEW: ok|fix`, `NEEDS_CONTEXT`, `NEEDS_ANSWER`).
+## Process
+1. **Record position.** Write `.team/current.json` {feature, stage: "architect", agent: "architect", started_at}.
+2. **Read everything, inherit silently.** Spec (NFRs, scope), research, the architecture and accepted ADRs. Do not re-decide what an ADR has settled; to change it → a new superseding ADR (STD-DESIGN-2) and one line in `## Decision` of `arch-impact.md`.
+3. **Reality first (running system).** Explore with concrete questions: which module owns which data, who calls whom, which deploy units exist. Paste the Explore summary as your basis. Ratify what the code already does before proposing anything new.
+4. **Candidate decision list** from the spec + NFRs. Each candidate goes through the three-condition test (Overview). Passes → ADR. Fails → `## Left to the designer` with the reason. Details and examples: `${CLAUDE_SKILL_DIR}/references/decision-test.md`.
+5. **NFR sweep.** Every NFR-n → a solution + ADR, or "dropped: reason". An NFR without a row is a defect.
+6. **Dimension sweep.** Environments and deploy, data ownership (one owner per entity), state write paths, error/log/config conventions, authentication/authorization. Each dimension: "decided" / "left to the designer" / "open question". A whole dimension left silent is a finding.
+7. **Technology.** Every library, service and version name must have a source in `research.md`. Missing → return `NEEDS_CONTEXT` with "need researcher: <question>" (team-leader calls researcher). Prefer technology the project already uses (STD-DEP-3).
+8. **Write the artifacts.** Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language).
+   - `system`: Write `docs/team/architecture.md` from `<kit>/templates/artifacts/architecture.md` (context, components, data flow, NFR → solution, boundaries and dependencies, risks, Mermaid diagram). AND Write a short `docs/team/features/<ID>/arch-impact.md` (section `## System mode`: point to `architecture.md`, list the new ADRs). `team.py` reads the feature's G2 gate from `arch-impact.md`; without that file the feature is stuck at G2 (K-46).
+   - `impact`: Write `docs/team/features/<ID>/arch-impact.md` from `<kit>/templates/artifacts/arch-impact.md`: modules touched, contracts changed (backward compatible or new version), NFRs affected, decisions, left to the designer, risks.
+9. **Dependency diagram.** Mermaid, one direction, no cycles (STD-DESIGN-6); every edge labeled with its protocol; external systems shown explicitly.
+10. **ADR.** The next number from Glob `docs/team/adr/ADR-*.md`. Write from `<kit>/templates/artifacts/adr.md`: context, decision, `## Constraints` (rules reviewer can check on a diff), options considered, consequences. Status `proposed`; it becomes `accepted` when G2 is approved. Never delete an ADR; superseding = a new ADR + editing only the status line of the old one.
+11. **Self-challenge.** Try to construct two tasks that both obey every ADR and still conflict (two owners writing one table, two error styles). If you find one → tighten that ADR's constraint. Record "tried: …" in `## Risks`.
+12. **`review` mode.** Exactly three sentences, each citing an ADR/NFR ID or a file: does it fit the architecture; the biggest risk; what must change. First line `REVIEW: ok` or `REVIEW: fix`. Do not rewrite the design.
+13. **Return** to team-leader in ≤ 10 lines, first line `architect -> team-leader | <ID> | ARCHITECTED (<mode>)` (or `REVIEW: ok|fix`, `NEEDS_CONTEXT`, `NEEDS_ANSWER`).
 
-## Đầu ra
-- `system`: `docs/team/architecture.md` + `docs/team/features/<ID>/arch-impact.md`; `impact`: `arch-impact.md`; mọi chế độ có quyết định: `docs/team/adr/ADR-NNN.md`.
-- Tin trả mẫu:
+## Outputs
+- `system`: `docs/team/architecture.md` + `docs/team/features/<ID>/arch-impact.md`; `impact`: `arch-impact.md`; any mode with a decision: `docs/team/adr/ADR-NNN.md`.
+- Example return message:
   ```
   architect -> team-leader | FEAT-030 | ARCHITECTED (impact)
-  File: docs/team/features/FEAT-030/arch-impact.md; ADR mới: ADR-007 (hàng đợi gửi email); ADR-004 superseded
-  Module bị chạm: 3 (billing, notify, api); hợp đồng: event invoice.paid v2, tương thích ngược
-  NFR: 4/4 có giải pháp; NFR-3 (p95 < 300 ms) dựa research.md phương án B
-  Để designer quyết: định dạng payload, khoảng retry
-  Rủi ro lớn nhất: hai consumer cùng ghi invoices → ADR-007 Ràng buộc: chỉ billing ghi
-  Cổng: G2 chờ Approved-by trong arch-impact.md. Tiếp: duyệt rồi /team:design FEAT-030
+  Files: docs/team/features/FEAT-030/arch-impact.md; new ADR: ADR-007 (email send queue); ADR-004 superseded
+  Modules touched: 3 (billing, notify, api); contract: event invoice.paid v2, backward compatible
+  NFR: 4/4 have a solution; NFR-3 (p95 < 300 ms) relies on research.md option B
+  Left to the designer: payload format, retry interval
+  Biggest risk: two consumers writing invoices → ADR-007 Constraint: only billing writes
+  Gate: G2 awaiting Approved-by in arch-impact.md. Next: approve, then /team:design FEAT-030
   ```
 
-## Lý do tự bào chữa thường gặp
-| Ý nghĩ | Làm đúng |
+## Common rationalizations
+| Thought | Correct action |
 |---|---|
-| "Hiển nhiên, khỏi ADR" | Chạy phép thử ba điều; đạt thì có ADR. |
-| "Thiết kế cho quy mô tương lai" | Chỉ NFR có trong spec (STD-DESIGN-5). |
-| "Dùng kiến trúc chuẩn cho chắc" | Phê chuẩn cái code đang có; đổi phải có lý do từ NFR. |
-| "Tôi biết bản mới nhất của thư viện" | Nguồn trong `research.md`, hoặc `NEEDS_CONTEXT`. |
-| "ADR cũ sai, sửa luôn nội dung" | ADR mới thay thế; ADR cũ chỉ đổi trạng thái. |
-| "Phần deploy để devops lo" | Quét chiều phải ghi quyết / để designer / câu hỏi mở. |
-| "Chế độ system thì chỉ cần architecture.md" | Thêm `arch-impact.md` của feature để mang cổng G2. |
-| "Review kỹ phải dài" | Đúng ba câu, có mã ADR/NFR. |
-| "Quyết luôn luật nghiệp vụ cho xong" | `NEEDS_ANSWER` qua team-leader. |
+| "It's obvious, no ADR needed" | Run the three-condition test; if it passes, write the ADR. |
+| "Design for future scale" | Only the NFRs in the spec (STD-DESIGN-5); a speculative cache or queue is over-design. |
+| "Use the standard architecture to be safe" | Ratify what the code already does; a change needs a reason traced to an NFR. |
+| "I know the latest version of this library" | A source in `research.md`, or `NEEDS_CONTEXT`. |
+| "The old ADR is wrong, just edit its content" | A new superseding ADR; the old one changes only its status line. |
+| "Deployment is devops' problem" | The dimension sweep must record decided / left to the designer / open question. |
+| "System mode only needs architecture.md" | Add the feature's `arch-impact.md` to carry the G2 gate. |
+| "A thorough review must be long" | Exactly three sentences, with ADR/NFR IDs. |
+| "I'll settle the business rule to finish" | `NEEDS_ANSWER` via team-leader. |
 
-## Dấu hiệu sai
-- NFR trong spec không có dòng trong bảng NFR → giải pháp.
-- ADR thiếu phương án đã xét hoặc thiếu `## Ràng buộc`.
-- Sơ đồ Mermaid có vòng phụ thuộc.
-- Tên công nghệ không có nguồn trong `research.md`.
-- Chế độ `system` mà không có `arch-impact.md` của feature.
-- Nội dung ADR đã accepted bị sửa.
-- architect viết chi tiết cấp design (danh sách trường, endpoint, tên hàm).
+## Red flags
+- An NFR in the spec has no row in the NFR → solution table.
+- An ADR without options considered or without `## Constraints`.
+- The Mermaid diagram has a dependency cycle.
+- A technology name with no source in `research.md`.
+- `system` mode without the feature's `arch-impact.md`.
+- The content of an accepted ADR was edited.
+- architect wrote design-level detail (field lists, endpoints, function names).
 
-## Kiểm chứng
-- [ ] Danh sách NFR-n trong spec và trong bảng giải pháp được dán, khớp nhau.
-- [ ] Glob ADR mới được dán; mỗi ADR có Bối cảnh, Quyết định, Ràng buộc, Phương án, Hệ quả.
-- [ ] Tóm tắt Explore (module, phụ thuộc, đơn vị deploy) được dán làm căn cứ.
-- [ ] `team.py status <ID>` sau khi viết báo `architected` và chờ G2 trên `arch-impact.md` (khi G2 bật).
-- [ ] `review`: ba câu, mỗi câu có mã ADR/NFR hoặc file.
+## Verification
+- [ ] The NFR-n list from the spec and from the solution table are pasted and match.
+- [ ] The Glob of new ADRs is pasted; each ADR has Context, Decision, Constraints, Options, Consequences.
+- [ ] The Explore summary (modules, dependencies, deploy units) is pasted as the basis.
+- [ ] `team.py status <ID>` after writing reports `architected` and waiting on G2 in `arch-impact.md` (when G2 is on).
+- [ ] `review`: three sentences, each with an ADR/NFR ID or a file.
 
-## Xem thêm
-- `${CLAUDE_SKILL_DIR}/references/decision-test.md` — phép thử ngưỡng, ví dụ đạt/không đạt, danh sách chiều cần quét. Mở ở bước 4 và 6.
+## See also
+- `${CLAUDE_SKILL_DIR}/references/decision-test.md` — the threshold test, pass/fail examples, the list of dimensions to sweep. Open it at steps 4 and 6.
 - Agent `architect`; `<kit>/templates/artifacts/{architecture,arch-impact,adr}.md`.
-- `/team:research` (dữ kiện công nghệ), `/team:design` (bước sau), `/team:analyze --amend` (luật nghiệp vụ).
+- `/team:research` (technology facts), `/team:design` (next step), `/team:analyze --amend` (business rules).
 - `handbook/STD.md`: STD-DESIGN-2, STD-DESIGN-5, STD-DESIGN-6, STD-DOC-4, STD-DEP-3.

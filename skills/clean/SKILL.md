@@ -1,110 +1,110 @@
 ---
 name: clean
-description: Dùng khi cần dọn dẹp không đổi hành vi đúng một loại nợ: code chết, đặt tên, cấu trúc, phụ thuộc thừa, test mồ côi, đơn giản hóa, ngừng dùng API cũ, hoặc bổ sung log/metric.
-argument-hint: "<dead-code|naming|structure|deps|tests|simplify|deprecate|observe> [<đường dẫn>] [--decide]"
+description: Use when a behavior-preserving cleanup of exactly one kind of debt is needed: dead code, naming, structure, unused dependencies, orphan tests, simplification, deprecating an old API, or adding logs/metrics.
+argument-hint: "<dead-code|naming|structure|deps|tests|simplify|deprecate|observe> [<path>] [--decide]"
 context: fork
 agent: team:maintainer
 background: false
 allowed-tools: Bash(python3 *) Bash(cat *) Bash(git *)
 ---
 
-# Dọn dẹp không đổi hành vi
+# Cleanup without behavior change
 
-## Tổng quan
-Skill này làm đúng MỘT loại dọn dẹp và chứng minh hành vi không đổi bằng hai lần chạy `cmd.test` — trước và sau — cùng số test, cùng tên test, cùng kết quả. Skill chạy trong ngữ cảnh `maintainer` (fork). Bằng chứng "không đổi" chỉ có giá trị ở chỗ có test phủ: vùng không test nào chạm thì không chứng minh được gì, nên dừng hoặc viết test đặc tả (characterization) trước, trong commit riêng.
+## Overview
+This skill does exactly ONE kind of cleanup and proves behavior is unchanged with two runs of `cmd.test` — before and after — with the same test count, the same test names, the same results. It runs in the `maintainer` context (fork). The "unchanged" evidence is worth something only where tests cover the code: an area no test touches proves nothing, so stop, or first write characterization tests in a separate commit. For example, removing `src/util/legacy_fmt.py` is a valid `dead-code` run only when grep for its name and string forms comes back empty and the before/after test-name lists are identical.
 
-Trước khi xóa hay viết lại một đoạn, phải nói được vì sao nó tồn tại (`git log -L`, `git blame`). Không giải thích được → không đụng; ghi `debt.md` (hàng rào Chesterton). Đổi assertion để test xanh nghĩa là đã đổi hành vi — hoàn tác và leo thang.
+Before deleting or rewriting a piece of code, you must be able to say why it exists (`git log -L`, `git blame`). If you cannot explain it → do not touch it; record it in `debt.md` (Chesterton's fence). Changing an assertion to make a test green means behavior changed — revert and escalate.
 
-`$ARGUMENTS`: loại, phạm vi đường dẫn, `--decide` (maintainer không bao giờ hỏi người; điểm chưa rõ → `NEEDS_ANSWER` về team-leader). `<kit>` = nội dung `.team/plugin_root`.
+`$ARGUMENTS`: the kind, the path scope, `--decide` (maintainer never asks the human; an unclear point → `NEEDS_ANSWER` back to team-leader). `<kit>` = the content of `.team/plugin_root`.
 
-## Khi nào dùng (và khi nào không)
-Dùng khi:
-- Playbook `refactor` sau `/team:design --short` (G2b đã duyệt), hoặc batch `clean-sweep`.
-- Mục nợ trong `docs/team/debt.md` đến lượt: code chết, tên lệch `naming.*`, file sai chỗ theo `structure.*`, phụ thuộc thừa, test mồ côi.
-- Cần ngừng dùng một API nội bộ (đã có cái thay thế) hay thêm log/metric cho đường đang chạy.
+## When to use (and when not)
+Use when:
+- Playbook `refactor` after `/team:design --short` (G2b approved), or batch `clean-sweep`.
+- A debt item in `docs/team/debt.md` comes up: dead code, names off `naming.*`, files misplaced per `structure.*`, unused dependencies, orphan tests.
+- An internal API needs deprecating (its replacement already exists), or a running path needs logs/metrics.
 
-Không dùng khi:
-- Có bug cần sửa → `bug-fix`; trộn vào sẽ phá bằng chứng trước == sau.
-- Đổi schema dữ liệu → playbook `data-migration` (mở rộng → chuyển → thu hẹp).
-- Thay framework, tách module lớn → `change-request`/`new-feature` có design đầy đủ.
-- Hai loại một lần → hai lần chạy, hai PR.
+Do not use when:
+- There is a bug to fix → `bug-fix`; mixing it in breaks the before == after evidence.
+- A data schema change → playbook `data-migration` (expand → migrate → contract).
+- Replacing a framework, splitting a large module → `change-request`/`new-feature` with a full design.
+- Two kinds at once → two runs, two PRs.
 
-## Tìm hiểu stack trước
+## Discover the stack first
 1. Read `.team/profile.json`: `cmd.test`, `cmd.test_one`, `cmd.lint`, `cmd.typecheck`, `cmd.build`, `cmd.install`, `naming.*`, `structure.*`, `test.skip_markers`, `protected_paths`.
 2. Read `.team/config.json`: `base_branch`.
-3. Read `docs/team/features/<ID>/design.md` (mục "Cách chứng minh hành vi không đổi") và mục nợ trong `docs/team/debt.md`.
+3. Read `docs/team/features/<ID>/design.md` (the "How to prove behavior is unchanged" section) and the debt item in `docs/team/debt.md`.
 
-## Đầu vào và điều kiện trước
-- Mã `<ID>` (refactor), đúng MỘT loại, phạm vi đường dẫn.
-- Kiểm: `python3 "<kit>/scripts/team.py" status <ID>` báo `designed` và G2b đã duyệt (playbook refactor luôn bật G2b). Batch `clean-sweep` không có design → phạm vi phải là một mục cụ thể của `debt.md`.
-- Nhánh `team/<ID>` không đang checkout ở worktree khác; nếu có → `NEEDS_CONTEXT`.
-- Phạm vi dự kiến > 500 dòng đổi → tách thành nhiều lần, hoặc dừng xin cách làm bằng công cụ (codemod) qua team-leader.
+## Inputs and preconditions
+- The `<ID>` (refactor), exactly ONE kind, a path scope.
+- Check: `python3 "<kit>/scripts/team.py" status <ID>` reports `designed` and G2b approved (the refactor playbook always has G2b on). Batch `clean-sweep` has no design → the scope must be one specific `debt.md` item.
+- Branch `team/<ID>` is not checked out in another worktree; if it is → `NEEDS_CONTEXT`.
+- Expected scope > 500 changed lines → split into several runs, or stop and ask team-leader for a tool-driven approach (codemod).
 
-## Quy trình
-1. **Ghi vị trí.** Write `.team/current.json` {feature: <ID>, stage: "clean", agent: "maintainer", started_at}.
-2. **Nhánh.** Trong worktree của mình: `git switch -c team/<ID> <base_branch>` (hoặc `git switch team/<ID>` nếu đã có).
-3. **Đường nền.** `cmd.test` TRƯỚC: lưu số test VÀ danh sách tên, mã thoát, `git rev-parse HEAD`. Có `cmd.build` → lưu số cảnh báo. Không có test phủ phạm vi (Grep tên module trong thư mục test) → điểm quyết định: design cho phép thì thêm test đặc tả ở commit RIÊNG trước đường nền; không → dừng.
-4. **Hàng rào Chesterton.** Với mỗi đoạn sẽ xóa hay viết lại: một dòng "tồn tại vì …" từ `git log -L`/`git blame`. Không giải thích được → ghi `debt.md`, bỏ qua đoạn đó.
-5. **Làm đúng loại** (chi tiết từng loại: `${CLAUDE_SKILL_DIR}/references/kinds.md`):
-   - `dead-code`: Grep tên VÀ dạng chuỗi, điểm vào trong `structure.config`, export, gọi động. Công khai (export, có trong README) → không xóa, chuyển sang `deprecate`.
-   - `naming`: một họ định danh mỗi commit, theo `naming.*`; sau đó grep tên cũ = 0 kết quả (trừ CHANGELOG).
-   - `structure`: chỉ di chuyển; `git diff -M --stat` cho thấy rename ≥ 90% giống; thư mục mới dưới `allowed_new_file_roots`.
-   - `deps`: grep import của gói = 0 → sửa manifest → `cmd.install` để công cụ sinh lại lockfile (STD-DEP-2); không sửa tay lockfile; manifest nằm trong `protected_paths` → dừng.
-   - `tests`: test mồ côi chỉ xóa khi code đích đã mất hoặc assertion trùng một test có tên khác (dẫn cả hai).
-   - `simplify`: mỗi lần một phép đơn giản hóa → `cmd.test_one` trên test phủ → phép tiếp theo. Không bỏ xử lý lỗi (đó là hành vi).
-   - `deprecate`: cái thay thế phải chạy được trước; đánh dấu cũ kèm trạng thái, cái thay, hạn gỡ; gỡ hẳn là lần chạy sau khi grep chỗ dùng = 0.
-   - `observe`: viết 2–4 câu hỏi vận hành trước; log có cấu trúc, nhãn hữu hạn, không dữ liệu nhạy cảm (STD-SEC-6); test giữ nguyên.
-6. **Sau.** `cmd.test` SAU: so danh sách tên với đường nền (diff rỗng). Ngoại lệ duy nhất: loại `tests` — ghi "trước N, sau N−k, đã xóa: <tên>". `cmd.lint`, `cmd.typecheck` mã thoát 0. Khác đường nền → DỪNG, không "sửa cho khớp".
-7. **Kiểm cấm.** `git diff --name-only <base_branch>` ∩ `protected_paths` = rỗng; grep diff tìm `test.skip_markers` mới = rỗng; file test chỉ đổi ở loại `tests` hoặc do đổi tên ký hiệu.
-8. **Commit** bằng `/team:commit` (`refactor(<phạm vi>): … (<ID>)`). Sau commit: `git switch --detach` để nhả nhánh `team/<ID>` cho qa checkout.
-9. **Đánh dấu xong cho `team.py`.** Write `docs/team/features/<ID>/tasks.md` ở CÂY CHÍNH (đường dẫn gốc = dòng đầu `git worktree list`): `- [x] T1 — clean <loại> (<phạm vi>)`. Chuỗi refactor không có plan; dòng này làm feature thành `built` để `/team:verify` chạy được (ADJ-26).
-10. **Nợ.** Cập nhật `docs/team/debt.md`: mục đã trả, phần còn lại, điều phát hiện thêm.
-11. **Trả** team-leader ≤ 10 dòng, dòng đầu `maintainer -> team-leader | <ID> | DONE (<loại>)` (hoặc `BLOCKED`, `NEEDS_ANSWER`).
+## Process
+1. **Record position.** Write `.team/current.json` {feature: <ID>, stage: "clean", agent: "maintainer", started_at}.
+2. **Branch.** In your own worktree: `git switch -c team/<ID> <base_branch>` (or `git switch team/<ID>` if it already exists).
+3. **Baseline.** `cmd.test` BEFORE: save the test count AND the list of names, the exit code, `git rev-parse HEAD`. With a `cmd.build` → save the warning count. No test covers the scope (Grep the module name in the test directory) → decision point: if the design allows it, add characterization tests in a SEPARATE commit before the baseline; otherwise stop.
+4. **Chesterton's fence.** For every piece you will delete or rewrite: one line "exists because …" from `git log -L`/`git blame`. Cannot explain it → record it in `debt.md` and skip that piece.
+5. **Do exactly the kind** (details per kind: `${CLAUDE_SKILL_DIR}/references/kinds.md`):
+   - `dead-code`: Grep the name AND its string forms, entry points in `structure.config`, exports, dynamic calls. Public (exported, mentioned in the README) → do not delete, switch to `deprecate`.
+   - `naming`: one identifier family per commit, per `naming.*`; afterwards grep for the old name = 0 results (except CHANGELOG).
+   - `structure`: moves only; `git diff -M --stat` shows renames ≥ 90% similar; new directories under `allowed_new_file_roots`.
+   - `deps`: grep for the package's imports = 0 → edit the manifest → `cmd.install` so the tool regenerates the lockfile (STD-DEP-2); never hand-edit the lockfile; manifest in `protected_paths` → stop.
+   - `tests`: delete an orphan test only when its target code is gone or its assertion duplicates a differently named test (cite both).
+   - `simplify`: one simplification at a time → `cmd.test_one` on the covering test → the next one. Never remove error handling (that is behavior).
+   - `deprecate`: the replacement must work first; mark the old one with status, replacement, removal deadline; full removal is a later run, once grep for call sites = 0.
+   - `observe`: write 2–4 operational questions first; structured logs, bounded labels, no sensitive data (STD-SEC-6); tests stay unchanged.
+6. **After.** `cmd.test` AFTER: compare the name list with the baseline (empty diff). The only exception: kind `tests` — record "before N, after N−k, deleted: <names>". `cmd.lint`, `cmd.typecheck` exit code 0. Different from the baseline → STOP; never "adjust it to match".
+7. **Forbidden-change check.** `git diff --name-only <base_branch>` ∩ `protected_paths` = empty; grep the diff for new `test.skip_markers` = empty; test files change only in kind `tests` or through symbol renames.
+8. **Commit** with `/team:commit` (`refactor(<scope>): … (<ID>)`). After the commit: `git switch --detach` to release branch `team/<ID>` so qa can check it out.
+9. **Mark done for `team.py`.** Write `docs/team/features/<ID>/tasks.md` in the MAIN tree (the root path = the first line of `git worktree list`): `- [x] T1 — clean <kind> (<scope>)`. The refactor chain has no plan; this line makes the feature `built` so `/team:verify` can run (ADJ-26). Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language); the task line itself stays as shown.
+10. **Debt.** Update `docs/team/debt.md`: the item paid, what remains, anything newly found.
+11. **Return** to team-leader in ≤ 10 lines, first line `maintainer -> team-leader | <ID> | DONE (<kind>)` (or `BLOCKED`, `NEEDS_ANSWER`).
 
-## Đầu ra
-- Commit trên `team/<ID>`; `docs/team/features/<ID>/tasks.md` (T1 tick); `docs/team/debt.md`.
-- Tin trả mẫu:
+## Outputs
+- A commit on `team/<ID>`; `docs/team/features/<ID>/tasks.md` (T1 ticked); `docs/team/debt.md`.
+- Example return message:
   ```
   maintainer -> team-leader | REF-007 | DONE (dead-code)
-  Nhánh team/REF-007, commit 3f2a9c1 (đã nhả nhánh)
-  Xóa: src/util/legacy_fmt.py (grep "legacy_fmt" 0 kết quả ngoài CHANGELOG; tồn tại vì export cũ, gỡ ở v2.0)
-  cmd.test trước: 142 passed @a1b2c3d; sau: 142 passed @3f2a9c1; danh sách tên giống nhau
-  lint exit 0, typecheck exit 0; protected_paths: không chạm; skip marker mới: 0
-  Còn nợ: src/report.py hai hàm trùng (debt.md #12)
-  Tiếp: /team:verify REF-007
+  Branch team/REF-007, commit 3f2a9c1 (branch released)
+  Deleted: src/util/legacy_fmt.py (grep "legacy_fmt" 0 results outside CHANGELOG; existed for an old export, removed in v2.0)
+  cmd.test before: 142 passed @a1b2c3d; after: 142 passed @3f2a9c1; name lists identical
+  lint exit 0, typecheck exit 0; protected_paths: untouched; new skip markers: 0
+  Remaining debt: src/report.py two duplicate functions (debt.md #12)
+  Next: /team:verify REF-007
   ```
 
-## Lý do tự bào chữa thường gặp
-| Ý nghĩ | Làm đúng |
+## Common rationalizations
+| Thought | Correct action |
 |---|---|
-| "Grep không thấy ai gọi" | Kiểm thêm chuỗi, cấu hình, export; công khai → `deprecate`. |
-| "Test xanh là hành vi không đổi" | Chỉ ở chỗ có test phủ; không phủ → test đặc tả trước hoặc dừng. |
-| "Phải chỉnh một assertion thôi" | Đã đổi hành vi; hoàn tác, leo thang. |
-| "Bỏ xử lý lỗi cho gọn" | Đường lỗi là hành vi; cấm. |
-| "Lockfile cũ, sửa tay" | `cmd.install` (STD-DEP-2). |
-| "Tiện sửa luôn một bug" | `debt.md` + bug-fix riêng. |
-| "Đổi tên theo kiểu tôi thích" | Chỉ theo `naming.*`. |
-| "Cùng số test là đủ" | So tên test, không chỉ số. |
-| "Đang deprecate thì chuyển luôn chỗ gọi" | Chuyển chỗ gọi là lần chạy riêng. |
+| "Grep finds no caller" | Also check strings, config, exports; public → `deprecate`. |
+| "Green tests mean behavior is unchanged" | Only where tests cover the code; uncovered → characterization tests first, or stop. |
+| "I only need to adjust one assertion" | Behavior has changed; revert and escalate. |
+| "Drop the error handling to tidy up" | The error path is behavior; forbidden. |
+| "The lockfile is stale, edit it by hand" | `cmd.install` (STD-DEP-2). |
+| "While I'm here, fix this bug" | `debt.md` + a separate bug-fix. |
+| "Rename things the way I like" | Only per `naming.*`. |
+| "Same test count is enough" | Compare test names, not just the count. |
+| "Since I'm deprecating, migrate the callers too" | Migrating callers is a separate run. |
 
-## Dấu hiệu sai
-- Hai đầu ra `cmd.test` khác số hay khác tên mà không có danh sách "đã xóa".
-- Diff trộn đổi tên với sửa logic.
-- File test bị sửa trong loại `simplify`/`naming` ngoài đổi tên ký hiệu.
-- Lockfile đổi mà báo cáo không có dòng `cmd.install`.
-- Diff > 500 dòng.
-- Code "chết" bị xóa không có lệnh grep rỗng được dán.
-- Không có `tasks.md` T1 sau khi xong (feature kẹt ở `designed`).
+## Red flags
+- The two `cmd.test` outputs differ in count or names with no "deleted" list.
+- A diff mixing renames with logic changes.
+- Test files edited in kind `simplify`/`naming` beyond symbol renames.
+- The lockfile changed but the report has no `cmd.install` line.
+- A diff > 500 lines.
+- "Dead" code deleted without a pasted empty-grep command.
+- No `tasks.md` T1 after finishing (feature stuck at `designed`).
 
-## Kiểm chứng
-- [ ] Hai đầu ra `cmd.test` (số + tên) kèm SHA trước/sau; diff tên rỗng, hoặc khớp danh sách đã xóa của loại `tests`.
-- [ ] Mã thoát `cmd.lint`, `cmd.typecheck` được dán.
-- [ ] Bằng chứng riêng của loại (grep rỗng, độ giống rename, đầu ra `cmd.install`).
-- [ ] `git diff --name-only` ∩ `protected_paths` và grep skip marker được dán (kể cả rỗng).
-- [ ] `team.py status <ID>` báo `built` sau bước 9.
+## Verification
+- [ ] Both `cmd.test` outputs (count + names) with before/after SHAs; the name diff is empty, or matches the deleted list for kind `tests`.
+- [ ] The exit codes of `cmd.lint`, `cmd.typecheck` are pasted.
+- [ ] The kind-specific evidence (empty grep, rename similarity, `cmd.install` output).
+- [ ] `git diff --name-only` ∩ `protected_paths` and the skip-marker grep are pasted (even when empty).
+- [ ] `team.py status <ID>` reports `built` after step 9.
 
-## Xem thêm
-- `${CLAUDE_SKILL_DIR}/references/kinds.md` — bằng chứng và bẫy của từng loại. Mở ở bước 5.
+## See also
+- `${CLAUDE_SKILL_DIR}/references/kinds.md` — the evidence and traps of each kind. Open it at step 5.
 - Agent `maintainer`; `workflows/refactor.md`, `workflows/batch/clean-sweep.md`.
-- `/team:design --short` (trước), `/team:verify` (sau), `/team:commit`, `/team:pr`.
+- `/team:design --short` (before), `/team:verify` (after), `/team:commit`, `/team:pr`.
 - `handbook/STD.md`: STD-TEST-5, STD-DEP-2, STD-STRUCT-1, STD-NAME-1, STD-DESIGN-3, STD-SEC-6, STD-OPS-5.

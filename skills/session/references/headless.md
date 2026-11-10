@@ -1,32 +1,32 @@
-# Chạy headless
+# Running headless
 
-## Cờ bắt buộc
-| Cờ | Vì sao |
+## Mandatory flags
+| Flag | Why |
 |---|---|
-| `--agent team:team-leader` | team-leader là cửa duy nhất, kể cả không người trông (ADJ-01) |
-| `--permission-mode dontAsk` | không ai trả lời hộp thoại quyền |
-| `--allowedTools "<từ permissions.allow>"` | thư mục chưa được tin (CI, máy mới) bỏ qua `permissions.allow` của dự án (K-06) |
-| `--max-turns`, `--max-budget-usd` | trần cứng; chạm trần thì dừng, không chạy tiếp |
-| `--output-format json` | đọc `subtype`, `total_cost_usd`, `result` |
-| lệnh có `--decide` | không hỏi được người; câu hỏi lớn → `WAITING_FOR_ANSWER` |
-Không dùng `--bare` khi có sửa file: nó tắt mọi hook, kể cả hook của plugin (ADJ-03). `--bare` chỉ cho báo cáo chỉ-đọc như `/team:status`.
+| `--agent team:team-leader` | team-leader is the only entry point, even when nobody is watching (ADJ-01) |
+| `--permission-mode dontAsk` | nobody is there to answer permission dialogs |
+| `--allowedTools "<from permissions.allow>"` | an untrusted folder (CI, a new machine) ignores the project's `permissions.allow` (K-06) |
+| `--max-turns`, `--max-budget-usd` | hard caps; hitting a cap stops the run, it does not continue |
+| `--output-format json` | to read `subtype`, `total_cost_usd`, `result` |
+| a command with `--decide` | the human cannot be asked; big questions → `WAITING_FOR_ANSWER` |
+Do not use `--bare` when files are edited: it turns off every hook, including the plugin's hooks (ADJ-03). `--bare` is only for read-only reports such as `/team:status`.
 
-Danh sách `--allowedTools`:
+The `--allowedTools` list:
 ```
 jq -r '["Read","Grep","Glob","Edit","Write","Agent","Skill"] + (.permissions.allow // []) | join(",")' .claude/settings.json
 ```
-Giai đoạn không sửa code (verify, retro): bỏ `Edit` khỏi mảng đầu.
+Stages that do not edit code (verify, retro): drop `Edit` from the first array.
 
-## Mẫu theo giai đoạn
-| Việc | Lệnh | Trần gợi ý |
+## Templates per stage
+| Job | Command | Suggested cap |
 |---|---|---|
-| Build hết task | `/team:build <ID> --decide` | lấy từ trung vị `measure.py` × 1,5; không có số liệu → bắt đầu thấp, đọc JSON rồi tăng |
-| Nghiệm thu | `/team:verify <ID>` | như trên |
-| Retro định kỳ | `/team:retro --decide` | như trên |
-| Dọn một loại nợ | `/team:clean <loại> --decide` | như trên |
+| Build every task | `/team:build <ID> --decide` | the `measure.py` median × 1.5; no data → start low, read the JSON, then raise it |
+| Acceptance | `/team:verify <ID>` | same as above |
+| Periodic retro | `/team:retro --decide` | same as above |
+| Clean one kind of debt | `/team:clean <kind> --decide` | same as above |
 
-## Đọc kết quả
-- `subtype: success` + `team.py status <ID>` để biết giai đoạn thật (đừng tin chữ trong `result`).
-- `subtype` báo hết lượt/ngân sách → việc dở; `/team:session load` ở phiên sau.
-- Trạng thái chờ người (`WAITING_FOR_APPROVAL`, `WAITING_FOR_ANSWER`) là kết thúc bình thường, không phải lỗi.
-- Ghi `total_cost_usd` vào journal của feature.
+## Reading the result
+- `subtype: success` + `team.py status <ID>` to learn the real stage (do not trust the text in `result`).
+- A `subtype` reporting turns/budget exhausted → the job is unfinished; `/team:session load` in the next session.
+- A state waiting for the human (`WAITING_FOR_APPROVAL`, `WAITING_FOR_ANSWER`) is a normal ending, not an error.
+- Record `total_cost_usd` in the feature's journal.

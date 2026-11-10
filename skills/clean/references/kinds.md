@@ -1,26 +1,26 @@
-# Từng loại dọn dẹp: bằng chứng và bẫy
+# Each cleanup kind: evidence and traps
 
-| Loại | Bằng chứng bắt buộc | Bẫy thường gặp |
+| Kind | Required evidence | Common traps |
 |---|---|---|
-| dead-code | grep tên + dạng chuỗi (đăng ký động, reflection), grep điểm vào trong `structure.config`, danh sách export — tất cả rỗng; một dòng "tồn tại vì" | code chỉ được gọi qua cấu hình hay plugin; API công khai (phải deprecate) |
-| naming | danh sách tên cũ → mới; grep tên cũ sau đổi = 0 (trừ CHANGELOG); một họ định danh mỗi commit | đổi tên trong chuỗi hiển thị cho người dùng (đó là hành vi); tên trong dữ liệu đã lưu |
-| structure | `git diff -M --stat`: rename ≥ 90% giống; import cập nhật; thư mục mới dưới `allowed_new_file_roots` | sửa logic "tiện tay" trong file vừa chuyển |
-| deps | grep import = 0; manifest đổi; đầu ra `cmd.install`; `cmd.build` + `cmd.test` sau | gói chỉ dùng lúc build/test; gói kéo theo plugin; manifest trong `protected_paths` |
-| tests | code đích đã mất, hoặc assertion trùng test khác (dẫn cả hai `file::tên`) | test "trông" mồ côi nhưng phủ đường lỗi duy nhất |
-| simplify | mỗi phép: `cmd.test_one` trên test phủ trước khi sang phép sau | bỏ xử lý lỗi, gộp hai nhánh có khác biệt nhỏ, đổi thứ tự có tác dụng phụ |
-| deprecate | cái thay thế chạy được (test); dấu deprecate có cái thay + hạn gỡ; grep chỗ dùng trước khi gỡ hẳn | gỡ ngay khi còn chỗ dùng; deprecate schema (sang data-migration) |
-| observe | 2–4 câu hỏi vận hành; log có cấu trúc, nhãn hữu hạn, không dữ liệu nhạy cảm; test giữ nguyên | ghi PII, nhãn vô hạn (id người dùng làm nhãn metric), log trong vòng lặp nóng |
+| dead-code | grep for the name + string forms (dynamic registration, reflection), grep for entry points in `structure.config`, the export list — all empty; one "exists because" line | code called only through config or a plugin; a public API (must be deprecated) |
+| naming | old → new name list; grep for the old name after the rename = 0 (except CHANGELOG); one identifier family per commit | renaming inside user-facing strings (that is behavior); names in stored data |
+| structure | `git diff -M --stat`: renames ≥ 90% similar; imports updated; new directories under `allowed_new_file_roots` | a "while I'm here" logic fix in the moved file |
+| deps | grep imports = 0; manifest changed; `cmd.install` output; `cmd.build` + `cmd.test` afterwards | a package used only at build/test time; a package that pulls in a plugin; manifest in `protected_paths` |
+| tests | target code is gone, or the assertion duplicates another test (cite both `file::name`) | a test that "looks" orphaned but covers the only error path |
+| simplify | for each step: `cmd.test_one` on the covering test before the next step | removing error handling, merging two branches with a small difference, reordering something with side effects |
+| deprecate | the replacement works (tested); the deprecation mark names the replacement + removal deadline; grep call sites before full removal | removing it while call sites remain; deprecating a schema (goes to data-migration) |
+| observe | 2–4 operational questions; structured logs, bounded labels, no sensitive data; tests unchanged | logging PII, unbounded labels (user id as a metric label), logging in a hot loop |
 
-## Test đặc tả (characterization)
-Khi vùng cần dọn không có test phủ và design cho phép:
-1. Commit riêng, TRƯỚC đường nền: test ghi lại hành vi HIỆN TẠI (kể cả hành vi lạ) — không sửa code.
-2. Chạy test mới: phải xanh trên code cũ.
-3. Đường nền (bước 3) chạy sau commit này.
-Không viết test đặc tả trong cùng commit với thay đổi.
+## Characterization tests
+When the area to clean has no covering test and the design allows it:
+1. A separate commit, BEFORE the baseline: tests that record the CURRENT behavior (odd behavior included) — no code changes.
+2. Run the new tests: they must be green on the old code.
+3. The baseline (step 3) runs after this commit.
+Never write characterization tests in the same commit as the change.
 
-## Khi nào dừng
-- `cmd.test` sau khác trước (số, tên, kết quả).
-- Phạm vi vượt 500 dòng.
-- Đích là API công khai hoặc dữ liệu đã lưu.
-- Cần đổi `protected_paths` (manifest, lockfile, cấu hình prod).
-- Hàng rào Chesterton không giải thích được cho một đoạn quan trọng.
+## When to stop
+- `cmd.test` after differs from before (count, names, results).
+- The scope exceeds 500 lines.
+- The target is a public API or stored data.
+- A `protected_paths` change would be needed (manifest, lockfile, prod config).
+- Chesterton's fence cannot be explained for an important piece of code.

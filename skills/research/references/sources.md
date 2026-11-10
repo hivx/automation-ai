@@ -1,41 +1,41 @@
-# Nguồn, trích dẫn, độ tin cậy
+# Sources, citation, confidence
 
-## Thứ bậc nguồn
-| Hạng | Nguồn | Dùng cho |
+## Source ranking
+| Rank | Source | Used for |
 |---|---|---|
-| 1 | Docs chính thức của đúng phiên bản (reference, guide) | mọi khẳng định về API, cấu hình, giới hạn |
-| 2 | Changelog, release notes, migration guide, blog chính thức của dự án | thay đổi giữa phiên bản, deprecate |
-| 3 | Chuẩn (RFC, W3C, MDN) | giao thức, định dạng, trình duyệt |
-| 4 | Bảng tương thích, issue tracker chính thức (trạng thái lỗi đã xác nhận) | lỗi đã biết, nền tảng hỗ trợ |
-| — | Blog cá nhân, hỏi đáp cộng đồng, tóm tắt AI, trí nhớ | chỉ để tìm hướng; không bao giờ là nguồn của khẳng định |
+| 1 | Official docs for the exact version (reference, guide) | every claim about an API, configuration, limit |
+| 2 | Changelog, release notes, migration guide, the project's official blog | changes between versions, deprecations |
+| 3 | Standards (RFC, W3C, MDN) | protocols, formats, browsers |
+| 4 | Compatibility tables, the official issue tracker (confirmed bug status) | known bugs, supported platforms |
+| — | Personal blogs, community Q&A, AI summaries, memory | only to find direction; never the source of a claim |
 
-## Cách trích
-- URL đầy đủ tới trang/mục (anchor), kèm `(truy cập YYYY-MM-DD)`.
-- Khẳng định khó thấy hay gây tranh cãi: trích một câu nguyên văn, ngắn.
-- Khẳng định không tìm được nguồn: ghi `UNVERIFIED` ngay sau câu; liệt kê ở cuối mục trả lời.
-- Hai nguồn mâu thuẫn: ghi cả hai, nói nguồn nào áp cho phiên bản đang dùng và vì sao.
+## How to cite
+- The full URL to the page/section (anchor), with `(accessed YYYY-MM-DD)`.
+- A claim that is hard to find or contentious: quote one short sentence verbatim.
+- A claim with no source found: write `UNVERIFIED` right after the sentence; list them at the end of the answer section.
+- Two conflicting sources: record both, say which one applies to the version in use and why.
 
-## Độ tin cậy
-| Mức | Khi nào |
+## Confidence
+| Level | When |
 |---|---|
-| cao | nguồn hạng 1–2 của đúng phiên bản trả lời trực tiếp; POC (nếu có) xác nhận |
-| trung bình | nguồn hạng 1–2 nhưng khác phiên bản minor, hoặc phải suy từ hai nguồn |
-| thấp | chỉ hạng 3–4, có `UNVERIFIED`, hoặc phiên bản không xác định được |
+| high | a rank 1–2 source for the exact version answers directly; the POC (if any) confirms it |
+| medium | a rank 1–2 source but for a different minor version, or inferred from two sources |
+| low | only rank 3–4, has `UNVERIFIED`, or the version could not be determined |
 
-## Mẫu bảng `--upgrade`
-| Thay đổi phá vỡ | Nguồn | File bị ảnh hưởng (Explore) | Bước di trú | Rủi ro |
+## `--upgrade` table template
+| Breaking change | Source | Affected files (Explore) | Migration step | Risk |
 |---|---|---|---|---|
-| `connect()` bỏ tham số `timeout` | <URL#breaking> | src/db/pool.py:12, src/jobs/sync.py:40 | dùng `options.timeout` | thấp |
+| `connect()` drops the `timeout` parameter | <URL#breaking> | src/db/pool.py:12, src/jobs/sync.py:40 | use `options.timeout` | low |
 
-Mỗi dòng cỡ một task 2–5 phút; dòng quá lớn → tách.
+Each row is the size of one 2–5 minute task; a row that is too big → split it.
 
-## Mẫu bảng `--integration`
-| Mục | Giá trị | Nguồn |
+## `--integration` table template
+| Item | Value | Source |
 |---|---|---|
-| Xác thực | OAuth2 client credentials, token 1 giờ | <URL> |
-| Giới hạn | 100 yêu cầu/phút/khóa; vượt → 429 + `Retry-After` | <URL> |
-| Idempotency | header `Idempotency-Key`, giữ 24 giờ | <URL> |
-| Sandbox | có, dữ liệu reset hằng ngày | <URL> |
-| Lỗi | JSON `{code, message}`; 5xx nên retry có backoff | <URL> |
-| Phân trang | cursor | <URL> |
-| Timeout khuyến nghị | 10 giây | <URL> hoặc `UNVERIFIED` |
+| Authentication | OAuth2 client credentials, 1-hour token | <URL> |
+| Rate limit | 100 requests/minute/key; exceeded → 429 + `Retry-After` | <URL> |
+| Idempotency | `Idempotency-Key` header, kept 24 hours | <URL> |
+| Sandbox | yes, data reset daily | <URL> |
+| Errors | JSON `{code, message}`; 5xx should be retried with backoff | <URL> |
+| Pagination | cursor | <URL> |
+| Recommended timeout | 10 seconds | <URL> or `UNVERIFIED` |

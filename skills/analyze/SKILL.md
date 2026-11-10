@@ -1,118 +1,118 @@
 ---
 name: analyze
-description: Dùng khi feature đã qua intake và cần spec có Definition of Done, hoặc khi spec đã duyệt phải sửa đổi (--amend).
-argument-hint: "<ID> [--amend \"<thay đổi>\"] [--decide]"
+description: Use when a feature has passed intake and needs a spec with a Definition of Done, or when an approved spec must be amended (--amend).
+argument-hint: "<ID> [--amend \"<change>\"] [--decide]"
 context: fork
 agent: team:analyst
 background: false
 allowed-tools: Bash(python3 *) Bash(cat *)
 ---
 
-# Phân tích yêu cầu → spec
+# Requirements analysis → spec
 
-## Tổng quan
-Skill này biến `intake.md` thành `spec.md` đo được, có Definition of Done, để mọi giai đoạn sau (design, plan, build, verify) có một hợp đồng chung. Skill chạy trong ngữ cảnh của agent `analyst` (fork). Analyst KHÔNG hỏi người trực tiếp: mọi câu hỏi đi qua `questions.md` và trạng thái `NEEDS_ANSWER`, team-leader là người hỏi.
+## Overview
+This skill turns `intake.md` into a measurable `spec.md` with a Definition of Done, so that every later stage (design, plan, build, verify) works against one shared contract. It runs in the context of the `analyst` agent (fork). The analyst does NOT ask the human directly: every question goes through `questions.md` and the `NEEDS_ANSWER` status, and the team-leader is the one who asks.
 
-Đầu ra tốt có ba tính chất: (1) mỗi tiêu chí nghiệm thu kiểm được bằng một lệnh hoặc một bước có đầu ra, (2) mọi giả định được ghi ra kèm cách sửa nếu sai, (3) không có quyết định công nghệ — chỗ đó thuộc researcher và architect.
+A good output has three properties: (1) every acceptance criterion can be checked by a command or by a step with an observable output, (2) every assumption is written down together with how to correct it if it turns out wrong, (3) it contains no technology decision — that belongs to the researcher and the architect. Example: "export is fast" is not a criterion; "`cmd.test_one` on `tests/test_export.py` exports 10,000 rows in under 2 s" is.
 
-`$ARGUMENTS`: mã `<ID>`; `--amend "<thay đổi>"` khi spec đã duyệt cần sửa; `--decide` để không hỏi. `<kit>` = nội dung `.team/plugin_root`.
+`$ARGUMENTS`: the `<ID>`; `--amend "<change>"` when an approved spec needs a change; `--decide` to skip questions. `<kit>` = the content of `.team/plugin_root`.
 
-## Khi nào dùng (và khi nào không)
-Dùng khi:
-- Feature đã qua `/team:intake` (có `docs/team/features/<ID>/intake.md`) và chưa có `spec.md` có `## Definition of Done`.
-- Spec đã duyệt G1 nhưng yêu cầu đổi (playbook change-request) → chạy với `--amend`.
-- Playbook client-docs hoặc data-migration cần chốt người đọc / phạm vi dữ liệu trước khi viết.
+## When to use (and when not)
+Use when:
+- The feature has been through `/team:intake` (there is a `docs/team/features/<ID>/intake.md`) and there is no `spec.md` with `## Definition of Done` yet.
+- The spec passed gate G1 but the requirement changed (change-request playbook) → run with `--amend`.
+- The client-docs or data-migration playbook needs the audience or the data scope fixed before anything is written.
 
-Không dùng khi:
-- Chưa có intake → chạy `/team:intake` trước.
-- Câu hỏi là kỹ thuật ("thư viện nào", "API ngoài hỗ trợ gì") → `/team:research`.
-- Việc là bug-fix hay hotfix cỡ S mà intake đã mô tả triệu chứng tái hiện được → playbook đi thẳng `/team:build`.
-- Muốn chọn kiến trúc, thiết kế dữ liệu hay API → `/team:architect`, `/team:design`.
+Do not use when:
+- There is no intake yet → run `/team:intake` first.
+- The question is technical ("which library", "what does the external API support") → `/team:research`.
+- The work is a size S bug-fix or hotfix whose intake already describes a reproducible symptom → the playbook goes straight to `/team:build`.
+- You want to choose an architecture, a data design or an API → `/team:architect`, `/team:design`.
 
-## Tìm hiểu stack trước
-Analyst không chọn công nghệ, nhưng phải biết dự án đang có gì để không hỏi điều code đã trả lời:
-1. Read `.team/profile.json`: `stack`, `language`, `structure.src`, `structure.tests`, `ui`, `tracker`. Đây là bối cảnh, không phải đề xuất.
-2. Read `docs/team/glossary.md` (nếu có) để dùng đúng thuật ngữ nghiệp vụ.
-3. Tra cache khám phá: `bash "<kit>/scripts/explore-cache.sh" <thư mục liên quan>`; `HIT` → đọc file cache thay vì đọc lại code.
-4. Gọi Explore (Agent) cho phần code liên quan khi cache `MISS`: hỏi đúng câu "hành vi X hiện ở đâu, ràng buộc gì".
-Không chạy lệnh `cmd.*` nào trong giai đoạn này.
+## Discover the stack first
+The analyst does not choose technology, but must know what the project already has, so it never asks something the code already answers:
+1. Read `.team/profile.json`: `stack`, `language`, `structure.src`, `structure.tests`, `ui`, `tracker`. This is context, not a proposal.
+2. Read `docs/team/glossary.md` (if present) to use the business terms correctly.
+3. Check the exploration cache: `bash "<kit>/scripts/explore-cache.sh" <relevant directory>`; on `HIT` read the cache file instead of re-reading the code.
+4. On a cache `MISS`, call Explore (Agent) for the relevant code with one precise question: "where does behavior X live today, and what constrains it".
+Do not run any `cmd.*` command in this stage.
 
-## Đầu vào và điều kiện trước
-- `docs/team/features/<ID>/intake.md` có (kiểm bằng `python3 "<kit>/scripts/team.py" status <ID>` → `intaken`).
-- Chế độ: `--decide` thắng; không có thì lấy dòng `Chế độ:` trong `intake.md`.
-- `--amend`: `spec.md` đã có `Approved-by:` và yêu cầu thay đổi được nêu rõ trong `$ARGUMENTS` hoặc trong `intake.md` của change-request.
-- Thiếu một điều trên → trả về ≤ 5 dòng nêu điều thiếu, trạng thái `NEEDS_CONTEXT`, rồi dừng.
+## Inputs and preconditions
+- `docs/team/features/<ID>/intake.md` exists (check with `python3 "<kit>/scripts/team.py" status <ID>` → `intaken`).
+- Mode: `--decide` wins; otherwise take the `Mode:` line in `intake.md`.
+- `--amend`: `spec.md` already has `Approved-by:` and the requested change is stated clearly in `$ARGUMENTS` or in the change-request's `intake.md`.
+- Any of the above missing → return ≤ 5 lines naming what is missing, with status `NEEDS_CONTEXT`, then stop.
 
-## Quy trình
-1. **Ghi vị trí.** Write `.team/current.json` {feature: <ID>, stage: "analyze", agent: "analyst", started_at}.
-   Thoát nếu: `team.py status` cho thấy spec đã duyệt và không có `--amend` → trả `SPECIFIED`, không viết lại.
-2. **Giả thuyết.** Viết một câu "người yêu cầu muốn gì" + độ tin cậy % + điều còn thiếu. Câu này là dòng đầu của phần Mục tiêu, giữ đến khi hoàn tất.
-3. **Nhìn trước khi hỏi.** Liệt kê điều intake, README, glossary và Explore đã trả lời, kèm đường dẫn. Mọi câu hỏi về sau phải ghi "code/tài liệu không trả lời điều này (đã xem <đường dẫn>)".
-4. **Phân loại 7 mục** (chi tiết và câu hỏi gợi ý: `${CLAUDE_SKILL_DIR}/references/triage.md`, mở khi một mục còn trống):
-   mục tiêu · người dùng · phạm vi trong/ngoài (non-goals bắt buộc) · dữ liệu · giao diện/tích hợp · NFR · tiêu chí nghiệm thu. Mục trống phải ghi "không có, vì …".
-   Điểm kiểm: đủ 7 mục mới sang bước 5.
-5. **Đổi tính từ thành con số.** Mỗi "nhanh", "an toàn", "dễ dùng" → con số + cách đo ("p95 < 300 ms khi chạy <bước>"). Không đo được → đưa vào câu hỏi hoặc Assumptions.
-6. **Quyết định hỏi hay tự quyết** (điểm quyết định):
-   - Điều chưa rõ có hậu quả LỚN hoặc KHÔNG ĐẢO NGƯỢC (xóa/di trú dữ liệu, API công khai, luật nghiệp vụ, chi phí) và chế độ `ask` → câu hỏi.
-   - Còn lại → `## Assumptions decided by the team` với 4 trường: chọn gì / vì sao / phương án khác / sửa thế nào nếu sai.
-   - Chế độ `decide` → không hỏi; mọi điểm lớn cũng ghi đủ 4 trường.
-7. **Viết câu hỏi (chỉ chế độ ask).** Write `questions.md` theo `<kit>/templates/artifacts/question-comment.md`: ≤ 5 câu; mỗi câu 2–4 lựa chọn, một khuyến nghị, hậu quả của từng lựa chọn, "câu trả lời nào làm đổi phần nào của việc".
-   Phép thử dừng hỏi: nếu đoán đúng được câu trả lời của 3 câu kế tiếp → không hỏi nữa, ghi giả định.
-   Trả `NEEDS_ANSWER` và dừng. Tối đa 2 vòng; sau vòng 2 còn điểm lớn → `NEEDS_ANSWER` với ghi chú "thiếu nền tảng", không mở vòng 3.
-8. **Câu trả lời mơ hồ.** Người trả "tùy đội" hay "sao cũng được" cho một điểm lớn → coi như decide cho điểm đó, ghi Assumptions, và nêu lại một lần với 2 lựa chọn nếu điểm đó không đảo ngược được.
-9. **Kiểm khối lượng.** Tiêu chí tách thành các nhóm độc lập, hoặc vượt mô tả của cỡ trong intake → ghi đề xuất đổi cỡ cho team-leader (không tự đổi).
-10. **Viết spec.** Write `docs/team/features/<ID>/spec.md` từ `<kit>/templates/artifacts/spec.md`: 7 mục, bảng NFR, bảng tiêu chí `AC-n | tiêu chí | cách kiểm`, Assumptions, Definition of Done (luôn gồm As-Built, tài liệu người dùng nếu hành vi đổi, CHANGELOG, `cmd.test` xanh). Cỡ S: tối đa 5 tiêu chí, phần NFR có thể "không có".
-11. **`--amend`.** Không xóa chữ cũ. Thêm `## Amendment <n> (<date>)`: thay đổi gì, tiêu chí nào đổi (đánh dấu `[changed]` ngay trên dòng tiêu chí), artifact sau nào bị ảnh hưởng (design, tasks) để team-leader định tuyến (`/team:architect` impact, `/team:plan --insert`).
-12. **Tự kiểm trước khi trả.** Mỗi tiêu chí đo được; mỗi "phải" truy được về một dòng của intake; không có tên thư viện/framework như một quyết định; không có "TBD"; không mâu thuẫn spec đã duyệt trước đó.
-13. **Trả và dừng.** Tin trả team-leader ≤ 10 dòng: `SPECIFIED` hoặc `NEEDS_ANSWER`, số tiêu chí, giả định chính, cổng G1 (áp dụng hay không theo `team.py`). Analyst không bắt đầu research hay design.
+## Process
+1. **Record the position.** Write `.team/current.json` {feature: <ID>, stage: "analyze", agent: "analyst", started_at}.
+   Exit if: `team.py status` shows the spec is already approved and there is no `--amend` → return `SPECIFIED` and do not rewrite anything.
+2. **Hypothesis.** Write one sentence "what the requester wants" + a confidence % + what is still missing. This sentence is the first line of the Goal section and stays there until the spec is complete.
+3. **Look before you ask.** List what the intake, README, glossary and Explore already answered, with paths. Every later question must carry the note "the code/docs do not answer this (checked <path>)".
+4. **Triage into 7 sections** (details and suggested questions: `${CLAUDE_SKILL_DIR}/references/triage.md`, open it when a section is still empty):
+   goal · users · scope in/out (non-goals mandatory) · data · interfaces/integrations · NFR · acceptance criteria. An empty section must say "none, because …".
+   Checkpoint: all 7 sections filled before moving to step 5.
+5. **Turn adjectives into numbers.** Every "fast", "secure", "easy to use" → a number + how it is measured ("p95 < 300 ms when running <step>"). Not measurable → it becomes a question or goes into Assumptions.
+6. **Decide: ask or decide alone** (decision point):
+   - An unclear point with a LARGE or IRREVERSIBLE consequence (deleting/migrating data, public API, business rule, cost) and mode `ask` → a question.
+   - Everything else → `## Assumptions decided by the team` with 4 fields: chosen / why / alternative / how to correct if wrong.
+   - Mode `decide` → no questions; every large point is also written with all 4 fields.
+7. **Write the questions (ask mode only).** Write `questions.md` from `<kit>/templates/artifacts/question-comment.md`: ≤ 5 questions; each has 2–4 options, one recommendation, the consequence of each option, and "which answer changes which part of the work".
+   Stop-asking test: if you can correctly guess the answers to the next 3 questions → stop asking and record assumptions.
+   Return `NEEDS_ANSWER` and stop. At most 2 rounds; if a large point remains after round 2 → `NEEDS_ANSWER` with the note "missing foundation", never open a round 3.
+8. **Vague answers.** If the human answers "up to the team" or "either is fine" on a large point → treat it as decide for that point, record it in Assumptions, and restate it once with 2 options if the point is irreversible.
+9. **Check the volume.** If the criteria split into independent groups, or exceed what the intake's size describes → write a size-change proposal for the team-leader (never change the size yourself).
+10. **Write the spec.** Write `docs/team/features/<ID>/spec.md` from `<kit>/templates/artifacts/spec.md`: 7 sections, an NFR table, a criteria table `AC-n | criterion | how to check`, Assumptions, Definition of Done (always including As-Built, user docs if behavior changes, CHANGELOG, `cmd.test` green). Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language). Size S: at most 5 criteria, and the NFR section may say "none".
+11. **`--amend`.** Never delete old text. Add `## Amendment <n> (<date>)`: what changes, which criteria change (mark `[changed]` on the criterion line itself), which later artifacts are affected (design, tasks) so the team-leader can route them (`/team:architect` impact, `/team:plan --insert`).
+12. **Self-check before returning.** Every criterion is measurable; every "must" traces back to a line of the intake; no library/framework name appears as a decision; no "TBD"; nothing contradicts a previously approved spec.
+13. **Return and stop.** Return message to the team-leader, ≤ 10 lines: `SPECIFIED` or `NEEDS_ANSWER`, the number of criteria, the main assumptions, gate G1 (applies or not, per `team.py`). The analyst does not start research or design.
 
-## Đầu ra
-- `docs/team/features/<ID>/spec.md` (mẫu `<kit>/templates/artifacts/spec.md`).
-- `docs/team/features/<ID>/questions.md` khi chế độ ask có điểm lớn chưa rõ.
+## Outputs
+- `docs/team/features/<ID>/spec.md` (template `<kit>/templates/artifacts/spec.md`).
+- `docs/team/features/<ID>/questions.md` when ask mode has a large unclear point.
 - `.team/current.json` {stage: "analyze"}.
-- Tin trả mẫu:
+- Example return message:
   ```
   analyst -> team-leader | FEAT-012 | SPECIFIED
-  Spec: docs/team/features/FEAT-012/spec.md — 4 tiêu chí (AC-1..AC-4), mỗi cái có lệnh kiểm
-  Giả định chính: export UTF-8 có BOM (sửa: bỏ BOM ở AC-2)
-  Non-goals: không làm import CSV
-  Cổng G1: áp dụng (cỡ M) — chờ Approved-by
+  Spec: docs/team/features/FEAT-012/spec.md — 4 criteria (AC-1..AC-4), each with a check command
+  Main assumption: UTF-8 export with BOM (correction: drop the BOM in AC-2)
+  Non-goals: no CSV import
+  Gate G1: applies (size M) — waiting for Approved-by
   ```
 
-## Lý do tự bào chữa thường gặp
-| Ý nghĩ | Làm đúng |
+## Common rationalizations
+| Thought | Correct action |
 |---|---|
-| "Yêu cầu rõ rồi, bỏ phân loại 7 mục" | Điền đủ 7 mục; mục trống ghi "không có, vì …". |
-| "Hỏi hết cho chắc" | Chỉ hỏi điều lớn hoặc không đảo ngược; còn lại vào Assumptions. |
-| "Chắc code đã có câu trả lời" | Nêu file đã đọc, hoặc hỏi. |
-| "DoD hiển nhiên, khỏi viết" | Viết; As-Built, tài liệu, CHANGELOG luôn có. |
-| "Tiêu chí 'chạy tốt' là đủ" | Viết lại với lệnh và đầu ra mong đợi. |
-| "Người bảo 'tùy đội'" | Decide cho điểm đó; ghi đủ 4 trường. |
-| "Chọn luôn thư viện cho nhanh" | Công nghệ là việc của researcher/architect. |
-| "Sửa thẳng tiêu chí cũ khi amend" | Thêm Amendment n, đánh dấu `[changed]`, giữ bản gốc. |
-| "Vòng 3 cho chắc" | Tối đa 2 vòng; leo thang kèm điều còn thiếu. |
-| "Hỏi người qua tin nhắn cho nhanh" | Analyst không hỏi người; viết `questions.md`, trả `NEEDS_ANSWER`. |
+| "The requirement is already clear, skip the 7-section triage" | Fill all 7 sections; an empty one says "none, because …" so the reader knows it was considered. |
+| "Ask everything to be safe" | Ask only what is large or irreversible; everything else goes into Assumptions with 4 fields. |
+| "The code surely answers this" | Name the file you read, or ask. An unchecked guess is neither. |
+| "The DoD is obvious, no need to write it" | Write it; As-Built, docs and CHANGELOG are always in it. |
+| "The criterion 'works well' is enough" | Rewrite it with a command and the expected output. |
+| "The human said 'up to the team'" | Decide for that point; write all 4 fields. |
+| "Just pick the library now to save time" | Technology belongs to the researcher/architect; leave the need, not the choice. |
+| "Edit the old criterion directly when amending" | Add Amendment n, mark `[changed]`, keep the original text. |
+| "A round 3 to be sure" | At most 2 rounds; escalate with what is still missing. |
+| "Message the human directly, it is faster" | The analyst never asks the human; write `questions.md` and return `NEEDS_ANSWER`. |
 
-## Dấu hiệu sai
-- Hơn 5 câu hỏi, hoặc câu hỏi không có lựa chọn và khuyến nghị.
-- Câu hỏi về điều đã có trong repo hay intake.
-- Tiêu chí có tính từ mà không có con số hay lệnh kiểm.
-- Spec chứa tên thư viện/framework như một quyết định.
-- DoD thiếu As-Built, tài liệu hoặc CHANGELOG.
-- `## Assumptions decided by the team` trống ở việc cỡ M/L.
-- Amendment xóa chữ cũ, hoặc tiêu chí đổi mà không có `[changed]`.
-- "TBD" ở bất kỳ đâu; spec được viết khi còn `NEEDS_ANSWER` cho một điểm lớn.
+## Red flags
+- More than 5 questions, or questions with no options and no recommendation.
+- A question about something already in the repo or the intake.
+- A criterion with an adjective but no number and no check command.
+- The spec contains a library/framework name as a decision.
+- The DoD lacks As-Built, docs or CHANGELOG.
+- `## Assumptions decided by the team` is empty on size M/L work.
+- An amendment deletes old text, or a criterion changes without `[changed]`.
+- "TBD" anywhere; the spec is written while a large point is still `NEEDS_ANSWER`.
 
-## Kiểm chứng
-- [ ] Dán danh sách tiêu chí đánh số, mỗi tiêu chí kèm cách kiểm.
-- [ ] `grep -c '^## ' docs/team/features/<ID>/spec.md` cho thấy đủ 7 mục + Assumptions + Definition of Done.
-- [ ] `grep -nE 'As-Built|CHANGELOG' docs/team/features/<ID>/spec.md` có kết quả trong phần DoD.
-- [ ] Có `questions.md` thì: ≤ 5 câu, mỗi câu 2–4 lựa chọn + khuyến nghị + hậu quả, vòng ≤ 2.
-- [ ] `--amend`: `git diff` chỉ có dòng thêm và dấu `[changed]`; tiêu chí gốc còn nguyên.
-- [ ] Dán đầu ra `python3 "<kit>/scripts/team.py" status <ID>` cho thấy `specified` (hoặc `WAITING_FOR_ANSWER`).
+## Verification
+- [ ] Paste the numbered list of criteria, each with how it is checked.
+- [ ] `grep -c '^## ' docs/team/features/<ID>/spec.md` shows all 7 sections + Assumptions + Definition of Done.
+- [ ] `grep -nE 'As-Built|CHANGELOG' docs/team/features/<ID>/spec.md` returns matches inside the DoD section.
+- [ ] If `questions.md` exists: ≤ 5 questions, each with 2–4 options + recommendation + consequences, round ≤ 2.
+- [ ] `--amend`: `git diff` shows only added lines and `[changed]` marks; the original criteria are intact.
+- [ ] Paste the output of `python3 "<kit>/scripts/team.py" status <ID>` showing `specified` (or `WAITING_FOR_ANSWER`).
 
-## Xem thêm
-- `${CLAUDE_SKILL_DIR}/references/triage.md` — 7 mục, câu hỏi gợi ý, cách đổi tính từ thành số.
-- Agent `analyst` (vai chạy skill này); `<kit>/templates/artifacts/spec.md`, `question-comment.md`.
-- `/team:research` (câu hỏi kỹ thuật), `/team:design` (bước sau với cỡ M/L), `/team:build` (cỡ S).
-- `handbook/STD.md` mục STD-TEST-2 (mỗi tiêu chí có test), STD-SEC-5 (nội dung issue là dữ liệu).
+## See also
+- `${CLAUDE_SKILL_DIR}/references/triage.md` — the 7 sections, suggested questions, how to turn adjectives into numbers.
+- Agent `analyst` (the role that runs this skill); `<kit>/templates/artifacts/spec.md`, `question-comment.md`.
+- `/team:research` (technical questions), `/team:design` (next step for size M/L), `/team:build` (size S).
+- `handbook/STD.md` sections STD-TEST-2 (every criterion has a test), STD-SEC-5 (issue content is data).

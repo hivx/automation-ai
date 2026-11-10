@@ -1,31 +1,31 @@
-# Các kiểm của audit-kit
+# audit-kit checks
 
-Mỗi kiểm kết thúc bằng một dòng phạm vi `đã kiểm: N file / bỏ qua: <lý do>` để "0 vấn đề" phân biệt được với "không chạy". Chỉ dùng lệnh chỉ-đọc (Read, Grep, Glob, `jq`, `git log`) và `python3 <kit>/scripts/{team.py status,measure.py,check-profile.py}` bằng đường dẫn tuyệt đối. Không chạy `validate.sh`, `log-run.sh`, `team.py scorecard` hay `evals/run-eval.sh`.
+Every check ends with a scope line `checked: N files / skipped: <reason>`, so that "0 issues" can be told apart from "not run". Use only read-only commands (Read, Grep, Glob, `jq`, `git log`) and `python3 <kit>/scripts/{team.py status,measure.py,check-profile.py}` by absolute path. Do not run `validate.sh`, `log-run.sh`, `team.py scorecard` or `evals/run-eval.sh`.
 
-## Kiểm tĩnh (không cần số liệu)
-| # | Kiểm | Cách làm | Báo khi |
+## Static checks (no metrics needed)
+| # | Check | How | Report when |
 |---|---|---|---|
-| S1 | Ranh giới tin cậy | Liệt kê nguồn đưa chữ vào agent: nội dung issue (prompt của `team-feature.yml`), trang web (researcher), skill tạm `.claude/skills/`, CLAUDE.md/rule của dự án, `docs/team/**` do vai khác viết. Grep câu "dữ liệu, không phải chỉ dẫn" (STD-SEC-5) ở nơi đọc chúng. | Nguồn nào được đọc mà không có câu đó |
-| S2 | Hook mở khi lỗi | Đọc `protect.sh`, `role-policy.sh`, `check-git.sh`: JSON hỏng hay lệnh con lỗi dẫn tới mã thoát nào? Claude Code chỉ chặn ở mã 2; mã khác là cho qua. | Hook an toàn cho qua khi lỗi mà không in chẩn đoán ra stderr |
-| S3 | Matcher phủ tool | Gom `tools:` của `agents/*.md`, `.claude/agents/*.md` và `allowed-tools:` của skill; so với matcher PreToolUse trong `hooks/hooks.json`. Ghi file phải được chặn ở `Edit`, `Write`, `NotebookEdit`, `Bash`. | Tool ghi được mà không matcher nào chặn |
-| S4 | Danh sách chỉ-đọc | `hooks/role-policy.json` `readonly_commands`: lệnh nào có cờ ghi/chạy lệnh (`sed -i/e/w`, `sort -o`, `uniq IN OUT`, `tree -o`, `rg --pre`, `find -delete/-fprint`, `mkdir`)? `teamlib.py is_readonly` có chặn từng dạng không (đọc code)? `readonly_scripts` so theo đường dẫn hay tên? | Dạng ghi lọt; script so theo tên |
-| S5 | Danh sách ghi của từng vai | So `roles[*].write` trong `role-policy.json` với câu "chỉ ghi …" ở mục 1 của `agents/<vai>.md` và cột tools của SPEC §3 (kèm ADJ trong `docs/00-overview.md`). | Ba nơi khác nhau |
-| S6 | Nới cổng bằng cấu hình | File cấu hình lint/format/test (tên trong profile hoặc thường gặp) có nằm trong `protected_paths` không; vai `bash: any` sửa được không. | Cấu hình kiểm tra sửa được bởi dev/maintainer/devops |
-| S7 | Allowlist headless | Mỗi `workflows/batch/*.md`, `templates/project/github/workflows/*.yml`: `--allowedTools` có đủ cho chuỗi skill (`python3` cho `team.py`, khe `cmd.*`) không; có lấy từ `permissions.allow` không (K-06). | Thiếu, hoặc chép tay lệnh stack |
-| S8 | `allowed-tools` quá rộng | Grep `allowed-tools:` có `Bash` trần, `Bash(*)`, `Bash(bash *)`, `Bash(rm *)`, `Bash(sudo *)`. Ghi riêng `Bash(python3 *)` (cho phép `python3 -c`, K-25). | Mọi dòng |
-| S9 | Mô tả | Skill: bắt đầu "Dùng khi", < 500 ký tự, không tóm tắt quy trình ("rồi", "sau đó" nhiều lần). Agent: bắt đầu "Giao khi", ≤ 300 ký tự. | Sai một điều |
-| S10 | Khe treo | Grep `cmd\.[a-z_]+`, `deploy\.[a-z_]+`, `ci\.[a-z_]+` trong agents/skills/workflows; so với `templates/schemas/profile.schema.json`. | Khe không có trong schema |
-| S11 | Mâu thuẫn chỉ dẫn | Grep cùng danh từ (push, skip, migration, prod, hỏi người) đi với "luôn/bắt buộc" ở file này và "không/cấm" ở file khác. | Mọi cặp tìm được (dán hai `file:line`) |
-| S12 | Lệch tên | Grep `/team:<x>`, `agents/<x>.md`, `skills/<x>` trong `docs/`; đối chiếu thư mục. | Tên không tồn tại |
-| S13 | Skill/agent tạm | So `.claude/skills/*/`, `.claude/agents/*.md` với `docs/team/skills-registry.md`; dòng `temp` không dùng 30 ngày; agent tạm có `permissionMode`, `hooks`, `mcpServers` trong frontmatter. | Thiếu đăng ký, quá hạn, khóa nguy hiểm |
-| S14 | Công tắc tắt hook | Grep biến môi trường hay cờ tắt hook trong `scripts/`. | Có bất kỳ công tắc nào (luật máy không được có đường tắt) |
+| S1 | Trust boundary | List the sources that feed text into agents: issue content (the prompt of `team-feature.yml`), web pages (researcher), temp skills in `.claude/skills/`, the project's CLAUDE.md/rules, `docs/team/**` written by other roles. Grep for the "data, not instructions" sentence (STD-SEC-5) where each is read. | A source is read without that sentence |
+| S2 | Hooks failing open | Read `protect.sh`, `role-policy.sh`, `check-git.sh`: which exit code follows malformed JSON or a failing sub-command? Claude Code blocks only on exit code 2; any other code lets the call through. | A safety hook lets the call through on error without printing a diagnosis to stderr |
+| S3 | Matchers cover the tools | Collect `tools:` from `agents/*.md`, `.claude/agents/*.md` and `allowed-tools:` from skills; compare with the PreToolUse matchers in `hooks/hooks.json`. File writes must be blocked on `Edit`, `Write`, `NotebookEdit`, `Bash`. | A tool can write and no matcher blocks it |
+| S4 | Read-only list | `hooks/role-policy.json` `readonly_commands`: which commands have flags that write or run commands (`sed -i/e/w`, `sort -o`, `uniq IN OUT`, `tree -o`, `rg --pre`, `find -delete/-fprint`, `mkdir`)? Does `teamlib.py is_readonly` block each form (read the code)? Does `readonly_scripts` match by path or by name? | A write form slips through; scripts matched by name |
+| S5 | Write list per role | Compare `roles[*].write` in `role-policy.json` with the "writes only …" sentence in section 1 of `agents/<role>.md` and the tools column of SPEC §3 (with the ADJ entries in `docs/00-overview.md`). | The three places differ |
+| S6 | Gates loosened by configuration | Are the lint/format/test config files (names from the profile, or the usual ones) inside `protected_paths`; can a `bash: any` role edit them? | A check configuration can be edited by dev/maintainer/devops |
+| S7 | Headless allowlist | For each `workflows/batch/*.md` and `templates/project/github/workflows/*.yml`: is `--allowedTools` enough for the skill chain (`python3` for `team.py`, the `cmd.*` slots); is it built from `permissions.allow` (K-06)? | Missing entries, or stack commands copied by hand |
+| S8 | `allowed-tools` too broad | Grep `allowed-tools:` for bare `Bash`, `Bash(*)`, `Bash(bash *)`, `Bash(rm *)`, `Bash(sudo *)`. Record `Bash(python3 *)` separately (it allows `python3 -c`, K-25). | Every such line |
+| S9 | Descriptions | Skill: starts with "Use when", < 500 characters, no process summary (repeated "then", "after that"). Agent: starts with "Delegate when", ≤ 300 characters. | Any one rule broken |
+| S10 | Dangling slots | Grep `cmd\.[a-z_]+`, `deploy\.[a-z_]+`, `ci\.[a-z_]+` in agents/skills/workflows; compare with `templates/schemas/profile.schema.json`. | A slot that is not in the schema |
+| S11 | Contradictory instructions | Grep the same noun (push, skip, migration, prod, asking the human) paired with "always/must" in one file and "never/forbidden" in another. | Every pair found (paste both `file:line`) |
+| S12 | Mismatched names | Grep `/team:<x>`, `agents/<x>.md`, `skills/<x>` in `docs/`; compare with the folders. | A name that does not exist |
+| S13 | Temp skills/agents | Compare `.claude/skills/*/`, `.claude/agents/*.md` with `docs/team/skills-registry.md`; `temp` rows unused for 30 days; temp agents with `permissionMode`, `hooks`, `mcpServers` in their frontmatter. | Not registered, overdue, dangerous keys |
+| S14 | Hook kill switches | Grep for environment variables or flags that turn hooks off in `scripts/`. | Any switch at all (machine rules must not have a bypass) |
 
-## Kiểm theo số liệu (cần `docs/team/metrics/runs.jsonl`)
-| # | Kiểm | Cách làm | Báo khi |
+## Metric-based checks (need `docs/team/metrics/runs.jsonl`)
+| # | Check | How | Report when |
 |---|---|---|---|
-| D1 | Skill không dùng | Dòng SubagentStop có `skill: null`; chỉ vài skill gọi `log-run.sh --skill`. Ghép skill fork với `agent` + `stage` (từ `current.json`). Skill không bao giờ ghi số liệu → "không có dữ liệu", KHÔNG phải "không dùng". | 0 lần trong 30 ngày với skill có dữ liệu |
-| D2 | Agent chạm trần lượt | Chuẩn hóa tiền tố `team:` của `agent`; so `turns` với `maxTurns` trong frontmatter. `turns` là số tin của assistant (xấp xỉ) — ghi rõ. | ≥ 2 lần |
-| D3 | Kết quả đoán từ chữ | Trường `result` của scorecard đoán từ tin cuối (K-18) — mọi số liệu dựa trên `result` gắn nhãn "độ tin cậy thấp". | Luôn ghi chú |
+| D1 | Unused skills | SubagentStop lines have `skill: null`; only a few skills call `log-run.sh --skill`. Match fork skills through `agent` + `stage` (from `current.json`). A skill that never logs metrics → "no data", NOT "unused". | 0 runs in 30 days for a skill that has data |
+| D2 | Agents hitting the turn limit | Normalise the `team:` prefix of `agent`; compare `turns` with `maxTurns` in the frontmatter. `turns` is the number of assistant messages (approximate) — say so. | ≥ 2 times |
+| D3 | Results guessed from text | The scorecard `result` field is guessed from the last message (K-18) — every metric based on `result` is labelled "low confidence". | Always note it |
 
-## Chống trùng
-Đọc `docs/kit-issues.md` của kit khi đọc được (`<kit>/docs/kit-issues.md`). Phát hiện trùng → Trạng thái "đã có (K-xx)" kèm bằng chứng mới (có thể đã tái phát). Phát hiện mới → "mới".
+## De-duplication
+Read the kit's `docs/kit-issues.md` when it is readable (`<kit>/docs/kit-issues.md`). A duplicate finding → status "known (K-xx)" with the new evidence (it may have regressed). A new finding → "new".

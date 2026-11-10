@@ -1,26 +1,26 @@
-# Bằng chứng nghiệm thu
+# Acceptance evidence
 
-## Khẳng định cần gì
-| Khẳng định | Cần | Không đủ |
+## What a claim needs
+| Claim | Needs | Not enough |
 |---|---|---|
-| "Test qua" | Đầu ra `cmd.test` trên commit đã ghi, 0 lỗi, mã thoát 0 | Lần chạy trước, CI cũ, lời dev |
-| "Build ổn" | `cmd.build` mã thoát 0 | Lint qua |
-| "Lỗi đã sửa" | Test tái hiện triệu chứng gốc: đỏ trước sửa (do dev dán), xanh bây giờ | Test mới chỉ xanh |
-| "Tiêu chí AC-n đạt" | Lệnh trong cột "cách kiểm" + đầu ra khớp mong đợi | Đọc code thấy đúng |
-| "Migration an toàn" | Lên → xuống → lên đều mã thoát 0, số lượng khớp | Chỉ chiều lên |
-| "Tài liệu đúng" | Lệnh/bước trong README chạy được, khớp hành vi | README có nhắc tới |
+| "Tests pass" | `cmd.test` output on the recorded commit, 0 failures, exit code 0 | An earlier run, old CI, the dev's word |
+| "The build is fine" | `cmd.build` exit code 0 | Lint passing |
+| "The bug is fixed" | A test reproducing the original symptom: red before the fix (pasted by the dev), green now | A new test that has only ever been green |
+| "Criterion AC-n passes" | The command in the "how to check" column + output matching the expectation | Reading the code and finding it right |
+| "The migration is safe" | Up → down → up all exit 0, counts reconcile | The up direction only |
+| "The docs are correct" | The commands/steps in the README run and match the behavior | The README mentions it |
 
-## Dòng bằng chứng
-`AC-2 | <cmd.test_one tests/auth/test_otp.py> | exit 1 | AssertionError: 200 != 401 | tests/auth/test_otp.py::test_expired | trượt`
+## Evidence row
+`AC-2 | <cmd.test_one tests/auth/test_otp.py> | exit 1 | AssertionError: 200 != 401 | tests/auth/test_otp.py::test_expired | fail`
 
-## Phân loại lỗi trước khi kết luận
-| Loại | Dấu hiệu | Phán quyết |
+## Classify the failure before concluding
+| Kind | Sign | Verdict |
 |---|---|---|
-| Code sai | Test đúng tiêu chí, code trả sai | rework (task chủ) |
-| Test sai | Test kiểm điều khác tiêu chí, hoặc không bao giờ trượt | rework (STD-TEST-5) |
-| Chập chờn | Cùng commit, kết quả khác nhau giữa 3 lần | rework + `debt.md` (STD-TEST-7) |
-| Môi trường | Lệnh không chạy được (thiếu dịch vụ, quyền) | BLOCKED, không kết luận |
-| Thiết kế | Code khớp design, design không thỏa tiêu chí | design-defect |
+| Wrong code | The test matches the criterion, the code returns the wrong thing | rework (owning task) |
+| Wrong test | The test checks something other than the criterion, or can never fail | rework (STD-TEST-5) |
+| Flaky | Same commit, different results across 3 runs | rework + `debt.md` (STD-TEST-7) |
+| Environment | The command cannot run (missing service, permissions) | BLOCKED, no conclusion |
+| Design | The code matches the design, the design does not satisfy the criterion | design-defect |
 
-## Acceptance checklist (6) — trích nguyên văn từ handbook/STD.md khi chấm
-Ghi từng mục: đạt / trượt + mã STD.
+## Acceptance checklist (6) — quote it verbatim from handbook/STD.md when grading
+Record each item: pass / fail + STD code.

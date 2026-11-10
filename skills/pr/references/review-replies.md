@@ -1,19 +1,19 @@
-# Trả lời bình luận review
+# Replying to review comments
 
-## Bảng phân loại (lập trước khi tạo task nào)
-| # | Bình luận (tóm tắt) | Kiểm với | Loại | Căn cứ | Việc |
+## Classification table (build it before creating any task)
+| # | Comment (summary) | Checked against | Class | Grounds | Action |
 |---|---|---|---|---|---|
-| 1 | Hàm `to_csv` không escape dấu phẩy | code `report.py:12`, AC-1 | đồng ý | STD-ERR-2 | task T5 |
-| 2 | "Nên thêm endpoint metrics đầy đủ" | Grep: không nơi nào dùng | không đồng ý | STD-DESIGN-5, spec non-goal | trả lời |
-| 3 | "Chỗ này lạ" | — | cần làm rõ | — | hỏi lại |
+| 1 | `to_csv` does not escape commas | code `report.py:12`, AC-1 | agree | STD-ERR-2 | task T5 |
+| 2 | "Should add a full metrics endpoint" | Grep: nothing uses it | disagree | STD-DESIGN-5, spec non-goal | reply |
+| 3 | "This part looks odd" | — | needs clarification | — | ask back |
 
-## Mẫu trả lời
-- Đồng ý, đã sửa: `Đã sửa ở a1b2c3d: escape dấu phẩy và ngoặc kép trong tên (STD-ERR-2); test tests/test_report.py::test_csv_quotes.`
-- Không đồng ý: `Chưa đổi: spec FEAT-012 ghi metrics là non-goal và không có chỗ nào dùng (đã tìm "metrics" trong src/). Theo STD-DESIGN-5 đội không thêm phần chưa được yêu cầu. Nếu cần, mở intake mới.`
-- Cần làm rõ: `"Chỗ này lạ" là về thứ tự cột hay về định dạng số? Đội chờ trả lời trước khi sửa các bình luận khác vì có thể liên quan.`
-- Đã phản bác sai: `Tôi nhầm ở trên: trường hợp tên rỗng có xảy ra (test mới đỏ). Đã sửa ở d4e5f6a.`
+## Reply templates
+- Agree, fixed: `Fixed in a1b2c3d: commas and double quotes in names are now escaped (STD-ERR-2); test tests/test_report.py::test_csv_quotes.`
+- Disagree: `Not changed: spec FEAT-012 lists metrics as a non-goal and nothing uses it (searched "metrics" in src/). Per STD-DESIGN-5 the team does not add what was not requested. If it is needed, open a new intake.`
+- Needs clarification: `Is "this part looks odd" about the column order or the number format? The team is waiting for the answer before fixing the other comments, since they may be related.`
+- Pushed back wrongly: `I was wrong above: the empty-name case does happen (the new test is red). Fixed in d4e5f6a.`
 
-## Không dùng
-- "Bạn hoàn toàn đúng!", "Cảm ơn góp ý tuyệt vời" — không có thông tin.
-- Đánh dấu resolved hàng loạt mà không trả lời.
-- Hứa sửa mà không có task.
+## Do not use
+- "You're absolutely right!", "Thanks for the great feedback" — they carry no information.
+- Marking threads resolved in bulk without replying.
+- Promising a fix without a task.

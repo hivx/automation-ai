@@ -1,24 +1,24 @@
-# Tự kiểm kế hoạch (5 điểm) và mẫu khối giao diện
+# Plan self-review (5 points) and the interface block template
 
-## 5 điểm — làm trước khi trả
-| # | Điểm | Cách kiểm | Trượt thì |
+## The 5 points — do them before returning
+| # | Point | How to check | If it fails |
 |---|---|---|---|
-| 1 | Phủ spec | Mỗi `AC-n` trong spec.md xuất hiện trong ít nhất một task | Thêm task hoặc thêm tiêu chí vào task chủ |
-| 2 | Không chữ mơ hồ | Tìm "TBD", "xử lý biên", "tùy", "v.v." trong plan/tasks | Thay bằng tên file, tên test, giá trị |
-| 3 | Tên nhất quán | Tên hàm/trường/route ở mục `Trả:` của task trước trùng mục `Nhận:` của task sau | Sửa một chỗ, ghi vào Ràng buộc chung |
-| 4 | Trọng tâm review | ≤ 5 đầu vào biên/chế độ lỗi có test | Thêm test vào task chủ |
-| 5 | Tỉ lệ | plan.md + tasks.md ngắn hơn phần code dự kiến | Bỏ code dán sẵn, giữ quyết định |
+| 1 | Spec coverage | Every `AC-n` in spec.md appears in at least one task | Add a task, or add the criterion to the owning task |
+| 2 | No vague words | Search plan/tasks for "TBD", "handle edge cases", "as needed", "etc." | Replace with a file name, a test name, a value |
+| 3 | Consistent names | The function/field/route names in the `Returns:` of an earlier task match the `Receives:` of the later task | Fix it in one place and record it under Shared constraints |
+| 4 | Review focus | ≤ 5 edge inputs/failure modes, each with a test | Add the test to the owning task |
+| 5 | Proportion | plan.md + tasks.md are shorter than the expected code | Remove pasted code, keep the decisions |
 
-## Mẫu một task đầy đủ
+## Template of one complete task
 ```
-- [ ] T3 — Từ chối mã OTP hết hạn — files: src/auth/otp.py, tests/auth/test_otp.py — test: tests/auth/test_otp.py — depends: T2
-  - Tiêu chí: AC-2 (mã quá 5 phút trả lỗi 401)
-  - Nhận: `verify_code(user_id: str, code: str, now: datetime) -> bool` (từ T2)
-  - Trả: `OtpExpired` (ngoại lệ mới, dùng ở T4)
-  - Kỳ vọng: `cmd.test_one` với tests/auth/test_otp.py → test_expired đạt
+- [ ] T3 — Reject expired OTP codes — files: src/auth/otp.py, tests/auth/test_otp.py — test: tests/auth/test_otp.py — depends: T2
+  - Criterion: AC-2 (a code older than 5 minutes returns error 401)
+  - Receives: `verify_code(user_id: str, code: str, now: datetime) -> bool` (from T2)
+  - Returns: `OtpExpired` (new exception, used in T4)
+  - Expect: `cmd.test_one` with tests/auth/test_otp.py → test_expired passes
 ```
 
-## Bảng một-file-một-chủ (plan.md)
-| File | Task chủ | Task khác chạm | Thứ tự |
+## The one-file-one-owner table (plan.md)
+| File | Owning task | Other tasks touching it | Order |
 |---|---|---|---|
 | src/auth/otp.py | T2 | T3 | T2 → T3 |

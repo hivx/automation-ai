@@ -1,6 +1,6 @@
 ---
 name: design
-description: Dùng khi spec đã duyệt cần thiết kế chi tiết (dữ liệu, API, luồng, quyền, migration, touchpoints, test plan) trước khi lập kế hoạch, hoặc khi refactor cần bản thiết kế ngắn chứng minh hành vi không đổi.
+description: Use when an approved spec needs a detailed design (data, API, flow, permissions, migration, touchpoints, test plan) before planning, or when a refactor needs a short design proving behavior does not change.
 argument-hint: "<ID> [--short]"
 context: fork
 agent: team:designer
@@ -8,98 +8,98 @@ background: false
 allowed-tools: Bash(python3 *) Bash(cat *)
 ---
 
-# Thiết kế chi tiết
+# Detailed design
 
-## Tổng quan
-Skill này viết `design.md` đủ cụ thể để tech-lead chia task mà không phải đoán, dev biết chính xác file nào chạm, và qa biết kiểm từng tiêu chí bằng test nào. Skill chạy trong ngữ cảnh `designer` (fork). designer theo kiến trúc đã duyệt (dẫn mã ADR), theo quy ước code đang có, và không quyết luật nghiệp vụ. Chia task là việc của tech-lead (`/team:plan`); designer chỉ liệt kê touchpoints.
+## Overview
+This skill writes a `design.md` concrete enough that tech-lead can split tasks without guessing, dev knows exactly which files to touch, and qa knows which test checks each criterion. It runs in the `designer` context (fork). designer follows the approved architecture (citing ADR IDs), follows the conventions already in the code, and does not decide business rules. Splitting tasks is tech-lead's job (`/team:plan`); designer only lists touchpoints.
 
-Thứ tự viết: hợp đồng trước luồng. Mọi hành vi quan sát được của một điểm vào công khai (mã lỗi, thông điệp, thứ tự, giá trị mặc định) đều là hợp đồng, vì sẽ có người phụ thuộc vào nó. Thêm vào thì an toàn hơn sửa; phá vỡ thì cần phiên bản mới và hướng dẫn di trú (STD-DESIGN-3).
+Writing order: contracts before flow. Every observable behavior of a public entry point (error codes, messages, ordering, default values) is a contract, because someone will come to depend on it. Adding is safer than changing; breaking needs a new version and a migration guide (STD-DESIGN-3). For example, adding an optional `OTP_EXPIRED` error code to `POST /otp/verify` is backward compatible; changing its existing 409 to 422 is a break, even if no document ever promised 409.
 
-`$ARGUMENTS`: mã `<ID>`; `--short` cho playbook refactor (mục 1, 7, 8 + cách chứng minh hành vi không đổi). `<kit>` = nội dung `.team/plugin_root`.
+`$ARGUMENTS`: the `<ID>`; `--short` for the refactor playbook (sections 1, 7, 8 + how to prove behavior is unchanged). `<kit>` = the content of `.team/plugin_root`.
 
-## Khi nào dùng (và khi nào không)
-Dùng khi:
-- Cỡ M/L sau analyze (và architect với cỡ L), trước `/team:plan`.
-- Playbook `refactor` (`--short`), `data-migration` (mapping, rollback; G2b bật), `integration` (hợp đồng, retry, idempotency).
-- qa trả `design-defect`: viết lại phần thiết kế sai, rồi plan/build lại phần bị ảnh hưởng.
+## When to use (and when not)
+Use when:
+- Size M/L after analyze (and after architect for size L), before `/team:plan`.
+- Playbook `refactor` (`--short`), `data-migration` (mapping, rollback; G2b on), `integration` (contracts, retry, idempotency).
+- qa returned `design-defect`: rewrite the wrong part of the design, then re-plan/rebuild the affected part.
 
-Không dùng khi:
-- Cỡ S: tiêu chí trong spec đủ cho một task → `/team:build` thẳng.
-- Cần quyết cấu trúc nhiều module hay NFR mới → `/team:architect` trước.
-- Câu hỏi là luật nghiệp vụ → `NEEDS_ANSWER` về team-leader, không đoán trong design.
+Do not use when:
+- Size S: the criteria in the spec are enough for one task → `/team:build` directly.
+- A multi-module structural decision or a new NFR is needed → `/team:architect` first.
+- The question is a business rule → `NEEDS_ANSWER` back to team-leader; never guess it in the design.
 
-## Tìm hiểu stack trước
-1. Read `.team/profile.json`: `structure.*` (`src`, `tests`, `allowed_new_file_roots`), `naming.*` (file, class, function, `test_file`), `protected_paths`, `cmd.test_one` (chỉ có chỗ thay `{file}`), `cmd.migrate`, `ui`.
-2. Explore (câu hỏi cụ thể): kiểu lỗi đang dùng, kiểu phân trang, nơi kiểm quyền, cách đọc cấu hình, bố cục test hiện có, file và dữ liệu sẽ bị chạm. Tra cache trước: `bash "<kit>/scripts/explore-cache.sh" <thư mục>`; `HIT` → đọc file cache.
-3. Read `docs/team/architecture.md` / `arch-impact.md` và ADR liên quan (cỡ L): ràng buộc của ADR là luật của design.
+## Discover the stack first
+1. Read `.team/profile.json`: `structure.*` (`src`, `tests`, `allowed_new_file_roots`), `naming.*` (file, class, function, `test_file`), `protected_paths`, `cmd.test_one` (only the `{file}` placeholder varies), `cmd.migrate`, `ui`.
+2. Explore (concrete questions): the error style in use, the pagination style, where permissions are checked, how configuration is read, the existing test layout, the files and data that will be touched. Check the cache first: `bash "<kit>/scripts/explore-cache.sh" <directory>`; `HIT` → read the cache file.
+3. Read `docs/team/architecture.md` / `arch-impact.md` and the relevant ADRs (size L): an ADR's constraints are law for the design.
 
-## Đầu vào và điều kiện trước
-- `docs/team/features/<ID>/spec.md` (tiêu chí AC-n, NFR, DoD); `research.md` nếu có; `arch-impact.md`/`architecture.md` khi cỡ L hoặc playbook có architect.
-- `--short` (refactor): `intake.md` + mục nợ trong `docs/team/debt.md` là đủ; chuỗi refactor không có spec (ADJ-26).
-- Kiểm: `python3 "<kit>/scripts/team.py" status <ID>`; G1 bật mà chưa duyệt, hoặc có kiến trúc mà G2 chưa duyệt → dừng.
+## Inputs and preconditions
+- `docs/team/features/<ID>/spec.md` (criteria AC-n, NFRs, DoD); `research.md` if present; `arch-impact.md`/`architecture.md` for size L or a playbook that includes architect.
+- `--short` (refactor): `intake.md` + the debt item in `docs/team/debt.md` is enough; the refactor chain has no spec (ADJ-26).
+- Check: `python3 "<kit>/scripts/team.py" status <ID>`; G1 on but not approved, or an architecture exists and G2 is not approved → stop.
 
-## Quy trình
-1. **Ghi vị trí.** Write `.team/current.json` {feature, stage: "design", agent: "designer", started_at}.
-2. **Giả định trước khi viết.** Liệt kê điều đang giả định. Giả định về nghiệp vụ → ghi `questions.md` (2–4 lựa chọn, khuyến nghị, hậu quả) và trả `NEEDS_ANSWER`. Giả định kỹ thuật ở chế độ decide → `## Assumptions decided by the team` (chọn gì / vì sao / phương án khác / sửa thế nào nếu sai).
-3. **Mục 1 Bối cảnh:** vấn đề, phạm vi trong/ngoài (chép từ spec), mã ADR phải tuân.
-4. **Mục 3 Hợp đồng (viết trước mục 2, 4):** mỗi điểm vào công khai: đầu vào, đầu ra, lỗi (một kiểu, theo code hiện có), phiên bản. Đánh dấu hành vi nào là hợp đồng. Đổi thì ưu tiên thêm trường tùy chọn; phá vỡ → phiên bản mới + hướng dẫn di trú (STD-DOC-7).
-5. **Mục 2 Dữ liệu:** thực thể, trường, ràng buộc, chỉ mục theo cách truy cập; chủ sở hữu theo ADR. Không thêm trường "dự phòng" (STD-DESIGN-5).
-6. **Mục 4 Luồng:** đường thuận và đường lỗi cho từng tiêu chí; mọi lời gọi ra ngoài có timeout (STD-ERR-5) và kết cục thành công / thất bại / không rõ.
-7. **Tích hợp (playbook integration hoặc gọi API ngoài):** khóa idempotency suy từ ý định (không theo từng lần thử); giành quyền nguyên tử bằng ràng buộc duy nhất (không kiểm-rồi-chèn); cùng khóa khác nội dung → lỗi rõ ràng; chính sách cho bản trùng đang chạy; thời gian giữ khóa ≥ đường retry dài nhất. Chi tiết: `${CLAUDE_SKILL_DIR}/references/contracts.md`.
-8. **Mục 5 Quyền:** kiểm đầu vào ở biên, kiểm quyền phía server (STD-SEC-4); phản hồi bên thứ ba coi là không tin cậy.
-9. **Mục 6 Migration và rollback:** có `cmd.migrate` và đổi dữ liệu → lên, xuống, đối soát số lượng (STD-OPS-2, STD-OPS-3); bảng lớn chia lô; điều kiện kích hoạt rollback và tiêu chí thành công. designer chỉ lập kế hoạch; dev chạy trên bản sao, qa chạy lên/xuống/lên. Không có thay đổi dữ liệu → ghi "không có".
-10. **Quan sát (STD-OPS-5):** một log hoặc metric cho mỗi đường mới quan trọng, không dữ liệu nhạy cảm — để `/team:release` chứng minh tính năng chạy trên prod.
-11. **Mục 7 Touchpoints:** đường dẫn thật, "sửa" (Glob thấy file) hoặc "mới" (nằm dưới `structure.allowed_new_file_roots`); file test theo `structure.tests` và `naming.test_file`. Checkpoint máy: dán từng đường dẫn mới cạnh gốc cho phép mà nó khớp; không đường dẫn nào khớp `protected_paths`. Cột ghi chú nói vì sao chạm — không ghi số task.
-12. **Mục 8 Test plan:** mỗi AC-n và mỗi NFR có "cách kiểm" → ≥ 1 dòng `tiêu chí | file test::tên | loại | đường lỗi/biên`. Tiêu chí có đầu vào → ít nhất một dòng biên hoặc lỗi (qa sẽ chạy nó). Lệnh chỉ nêu bằng tên khe (`cmd.test_one`), không gõ lệnh stack.
-13. **`--short` (refactor):** mục 1, 7, 8 và mục "Cách chứng minh hành vi không đổi": `cmd.test` trước == sau (số test và tên test), lint/typecheck sạch, một loại dọn dẹp. Nơi không có test phủ → thêm test đặc tả (characterization) là task đầu, trước mọi thay đổi.
-14. **Tự đối chiếu (điểm quyết định).** Mỗi mục dẫn mã ADR mình tuân. Design không thể thỏa tiêu chí nếu giữ ADR → `DESIGN_CONFLICT` về team-leader; không lặng lẽ đổi kiến trúc (STD-DESIGN-2).
-15. **Viết** `docs/team/features/<ID>/design.md` từ `<kit>/templates/artifacts/design.md` (Write).
-16. **Trả** team-leader ≤ 10 dòng, dòng đầu `designer -> team-leader | <ID> | DESIGNED` (hoặc `DESIGN_CONFLICT`, `NEEDS_ANSWER`).
+## Process
+1. **Record position.** Write `.team/current.json` {feature, stage: "design", agent: "designer", started_at}.
+2. **Assumptions before writing.** List what you are assuming. A business assumption → write `questions.md` (2–4 options, recommendation, consequences) and return `NEEDS_ANSWER`. A technical assumption in decide mode → `## Assumptions decided by the team` (what was chosen / why / alternatives / how to fix if wrong).
+3. **Section 1 Context:** the problem, in/out of scope (copied from the spec), the ADR IDs that must be obeyed.
+4. **Section 3 Contracts (written before sections 2 and 4):** for each public entry point: input, output, errors (one style, following the existing code), version. Mark which behaviors are contract. To change, prefer adding an optional field; breaking → a new version + a migration guide (STD-DOC-7).
+5. **Section 2 Data:** entities, fields, constraints, indexes chosen from the access patterns; ownership per the ADR. No "just in case" fields (STD-DESIGN-5).
+6. **Section 4 Flow:** the happy path and the error path for every criterion; every outbound call has a timeout (STD-ERR-5) and an outcome of success / failure / unknown.
+7. **Integration (integration playbook or any external API call):** the idempotency key derived from intent (not per attempt); claim it atomically with a unique constraint (not check-then-insert); same key with a different payload → an explicit error; a policy for an in-flight duplicate; key retention ≥ the longest retry path. Details: `${CLAUDE_SKILL_DIR}/references/contracts.md`.
+8. **Section 5 Permissions:** validate input at the boundary, check permissions server side (STD-SEC-4); treat third-party responses as untrusted.
+9. **Section 6 Migration and rollback:** when there is a `cmd.migrate` and data changes → up, down, and row-count reconciliation (STD-OPS-2, STD-OPS-3); large tables in batches; rollback trigger conditions and success criteria. designer only plans; dev runs it on a copy, qa runs up/down/up. No data change → write "none".
+10. **Observability (STD-OPS-5):** one log or metric for each important new path, with no sensitive data — so `/team:release` can prove the feature runs in prod.
+11. **Section 7 Touchpoints:** real paths, "edit" (Glob finds the file) or "new" (under `structure.allowed_new_file_roots`); test files per `structure.tests` and `naming.test_file`. Machine checkpoint: paste each new path next to the allowed root it matches; no path may match `protected_paths`. The notes column says why the file is touched — never a task number.
+12. **Section 8 Test plan:** every AC-n and every NFR with a "how to check" → ≥ 1 row `criterion | test file::name | kind | error/boundary path`. A criterion with inputs → at least one boundary or error row (qa will run it). Commands are named only by slot (`cmd.test_one`), never as typed stack commands.
+13. **`--short` (refactor):** sections 1, 7, 8 and the "How to prove behavior is unchanged" section: `cmd.test` before == after (test count and test names), lint/typecheck clean, a single kind of cleanup. Where no test covers the code → a characterization test is the first task, before any change.
+14. **Self-check (decision point).** Every section cites the ADR IDs it obeys. The design cannot meet the criteria while keeping an ADR → `DESIGN_CONFLICT` back to team-leader; never quietly change the architecture (STD-DESIGN-2).
+15. **Write** `docs/team/features/<ID>/design.md` from `<kit>/templates/artifacts/design.md` (Write). Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language); the `## 7. Touchpoints` heading stays English.
+16. **Return** to team-leader in ≤ 10 lines, first line `designer -> team-leader | <ID> | DESIGNED` (or `DESIGN_CONFLICT`, `NEEDS_ANSWER`).
 
-## Đầu ra
-- `docs/team/features/<ID>/design.md` (8 mục; `--short`: 1, 7, 8 + chứng minh hành vi không đổi); `questions.md` khi cần hỏi.
-- Tin trả mẫu:
+## Outputs
+- `docs/team/features/<ID>/design.md` (8 sections; `--short`: 1, 7, 8 + proof that behavior is unchanged); `questions.md` when a question must be asked.
+- Example return message:
   ```
   designer -> team-leader | FEAT-014 | DESIGNED
-  File: docs/team/features/FEAT-014/design.md (8 mục; tuân ADR-003, ADR-007)
-  Touchpoints: 6 (4 sửa, 2 mới dưới src/auth/, tests/auth/ — thuộc allowed_new_file_roots); 0 trong protected_paths
-  Hợp đồng: POST /otp/verify thêm mã lỗi OTP_EXPIRED (thêm, tương thích ngược)
-  Dữ liệu: +1 cột otp_expires_at; migration 0007 lên/xuống + đối soát số hàng
-  Test plan: 5/5 AC có test, 3 có đường lỗi/biên
-  Giả định đã quyết: 1 (TTL đọc từ cấu hình); câu hỏi nghiệp vụ: 0. G2b tắt → Tiếp: /team:plan FEAT-014
+  File: docs/team/features/FEAT-014/design.md (8 sections; obeys ADR-003, ADR-007)
+  Touchpoints: 6 (4 edit, 2 new under src/auth/, tests/auth/ — within allowed_new_file_roots); 0 in protected_paths
+  Contract: POST /otp/verify adds error code OTP_EXPIRED (additive, backward compatible)
+  Data: +1 column otp_expires_at; migration 0007 up/down + row-count reconciliation
+  Test plan: 5/5 AC have tests, 3 with error/boundary paths
+  Assumptions decided: 1 (TTL read from config); business questions: 0. G2b off → Next: /team:plan FEAT-014
   ```
 
-## Lý do tự bào chữa thường gặp
-| Ý nghĩ | Làm đúng |
+## Common rationalizations
+| Thought | Correct action |
 |---|---|
-| "Viết luồng trước, API tính sau" | Hợp đồng (mục 3) trước luồng. |
-| "Lỗi trả kiểu nào cũng được" | Một kiểu, theo code hiện có (Explore). |
-| "Hành vi không ghi trong tài liệu thì chẳng ai dùng" | Liệt kê hành vi quan sát được là hợp đồng. |
-| "Thêm phiên bản API song song cho chắc" | Thêm trường tùy chọn; phiên bản mới chỉ khi phá vỡ. |
-| "Retry an toàn vì đã có header idempotency" | Khóa phải được lưu nguyên tử; thiết kế cả bản trùng đang chạy. |
-| "Dev tự tìm file" | Đường dẫn thật trong touchpoints. |
-| "Migration đơn giản, khỏi rollback" | Luôn có xuống và đối soát. |
-| "Luật nghiệp vụ chắc là vậy" | `NEEDS_ANSWER`, không đoán. |
-| "Thêm trường dự phòng" | Chỉ điều spec cần. |
+| "Write the flow first, the API later" | Contracts (section 3) before flow; the flow is shaped by what the entry point promises. |
+| "Any error style will do" | One style, following the existing code (Explore). |
+| "Undocumented behavior, nobody relies on it" | List observable behavior as contract. |
+| "Add a parallel API version to be safe" | Add an optional field; a new version only for a break. |
+| "Retry is safe because there's an idempotency header" | The key must be stored atomically; design the in-flight duplicate case too. |
+| "Dev will find the files" | Real paths in the touchpoints. |
+| "The migration is simple, no rollback needed" | Always a down path and a reconciliation. |
+| "The business rule is surely like this" | `NEEDS_ANSWER`, never guess. |
+| "Add a spare field for later" | Only what the spec needs. |
 
-## Dấu hiệu sai
-- Điểm vào công khai không có danh sách lỗi.
-- Touchpoint không tồn tại mà cũng không nằm dưới gốc cho phép; touchpoint khớp `protected_paths`.
-- AC không có dòng test; dòng test ghi lệnh thay vì file test.
-- Migration không có chiều xuống hay đối soát.
-- Idempotency kiểu kiểm-rồi-chèn.
-- Design chép lại kiến trúc thay vì dẫn mã ADR; design có số task.
-- Luật nghiệp vụ được quyết trong design.
+## Red flags
+- A public entry point with no error list.
+- A touchpoint that does not exist and is not under an allowed root; a touchpoint matching `protected_paths`.
+- An AC with no test row; a test row that names a command instead of a test file.
+- A migration without a down direction or a reconciliation.
+- Check-then-insert idempotency.
+- The design copies the architecture instead of citing ADR IDs; the design contains task numbers.
+- A business rule decided in the design.
 
-## Kiểm chứng
-- [ ] Đủ mục (dán `grep -c '^## [1-8]\.' design.md`), hoặc 3 mục + chứng minh khi `--short`.
-- [ ] Danh sách AC-n trong spec và trong test plan được dán, khớp nhau.
-- [ ] Mỗi đường dẫn mới dán cạnh gốc cho phép; dòng "0 trong protected_paths".
-- [ ] Tóm tắt Explore (quy ước lỗi, quyền, test) được dán làm căn cứ.
-- [ ] Hợp đồng phá vỡ có phiên bản + dòng di trú, hoặc ghi "không có thay đổi phá vỡ".
+## Verification
+- [ ] All sections present (paste `grep -c '^## [1-8]\.' design.md`), or 3 sections + the proof when `--short`.
+- [ ] The AC-n list from the spec and from the test plan are pasted and match.
+- [ ] Each new path is pasted next to its allowed root; the line "0 in protected_paths".
+- [ ] The Explore summary (error, permission and test conventions) is pasted as the basis.
+- [ ] A breaking contract has a version + a migration line, or "no breaking change" is written.
 
-## Xem thêm
-- `${CLAUDE_SKILL_DIR}/references/contracts.md` — hợp đồng, lỗi, idempotency, migration theo lô, mẫu dòng test plan. Mở ở bước 4, 7, 9, 12.
+## See also
+- `${CLAUDE_SKILL_DIR}/references/contracts.md` — contracts, errors, idempotency, batched migration, test-plan row template. Open it at steps 4, 7, 9, 12.
 - Agent `designer`; `<kit>/templates/artifacts/design.md`.
-- `/team:architect` (trước, cỡ L), `/team:plan` (sau), `/team:clean` (refactor).
+- `/team:architect` (before, size L), `/team:plan` (after), `/team:clean` (refactor).
 - `handbook/STD.md`: STD-DESIGN-1, STD-DESIGN-3, STD-DESIGN-5, STD-ERR-5, STD-SEC-4, STD-OPS-2, STD-OPS-3, STD-OPS-5.

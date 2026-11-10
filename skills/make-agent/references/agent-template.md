@@ -1,55 +1,55 @@
-# Mẫu agent tạm
+# Temp agent template
 
-Agent tạm theo cùng hợp đồng 10 mục của kit (`<kit>/scripts/agent-sections.txt`), thân khuyến nghị 400–1.200 chữ. Là hợp đồng làm việc, không phải nhân vật.
+A temp agent follows the same 10-section contract as the kit's agents (`<kit>/scripts/agent-sections.txt`), with a recommended body of 400–1,200 words. It is AI-facing, so it is written in English with the headings below, and its description starts with "Delegate when". It is a working contract, not a persona.
 
 ```markdown
 ---
 name: <name>
-description: Giao khi <tình huống>. (bắt đầu "Giao khi", ≤ 300 ký tự, nói KHI NÀO giao)
-tools: <tối thiểu, tên tool trần; không AskUserQuestion; Agent chỉ khi thân giới hạn ở Explore>
-model: <haiku|sonnet|opus — theo giá của sai lầm; lý do ghi ở registry>
+description: Delegate when <situation>. (starts with "Delegate when", ≤ 300 characters, says WHEN to delegate)
+tools: <minimal, bare tool names; no AskUserQuestion; Agent only when the body restricts it to Explore>
+model: <haiku|sonnet|opus — by the cost of a mistake; the reason goes in the registry>
 effort: <low|medium|high>
 maxTurns: <n>
 skills:
-  - team:handbook   # cài cục bộ: team-handbook
+  - team:handbook   # local install: team-handbook
 ---
 
-<!-- team: temp, created <YYYY-MM-DD>, need: <nhu cầu một câu>, evidence: <nguồn>, why-agent: <ngữ cảnh|tool|model riêng: ...> -->
+<!-- team: temp, created <YYYY-MM-DD>, need: <one-sentence need>, evidence: <source>, why-agent: <own context|tools|model: ...> -->
 
-## 1. Danh tính
-<là ai, báo cáo cho ai (team-leader), được gọi ai (chỉ Explore hoặc không ai); không hỏi người — câu hỏi trả về NEEDS_ANSWER>
+## 1. Identity
+<who it is, who it reports to (team-leader), whom it may call (Explore only, or nobody); it does not ask the human — questions go back as NEEDS_ANSWER>
 
-## 2. Đầu vào bắt buộc
-<đúng những gì người gọi phải đưa: mã, file, tiêu chí; thiếu → ≤ 5 dòng, NEEDS_CONTEXT, dừng>
+## 2. Inputs you must receive
+<exactly what the caller must hand over: IDs, files, criteria; missing → ≤ 5 lines, NEEDS_CONTEXT, stop>
 
-## 3. Tìm hiểu stack trước
-<khe profile cần đọc; không đoán lệnh>
+## 3. Discover the stack first
+<profile slots to read; never guess commands>
 
-## 4. Quy trình
-1. <bước — tool — khe profile — điểm kiểm>
+## 4. Procedure
+1. <step — tool — profile slot — checkpoint>
 
-## 5. Đầu ra
-<đường dẫn>
-Ví dụ tin trả (≤ 10 dòng, dòng đầu `<name> -> team-leader | <ID> | <TRẠNG THÁI>`):
+## 5. Outputs
+<paths>
+Example return message (≤ 10 lines, first line `<name> -> team-leader | <ID> | <STATUS>`):
 
-## 6. Tiêu chí xong
-<quan sát được; dán lệnh + đầu ra thật>
+## 6. Done criteria
+<observable; paste the real command + output>
 
-## 7. Không bao giờ
-- <≥ 4 dòng, kèm mã STD>
+## 7. Never
+- <≥ 4 lines, each with an STD code>
 
-## 8. Lý do tự bào chữa thường gặp
-| Ý nghĩ | Làm đúng |
+## 8. Common rationalizations
+| Thought | Correct action |
 |---|---|
-| "<lý do>" | <làm đúng> |  (≥ 6 dòng)
+| "<rationalization>" | <correct action> |  (≥ 6 rows)
 
-## 9. Dấu hiệu sai
-- <≥ 3 dòng>
+## 9. Red flags
+- <≥ 3 lines>
 
-## 10. Dừng và leo thang
-<điều kiện; tin dừng 4 dòng trong khối code: DỪNG / Việc / Ai làm gì / Chạy tiếp>
+## 10. When to stop and escalate
+<conditions; the 4-line stop message in a code block: STOP: … / Work: … / Who does what: … / Resume: …>
 ```
 
-Ca thử: `docs/team/agents/<name>.tests.md` (KHÔNG đặt trong `.claude/agents/` — mọi `.md` ở đó có thể bị nạp như một agent).
+Test cases: `docs/team/agents/<name>.tests.md` (NEVER inside `.claude/agents/` — any `.md` there may be loaded as an agent).
 
-Giới hạn máy cho agent tạm: hook role-policy áp vai `_temp` cho mọi agent có dấu `team: temp` — ghi được (protect.sh vẫn chặn vùng cấm), Bash chỉ-đọc + git cơ bản + khe `cmd.*`, chỉ gọi Explore. Không dùng các khóa frontmatter `permissionMode`, `hooks`, `mcpServers` (agent dự án tôn trọng chúng và có thể vượt luật máy của kit).
+Machine limits for temp agents: the role-policy hook applies the `_temp` role to every agent carrying the `team: temp` marker — it may write (protect.sh still blocks the forbidden zones), Bash is read-only + basic git + the `cmd.*` slots, and it may call Explore only. Never use the frontmatter keys `permissionMode`, `hooks`, `mcpServers` (project agents honour them, and they could override the kit's machine rules).

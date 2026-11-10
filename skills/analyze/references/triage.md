@@ -1,33 +1,33 @@
-# Phân loại 7 mục — câu hỏi gợi ý
+# The 7-section triage — suggested questions
 
-Mỗi mục: điền từ intake, README, glossary, Explore trước; chỉ thành câu hỏi khi hậu quả lớn hoặc không đảo ngược.
+For each section: fill it from the intake, README, glossary and Explore first; it becomes a question only when the consequence is large or irreversible.
 
-| Mục | Phải trả lời | Câu hỏi gợi ý | Dấu hiệu còn thiếu |
+| Section | Must answer | Suggested question | Sign it is still missing |
 |---|---|---|---|
-| Mục tiêu | Vì sao làm, giá trị cho ai, đo bằng gì | "Nếu không làm thì mất gì?" | Chỉ có giải pháp, không có vấn đề |
-| Người dùng | Ai dùng, trong tình huống nào, bao nhiêu người | "Ai bấm nút này, lúc nào?" | "Người dùng" chung chung |
-| Phạm vi trong/ngoài | Có gì, KHÔNG có gì (non-goals) | "Việc gần giống nào cố ý để ngoài?" | Không có dòng non-goal |
-| Dữ liệu | Thực thể, trường, khối lượng, dữ liệu nhạy cảm, giữ bao lâu | "Có xóa/đổi dữ liệu đã có không?" | Không nói tới dữ liệu cũ |
-| Giao diện / tích hợp | Màn hình, API, hệ thống ngoài, định dạng | "Ai/hệ thống nào gọi cái này?" | Định dạng vào/ra không rõ |
-| NFR | Hiệu năng, bảo mật, khả dụng, truy cập, quy định | "Chậm đến đâu thì không chấp nhận?" | Tính từ không có số |
-| Tiêu chí nghiệm thu | Mỗi hành vi một tiêu chí, lệnh/bước kiểm, đầu ra mong đợi | "Bạn sẽ kiểm bằng cách nào để chấp nhận?" | Tiêu chí không có cách kiểm |
+| Goal | Why do it, value for whom, measured by what | "What is lost if we do not do this?" | Only a solution, no problem |
+| Users | Who uses it, in what situation, how many people | "Who presses this button, and when?" | A generic "the user" |
+| Scope in/out | What is in, what is NOT in (non-goals) | "Which similar piece of work is deliberately left out?" | No non-goal line |
+| Data | Entities, fields, volume, sensitive data, retention | "Does this delete or change existing data?" | Nothing said about existing data |
+| Interfaces / integrations | Screens, APIs, external systems, formats | "Who or which system calls this?" | Input/output format unclear |
+| NFR | Performance, security, availability, accessibility, regulation | "How slow is unacceptable?" | Adjectives without numbers |
+| Acceptance criteria | One criterion per behavior, a check command/step, the expected output | "How will you check it before you accept it?" | A criterion with no way to check it |
 
-## Đổi tính từ thành con số
-| Tính từ | Câu viết lại | Cách kiểm |
+## Turn adjectives into numbers
+| Adjective | Rewritten sentence | How to check |
 |---|---|---|
-| nhanh | p95 < N ms cho thao tác X với M bản ghi | lệnh đo trong test plan |
-| an toàn | chỉ vai Y đọc được trường Z; thử với vai khác trả lỗi 403 | test truy cập |
-| dễ dùng | hoàn thành việc X trong ≤ N bước | bước kiểm có ảnh chụp |
-| đúng | đầu ra khớp mẫu `<file mẫu>` từng byte | so khớp trong test |
+| fast | p95 < N ms for operation X with M records | measurement command in the test plan |
+| secure | only role Y can read field Z; another role gets a 403 error | access test |
+| easy to use | task X completes in ≤ N steps | check step with a screenshot |
+| correct | output matches the sample `<sample file>` byte for byte | comparison in a test |
 
-## Định dạng một câu hỏi (questions.md)
+## Format of one question (questions.md)
 ```
-1. <câu hỏi> — vì sao cần: <phần việc sẽ đổi theo câu trả lời>
-   - a) <lựa chọn> — hậu quả: <...>
-   - b) <lựa chọn> — hậu quả: <...>
-   - Khuyến nghị: b, vì <...>
-   - Đã xem: <đường dẫn file/tài liệu không trả lời được>
+1. <question> — why it is needed: <the part of the work that changes with the answer>
+   - a) <option> — consequence: <...>
+   - b) <option> — consequence: <...>
+   - Recommendation: b, because <...>
+   - Checked: <path of the file/doc that does not answer it>
 ```
 
-## Bốn trường của một quyết định (decide / Assumptions)
-`chọn: … | vì: … | phương án khác: … | sửa nếu sai: …`
+## The four fields of a decision (decide / Assumptions)
+`chosen: … | why: … | alternative: … | correct if wrong: …`

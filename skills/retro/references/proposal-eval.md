@@ -1,34 +1,34 @@
-# Eval và canary cho một đề xuất
+# Eval and canary for a proposal
 
-## Eval phân biệt được
-Định dạng giống `evals/<skill>/scenarios.md` để `evals/run-eval.sh` chạy được:
+## An eval that discriminates
+Same format as `evals/<skill>/scenarios.md`, so that `evals/run-eval.sh` can run it:
 ```markdown
-## Scenario 1 — <tình huống đã gây điểm nghẽn>
-- Situation: <dẫn journal/runs.jsonl>
-- Input: `<lệnh /team:… với bản đề xuất>`
-- Baseline input: `<cùng lệnh>`  (BEFORE = kit hiện tại, AFTER = kit + overlay)
-- Good: <kết quả mong đợi>
-- Bad: <điều đã xảy ra>
+## Scenario 1 — <the situation that caused the bottleneck>
+- Situation: <cite journal/runs.jsonl>
+- Input: `<the /team:… command with the proposed version>`
+- Baseline input: `<the same command>`  (BEFORE = current kit, AFTER = kit + overlay)
+- Good: <expected result>
+- Bad: <what actually happened>
 - Checks:
   - grep: `<regex>` in `<file|OUTPUT>`
   - exists: `<path>`
 ```
-Luật:
-- ≥ 3 kịch bản: tình huống gốc, một biến thể, một đối chứng (việc mà bản hiện tại đã làm đúng — phải vẫn đúng).
-- Ít nhất một check bản hiện tại TRƯỢT và bản đề xuất QUA. Check qua ở cả hai bản ghi "không phân biệt" — không tính là bằng chứng.
-- Check về nội dung, không chỉ "file tồn tại" (file rỗng cũng tồn tại).
-- Đổi câu chữ (prompt): ≥ 3 lần chạy mỗi bản; độ dao động là một chỉ số.
-- coach không chạy eval (Bash chỉ đọc): ghi "người chạy: <người hoặc người bảo trì kit>", lệnh `EVAL_KIT=<kit có overlay> evals/run-eval.sh <skill> <n> --project <dự án mẫu>`.
+Rules:
+- ≥ 3 scenarios: the original situation, one variant, one control (a job the current version already does right — it must stay right).
+- At least one check that the current version FAILS and the proposed version PASSES. A check that passes on both versions is marked "does not discriminate" — it does not count as evidence.
+- Checks are about content, not just "the file exists" (an empty file exists too).
+- Wording changes (prompt): ≥ 3 runs per version; the spread is itself a metric.
+- coach does not run the eval (read-only Bash): write "run by: <the human or the kit maintainer>", with the command `EVAL_KIT=<kit with overlay> evals/run-eval.sh <skill> <n> --project <sample project>`.
 
 ## Canary
-| Mục | Ghi gì |
+| Item | What to record |
 |---|---|
-| Phạm vi | N việc cỡ S kế tiếp (N = 3 mặc định; độ tin cậy thấp → 2 và theo dõi sát) |
-| Đo | chỉ số của điểm nghẽn (lượt, rework, thời gian) qua `measure.py --since <ngày áp>` so trung vị đường nền cùng cỡ |
-| Giữ | chỉ số tốt hơn đường nền và không chỉ số nào xấu hơn quá 1 MAD |
-| Rollback | chỉ số xấu hơn đường nền, hoặc một việc canary hỏng vì thay đổi |
-| Thay | tốt ở chỉ số mục tiêu nhưng xấu ở chỉ số khác → đề xuất bản khác |
-| Bỏ | không khác biệt sau N việc → gỡ overlay (đơn giản hơn là tốt hơn) |
-| Rollback thế nào | xóa file overlay (đường dẫn), hoặc khôi phục bản trước (phiên bản ghi trong dòng đầu) |
+| Scope | the next N size S jobs (N = 3 by default; low confidence → 2, and watch closely) |
+| Measure | the bottleneck's metric (turns, rework, time) via `measure.py --since <date applied>` against the baseline median of the same size |
+| Keep | the metric is better than the baseline and no other metric is worse by more than 1 MAD |
+| Rollback | the metric is worse than the baseline, or a canary job broke because of the change |
+| Replace | better on the target metric but worse on another → propose a different version |
+| Remove | no difference after N jobs → remove the overlay (simpler is better) |
+| How to roll back | delete the overlay file (path), or restore the previous version (the version recorded in the first line) |
 
-Retro kế tiếp đọc kết quả canary ở bước "theo dõi retro trước" và ghi khuyến nghị; người quyết.
+The next retro reads the canary result in its "follow up the previous retro" step and records a recommendation; the human decides.
