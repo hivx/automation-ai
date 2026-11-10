@@ -1,0 +1,12 @@
+# SPEC overrides
+
+`SPEC.md` is frozen. Decisions that supersede it are appended here, dated and numbered, newest last. Each entry quotes the SPEC line it overrides, states the new rule and the reason. Earlier implementation adjustments (ADJ-01..ADJ-30) live in `docs/00-overview.md`; this file records owner decisions that change the specification itself.
+
+## 1. Language zones (2026-11-10, P9)
+- **Overrides** SPEC.md §0: `REPO_LANGUAGE: Vietnamese              # prose of agents, skills, rules, docs, templates, journal. Change to "English" to switch.`
+- **New rule — three language zones, by reader:**
+  1. *Zone 1, AI-facing, English:* every `agents/*.md` body, `skills/*/SKILL.md` and `references/*`, `handbook/*.md`, `workflows/**`, `templates/project/claude/rules/*`, `templates/project/CLAUDE.md.tmpl`, the repo's own `CLAUDE.md`, `README.md`, `docs/**` (except the historical records `docs/requirements/**` and `docs/acceptance/**`), `evals/**`, script `--help` text, comments and messages.
+  2. *Zone 2, owner-facing, Vietnamese:* exactly one file, `GUIDE-VI.md` (name kept in `scripts/vi-guide.conf`). It is the owner's control panel; its section 9 is the log of owner decisions and requests that every session reads. No other Vietnamese prose in the repo, except the allowlist enforced by `scripts/check-lang.py` (`scripts/vi-strings.json`, `templates/artifacts/vi/**`, historical records, CHANGELOG entries up to 0.3.0, and the first line of `README.md` pointing to the guide).
+  3. *Zone 3, artifacts produced inside a project:* prose language chosen by the new slot `output_language` in `.team/config.json` (enum `vi` | `en`, default `vi`). Templates come from `templates/artifacts/vi/` (Vietnamese headings/hints) or `templates/artifacts/` (English).
+- **Anchors** (machine-read strings listed in `scripts/anchors.txt`: `Approved-by:`, `## Sources`, `## Definition of Done`, `## Assumptions decided by the team`, verdict and status keywords, `STD-*` codes, IDs, branch and commit patterns, intake fields, PR-body headings, JSON keys, file names) never change language in any zone; `scripts/check-lang.py` fails on any translated form.
+- **Reason:** Claude reads AI-facing text on every call; Vietnamese with diacritics costs far more tokens than English for the same content (`docs/research/language-switch.md` measures it) and English is the language the reference kits and Claude Code docs use. The owner keeps reading and writing Vietnamese where it matters to him: the control file and the artifacts of his projects.

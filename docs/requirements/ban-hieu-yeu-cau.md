@@ -55,6 +55,13 @@ Repo **không** do Claude trong chat viết file trực tiếp. Claude trong cha
 - Nội dung agent, skill, rule, tài liệu, prompt: **tiếng Việt**.
 - Định danh (tên file, key JSON, tên skill/agent, mã STD, tên nhánh, tên script): **tiếng Anh**.
 
+> **Sửa đổi A5 — 2026-11-10 (P9, quyết định của chủ repo; ghi đè hai dòng trên, xem `SPEC-OVERRIDES.md` mục 1).** Ba vùng ngôn ngữ theo người đọc:
+> 1. **Cho AI — tiếng Anh:** thân agent, skill (kèm `references/`), handbook, playbook, rule và `CLAUDE.md.tmpl` của dự án, `CLAUDE.md` và `README.md` của repo, toàn bộ `docs/` (trừ bản ghi lịch sử `docs/requirements/`, `docs/acceptance/`), `evals/`, phần trợ giúp, chú thích và thông báo của script.
+> 2. **Cho chủ repo — tiếng Việt:** đúng một file `GUIDE-VI.md` ở gốc repo (tên ghi trong `scripts/vi-guide.conf`), là bảng điều khiển và kênh trao đổi; mục 9 của nó là nhật ký quyết định và yêu cầu của chủ repo. Ngoài file này không có văn xuôi tiếng Việt (trừ danh sách cho phép mà `scripts/check-lang.py` kiểm).
+> 3. **Artifact trong dự án — theo cấu hình:** khe mới `output_language` trong `.team/config.json` (`vi` | `en`, mặc định `vi`); mọi skill viết văn xuôi artifact bằng ngôn ngữ đó, mẫu lấy từ `templates/artifacts/vi/` hoặc `templates/artifacts/`.
+> - **Mốc máy đọc không bao giờ dịch** ở bất kỳ vùng nào (danh sách trong `scripts/anchors.txt`): `Approved-by:`, `Approved-by-prod:`, `## Sources`, `## Definition of Done`, `## Assumptions decided by the team`, `## Differences from design`, touchpoints, dòng task `- [ ] T<n> —`, từ khóa phán quyết và trạng thái, mã `STD-*`, mã feature, mẫu nhánh và tiền tố commit, khóa JSON, tên file skill/agent/playbook/script/template.
+> - Định danh vẫn bằng tiếng Anh như trước.
+
 ---
 
 ## Phần B — Đội ngũ
