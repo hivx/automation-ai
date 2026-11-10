@@ -1,6 +1,6 @@
-# Tên tool được phép trong trường `tools` của agents/*.md — mỗi dòng một tên.
-# Nguồn: https://code.claude.com/docs/en/tools-reference.md (truy cập 2026-11-09, Claude Code 2.1.319).
-# Chỉ liệt kê tool có ích cho các vai; thêm tool mới phải kèm lý do trong PR.
+# Tool names allowed in the `tools` field of agents/*.md — one name per line.
+# Source: https://code.claude.com/docs/en/tools-reference.md (accessed 2026-11-09, Claude Code 2.1.319).
+# Lists only tools useful to the roles; adding a tool needs a reason in the PR.
 Agent
 AskUserQuestion
 Bash

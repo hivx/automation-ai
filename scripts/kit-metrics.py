@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""kit-metrics.py — đo từng skill/agent so với chuẩn chất lượng (chỉ thư viện chuẩn).
+"""kit-metrics.py — measures every skill/agent against the quality bar (standard library only).
 
-Đọc chuẩn từ scripts/skill-budgets.txt, scripts/skill-sections.txt, scripts/agent-sections.txt.
-Mỗi mục: số chữ thân, tiêu đề có/thiếu (đúng thứ tự), số dòng tự bào chữa, số dấu hiệu sai, số ô kiểm,
-mô tả (độ dài, tiền tố), số file references/, lệnh stack ghi cứng, ngày đổi git cuối, score 0–100.
-score = 100 − Σ trọng số × khoảng cách tới chuẩn (WEIGHTS; thiếu chữ nặng nhất).
+Reads the bar from scripts/skill-budgets.txt, scripts/skill-sections.txt, scripts/agent-sections.txt.
+Per item: body word count, headings present/missing (in order), rationalization rows, red flags, checkboxes,
+description (length, prefix), number of references/ files, hard-coded stack commands, last git change date, score 0–100.
+score = 100 − Σ weight × distance to the bar (WEIGHTS; missing words weigh most).
 
-Dùng: kit-metrics.py [--only <tên>] [--json] [--md]   (mặc định in Markdown)
-      kit-metrics.py --check   thoát 1 nếu mục nào (ngoài scripts/quality-backlog.txt) chưa đạt chuẩn
+Usage: kit-metrics.py [--only <name>] [--json] [--md]   (Markdown by default)
+       kit-metrics.py --check   exit 1 if any item (outside scripts/quality-backlog.txt) is below the bar
 """
 import json
 import os
@@ -31,7 +31,8 @@ def load_heading_map():
         text = fh.read()
     if "\ntransition: on" not in "\n" + text:
         return {}
-    return dict(l.split(" = ", 1) for l in text.splitlines() if " = " in l and not l.startswith("# "))
+    return {a.encode("ascii").decode("unicode_escape"): b for a, b in
+            (l.split(" = ", 1) for l in text.splitlines() if " = " in l and not l.startswith("# "))}
 
 
 HMAP = load_heading_map()
@@ -218,22 +219,22 @@ def summary(items):
 
 
 def markdown(items, summ):
-    lines = ["| Mục | Lớp | Chữ | Ngân sách | Tiêu đề | Tự bào chữa | Dấu hiệu sai | Kiểm chứng | Mô tả | refs | Score | Đạt |",
+    lines = ["| Item | Class | Words | Budget | Headings | Rationalizations | Red flags | Verification | Description | refs | Score | At bar |",
              "|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for i in sorted(items, key=lambda x: (x["score"], x["kind"], x["name"])):
         c = i["counts"]
         lines.append(f"| {i['kind']}:{i['name']} | {i['cls']} | {i['words']} | {i['budget'][0]}–{i['budget'][1]} | "
-                     f"{i['sections_present']}/{i['sections_required']}{'' if i['order_ok'] else ' (thứ tự)'} | "
+                     f"{i['sections_present']}/{i['sections_required']}{'' if i['order_ok'] else ' (order)'} | "
                      f"{c.get('rows', '—')} | {c.get('bullets', '—')} | {c.get('checks', '—')} | "
-                     f"{i['desc_len']}{'' if i['desc_prefix_ok'] else ' (tiền tố!)'} | {i['references']} | {i['score']} | "
+                     f"{i['desc_len']}{'' if i['desc_prefix_ok'] else ' (prefix!)'} | {i['references']} | {i['score']} | "
                      f"{'✓' if i['at_bar'] else '—'} |")
-    lines += ["", "| Nhóm | Số mục | Trung vị chữ | % đạt chuẩn | Trung vị score |", "|---|---|---|---|---|"]
+    lines += ["", "| Group | Items | Median words | % at bar | Median score |", "|---|---|---|---|---|"]
     for k in ("always", "full", "agent"):
         if k in summ:
             s = summ[k]
             lines.append(f"| {k} | {s['count']} | {s['median_words']} | {s['at_bar_pct']}% | {s['median_score']} |")
     lines.append(f"| discipline skills | {summ['discipline']['count']} | {summ['discipline']['median_words']} | — | — |")
-    lines.append(f"| tất cả | {summ['all']['count']} | — | {summ['all']['at_bar_pct']}% | — |")
+    lines.append(f"| all | {summ['all']['count']} | — | {summ['all']['at_bar_pct']}% | — |")
     return "\n".join(lines)
 
 
@@ -254,23 +255,23 @@ def main(argv):
         for i in items:
             key = f"{i['kind']}:{i['name']}"
             if i["at_bar"] and key in backlog:
-                print(f"{key}: đã đạt chuẩn — xóa khỏi scripts/quality-backlog.txt")
+                print(f"{key}: at the bar — remove it from scripts/quality-backlog.txt")
                 bad += 1
             elif not i["at_bar"] and key not in backlog:
                 why = []
                 if i["words"] < i["budget"][0] or i["words"] > i["budget"][1]:
-                    why.append(f"{i['words']} chữ (cần {i['budget'][0]}–{i['budget'][1]})")
+                    why.append(f"{i['words']} words (need {i['budget'][0]}–{i['budget'][1]})")
                 if i["missing"]:
-                    why.append("thiếu " + ", ".join(i["missing"]))
+                    why.append("missing " + ", ".join(i["missing"]))
                 if not i["order_ok"]:
-                    why.append("sai thứ tự tiêu đề")
+                    why.append("headings out of order")
                 for k, v in i["counts"].items():
                     if isinstance(v, int):
                         why.append(f"{k}={v}")
-                why += [f"thiếu nội dung: {k}" for k in i["contains_fail"]]
+                why += [f"missing content: {k}" for k in i["contains_fail"]]
                 if not i["desc_prefix_ok"]:
-                    why.append("mô tả sai tiền tố")
-                print(f"{key}: chưa đạt chuẩn (score {i['score']}): {'; '.join(why)}")
+                    why.append("description has the wrong prefix")
+                print(f"{key}: below the bar (score {i['score']}): {'; '.join(why)}")
                 bad += 1
         return 1 if bad else 0
     summ = summary(items)

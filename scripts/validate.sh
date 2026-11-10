@@ -1,34 +1,34 @@
 #!/usr/bin/env bash
-# validate.sh — kiểm tra tĩnh bộ kit automation-ai (plugin `team`).
-# Phụ thuộc: bash, python3 (chỉ stdlib), jq. Tùy chọn: claude (chạy `claude plugin validate`).
-# Dùng: scripts/validate.sh [--strict]
-#   --strict  coi WARN là FAIL (bật từ P4).
-# Đầu ra: mỗi lỗi một dòng `<file>: FAIL|WARN: <problem>`; mã thoát khác 0 khi có FAIL.
+# validate.sh — static checks of the automation-ai kit (plugin `team`).
+# Dependencies: bash, python3 (stdlib only), jq. Optional: claude (runs `claude plugin validate`).
+# Usage: scripts/validate.sh [--strict]
+#   --strict  treat WARN as FAIL (on since P4).
+# Output: one line per problem `<file>: FAIL|WARN: <problem>`; non-zero exit code when there is a FAIL.
 
 set -euo pipefail
 
-# ---- Cấu hình (sửa ở đây, không sửa logic bên dưới) ----
+# ---- Configuration (edit here, not the logic below) ----
 SKILL_DESC_PREFIX="Use when"                       # skill descriptions (English, P9)
 DESC_MAX_CHARS=500
 AGENT_DESC_PREFIX="Delegate when"                  # agent descriptions (English, P9)
 AGENT_DESC_MAX_CHARS=300
-# Chuẩn chất lượng skill/agent (chữ, tiêu đề, số dòng tự bào chữa/dấu hiệu sai/kiểm chứng): scripts/skill-budgets.txt,
-# scripts/skill-sections.txt, scripts/agent-sections.txt — kiểm bằng scripts/kit-metrics.py --check (mục 6c).
+# Skill/agent quality bar (words, headings, rationalization/red-flag/verification counts): scripts/skill-budgets.txt,
+# scripts/skill-sections.txt, scripts/agent-sections.txt — checked by scripts/kit-metrics.py --check (section 6c).
 ALLOWED_TOOLS_FILE="scripts/allowed-tools.txt"
-SKILL_HEADING_EXEMPT="handbook using-team"         # skill nạp sẵn không cần argument-hint
-HUMAN_ONLY_SKILLS="takeover onboard run session retro audit-kit release ci"  # intake: team-leader nhận yêu cầu thô (ADJ-28, K-70)
+SKILL_HEADING_EXEMPT="handbook using-team"         # preloaded skills need no argument-hint
+HUMAN_ONLY_SKILLS="takeover onboard run session retro audit-kit release ci"  # intake: team-leader receives the raw request (ADJ-28, K-70)
 FORK_SKILLS="analyze=analyst research=researcher architect=architect design=designer plan=tech-lead build=tech-lead verify=qa asbuilt=writer clean=maintainer ci=devops retro=coach pr=tech-lead audit-kit=coach"
 WORKFLOW_HEADINGS="## When it applies|## Default size|## Chain|## Gates|## Stop points|## Done criteria|## Common mistakes|## Related playbooks"
 PLAYBOOKS="takeover new-project new-feature change-request bug-fix hotfix refactor dependency-upgrade data-migration integration ci-fix docs-only client-docs release spike retro"
 BATCH_FLOWS="build-all-tasks verify-all weekly-retro clean-sweep"
 PLAYBOOK_WORDS=300
 BATCH_WORDS=400
-PENDING_PATHS_FILE="scripts/pending-paths.txt"     # đường dẫn bước sau mới tạo; P5 làm rỗng
+PENDING_PATHS_FILE="scripts/pending-paths.txt"     # paths a later step creates; emptied in P5
 PATH_SCAN="agents skills workflows handbook docs templates profiles README.md CLAUDE.md"
 STACK_CMD_BLACKLIST="pytest|npm test|npm run|yarn|pnpm|go test|mvn|gradle|bench |flutter test|cargo test|dotnet test"
-STACK_CMD_SCAN_DIRS="agents skills hooks scripts"  # nơi cấm ghi cứng lệnh stack
-STACK_CMD_EXEMPT="scripts/validate.sh scripts/detect-stack.sh scripts/tests/"  # danh sách tên manifest/ca thử, không phải lệnh chạy
-# Nơi tìm tham chiếu /team:<x> và agents/<role>.md
+STACK_CMD_SCAN_DIRS="agents skills hooks scripts"  # where hard-coded stack commands are forbidden
+STACK_CMD_EXEMPT="scripts/validate.sh scripts/detect-stack.sh scripts/tests/"  # lists of manifest names/test cases, not commands that run
+# Where to look for /team:<x> and agents/<role>.md references
 REF_SCAN_PATHS="agents skills workflows hooks scripts handbook profiles templates evals docs README.md CLAUDE.md SPEC.md CHANGELOG.md"
 
 STRICT=0
@@ -99,7 +99,7 @@ def _hmap():
     p = pathlib.Path("scripts/heading-map.txt")
     if not p.is_file() or "\ntransition: on" not in "\n" + p.read_text(encoding="utf-8"):
         return {}
-    return dict(l.split(" = ", 1) for l in p.read_text(encoding="utf-8").splitlines() if " = " in l and not l.startswith("# "))
+    return {x.encode("ascii").decode("unicode_escape"): y for x, y in (l.split(" = ", 1) for l in p.read_text(encoding="utf-8").splitlines() if " = " in l and not l.startswith("# "))}
 HMAP = _hmap()
 ALT = {v.split(":", 1)[1]: k.split(":", 1)[1] for k, v in HMAP.items() if k.startswith("prefix:")}
 def pfx(desc, want):
@@ -260,7 +260,7 @@ def _hmap():
     p = pathlib.Path("scripts/heading-map.txt")
     if not p.is_file() or "\ntransition: on" not in "\n" + p.read_text(encoding="utf-8"):
         return {}
-    return dict(l.split(" = ", 1) for l in p.read_text(encoding="utf-8").splitlines() if " = " in l and not l.startswith("# "))
+    return {x.encode("ascii").decode("unicode_escape"): y for x, y in (l.split(" = ", 1) for l in p.read_text(encoding="utf-8").splitlines() if " = " in l and not l.startswith("# "))}
 HMAP = _hmap()
 env = os.environ
 
@@ -351,7 +351,7 @@ targets = []
 for t in env["PATH_SCAN"].split():
     p = pathlib.Path(t)
     targets += [p] if p.is_file() else [x for x in sorted(p.rglob("*")) if x.is_file() and x.suffix in (".md", ".json", ".yml", ".tmpl")]
-HISTORICAL = ("docs/acceptance/", "docs/requirements/")  # bản ghi lịch sử, không sửa lại
+HISTORICAL = ("docs/acceptance/", "docs/requirements/")  # historical records, never rewritten
 for f in targets:
     if str(f).startswith(HISTORICAL):
         continue
@@ -372,7 +372,7 @@ if [[ -f scripts/kit-metrics.py ]]; then
   if [[ -f scripts/quality-backlog.txt ]]; then
     while IFS= read -r item; do
       [[ -z $item || $item == \#* ]] && continue
-      echo "scripts/quality-backlog.txt: INFO: $item chưa đạt chuẩn chất lượng (vòng sau)" >>"$REPORT"
+      echo "scripts/quality-backlog.txt: INFO: $item not yet at the quality bar (later round)" >>"$REPORT"
     done < scripts/quality-backlog.txt
   fi
 fi
@@ -431,6 +431,20 @@ if [[ -f scripts/gen-guides.py ]]; then
   done < <(python3 -I scripts/gen-guides.py --check 2>&1 || true)
 fi
 
+# ---- 9d. owner guide (GUIDE-VI.md): generated blocks fresh, vi-strings.json complete (P9) ----
+if [[ -f scripts/gen-vi-guide.py ]]; then
+  while IFS= read -r line; do
+    [[ -n $line ]] && echo "scripts/gen-vi-guide.py: FAIL: ${line#gen-vi-guide: }" >>"$REPORT"
+  done < <(python3 -I scripts/gen-vi-guide.py --check 2>&1 || true)
+fi
+
+# ---- 9e. language zones and anchors (P9): no translated anchor, no Vietnamese prose outside the allowlist ----
+if [[ -f scripts/check-lang.py ]]; then
+  while IFS= read -r line; do
+    [[ $line == FAIL* ]] && echo "${line#FAIL }" | sed 's/^\(anchor\|zone\): \([^:]*\):/\2: FAIL: \1:/' >>"$REPORT"
+  done < <(python3 -I scripts/check-lang.py 2>&1 || true)
+fi
+
 # ---- 10. profiles and config template against their schemas ----
 check_schema() { # check_schema <schema> <file>...
   local schema=$1; shift
@@ -447,14 +461,14 @@ if [[ -f scripts/check-profile.py ]]; then
     && check_schema templates/schemas/config.schema.json templates/project/team/config.json
 fi
 
-# ---- 10b. test suite (chỉ --strict) ----
+# ---- 10b. test suite (--strict only) ----
 if (( STRICT )) && [[ -x scripts/tests/run-all.sh ]]; then
   if ! tests_out="$(bash scripts/tests/run-all.sh 2>&1)"; then
     fail "scripts/tests/run-all.sh" "tests failed: $(grep -E 'FAIL|failed|Error' <<<"$tests_out" | head -n 3 | tr '\n' ' ')"
   fi
 fi
 
-# ---- 10c. cross-reference audit (chỉ --strict) ----
+# ---- 10c. cross-reference audit (--strict only) ----
 if (( STRICT )) && [[ -f scripts/audit-xref.py ]]; then
   while IFS= read -r line; do
     [[ -n $line && $line != audit-xref:* ]] && echo "${line%%: *}: FAIL: xref ${line#*: }" >>"$REPORT"

@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# install-local.sh — chép bộ kit `team` vào .claude/ của một dự án (không qua marketplace).
-# Dùng: scripts/install-local.sh [--force] [--dry-run] <project-dir>
+# install-local.sh — copies the `team` kit into a project's .claude/ (without the marketplace).
+# Usage: scripts/install-local.sh [--force] [--dry-run] <project-dir>
 #   agents/  -> <project>/.claude/agents/
 #   skills/  -> <project>/.claude/skills/
 #   hooks/ scripts/ handbook/ profiles/ templates/ -> <project>/.claude/team-kit/
-#   ghi <project>/.team/plugin_root = đường dẫn tuyệt đối tới .claude/team-kit
-#   nối hooks/hooks.json vào <project>/.claude/settings.json (${CLAUDE_PROJECT_DIR}/.claude/team-kit/scripts/...)
-#   không có namespace plugin: skill đổi thành team-<tên> (/team-status), agent bỏ tiền tố `team:`
-# Chạy lại an toàn: file giống hệt thì bỏ qua; file khác thì KHÔNG ghi đè nếu thiếu --force.
-# Mã thoát: 0 = xong; 1 = có file bị bỏ qua vì khác bản đích; 64 = sai tham số.
+#   writes <project>/.team/plugin_root = absolute path of .claude/team-kit
+#   merges hooks/hooks.json into <project>/.claude/settings.json (${CLAUDE_PROJECT_DIR}/.claude/team-kit/scripts/...)
+#   no plugin namespace: skills are renamed team-<name> (/team-status), agents drop the `team:` prefix
+# Safe to rerun: identical files are skipped; differing files are NOT overwritten without --force.
+# Exit codes: 0 = done; 1 = some files skipped because they differ from the target; 64 = bad arguments.
 
 set -euo pipefail
 
@@ -67,7 +67,7 @@ cp -R "$KIT/agents" "$KIT/skills" "$STAGE/"
 find "$STAGE/skills" -name SKILL.md -exec sed -i 's/^agent: team:/agent: /' {} +
 ROLES="team-leader|tech-lead|coach|analyst|researcher|architect|designer|dev|reviewer|qa|writer|maintainer|devops"
 find "$STAGE/skills" "$STAGE/agents" -name '*.md' -exec sed -i -E "s#/team:([a-z-]+)#/team-\\1#g; s#\\bteam:($ROLES)\\b#\\1#g" {} +
-# Skill đổi tên thành team-<tên> để không đụng lệnh có sẵn (/status, /run, /verify, /feedback...).
+# Skills are renamed team-<name> so they do not clash with built-in commands (/status, /run, /verify, /feedback...).
 for d in "$STAGE/skills"/*/; do
   n="$(basename "$d")"; [[ $n == team-* ]] && continue
   sed -i -E "0,/^name: $n\$/s//name: team-$n/" "$d/SKILL.md"; mv "$d" "$STAGE/skills/team-$n"
@@ -100,8 +100,8 @@ fi
 
 echo "install-local: ${copied} copied, ${overwritten} overwritten, ${same} unchanged, ${skipped} skipped -> $PROJECT"
 cat <<'NOTE'
-Lưu ý: cài cục bộ không có namespace plugin: gõ /team-<tên> (ví dụ /team-status); agent là <vai>.
-       Hook đã nối vào .claude/settings.json; đặt "agent": "team-leader" khi onboard.
-       Bước tiếp: mở Claude Code trong dự án và chạy skill takeover.
+Note: a local install has no plugin namespace: type /team-<name> (for example /team-status); agents are <role>.
+      Hooks are merged into .claude/settings.json; set "agent": "team-leader" during onboard.
+      Next step: open Claude Code in the project and run the takeover skill.
 NOTE
 (( skipped == 0 ))

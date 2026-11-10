@@ -1,2 +1,2 @@
-# Mục chưa đạt chuẩn chất lượng P7 — làm ở vòng sau theo thứ tự score tăng dần.
-# kit-metrics.py --check báo FAIL nếu một mục ở đây đã đạt chuẩn (xóa khỏi danh sách) hoặc mục ngoài danh sách chưa đạt.
+# Items not yet at the P7 quality bar — handled in a later round, lowest score first.
+# kit-metrics.py --check reports FAIL when an item listed here is at the bar (remove it) or an unlisted item is below it.

@@ -1,1 +1,1 @@
-# Đường dẫn kit được tham chiếu nhưng bước sau mới tạo. Rỗng từ P5.
+# Kit paths that are referenced but created by a later step. Empty since P5.

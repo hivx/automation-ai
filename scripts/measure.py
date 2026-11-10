@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
-"""measure.py — đo hiệu quả agent/skill, không dùng LLM (chỉ thư viện chuẩn). Kết quả tất định.
+"""measure.py — measures agent/skill effectiveness without an LLM (standard library only). Deterministic output.
 
-Đầu vào: docs/team/metrics/runs.jsonl, feedback.jsonl, scorecard.json (dự phòng khi thiếu runs).
-Mỗi (đối tượng, cỡ): trung vị thời gian, trung vị lượt, tỉ lệ rework, tỉ lệ bị từ chối, vi phạm STD,
-can thiệp của người, token (khi có --logs). Điểm hiệu quả = z-score có trọng số so với trung vị của
-cùng cỡ (MAD); cao hơn = tốt hơn. Xu hướng = dấu độ dốc thời gian của N lần chạy cuối. Bất thường =
-lệch > 2 MAD khỏi trung vị cùng cỡ. Xếp hạng "cần chú ý": bất thường trước, rồi điểm thấp, rồi góp ý thấp.
+Inputs: docs/team/metrics/runs.jsonl, feedback.jsonl, scorecard.json (fallback when runs are missing).
+Per (subject, size): median duration, median turns, rework rate, rejection rate, STD violations,
+human interventions, tokens (with --logs). Effectiveness score = weighted z-score against the median of
+the same size (MAD); higher = better. Trend = sign of the duration slope over the last N runs. Anomaly =
+more than 2 MAD from the same-size median. "Attention" ranking: anomalies first, then low score, then low feedback.
 
-Dùng: measure.py [--root DIR] [--runs F] [--feedback F] [--scorecard F] [--since YYYY-MM-DD]
-                 [--last N] [--logs DIR] [--json]
+Usage: measure.py [--root DIR] [--runs F] [--feedback F] [--scorecard F] [--since YYYY-MM-DD]
+                  [--last N] [--logs DIR] [--json]
 """
 import json
 import os
 import statistics
 import sys
 
-# Trọng số: chỉ số nào càng THẤP càng tốt.
+# Weights: for every metric, LOWER is better.
 WEIGHTS = {"duration_s": 1.0, "turns": 1.0, "rework_rate": 2.0, "rejection_rate": 2.0,
            "std_violations": 1.5, "human_interventions": 1.5, "tokens": 0.5}
 REJECT = {"request-changes", "rework", "design-defect", "rejected", "DESIGN_CONFLICT", "BLOCKED"}
@@ -56,7 +56,7 @@ def mad(xs, med=None):
 
 
 def slope_sign(ys):
-    """Dấu độ dốc bình phương tối thiểu của ys theo thứ tự: 1, -1 hoặc 0."""
+    """Sign of the least-squares slope of ys in order: 1, -1 or 0."""
     ys = [y for y in ys if num(y) is not None]
     n = len(ys)
     if n < 2:
@@ -127,7 +127,7 @@ def from_scorecard(card):
 
 
 def score(rows):
-    """Thêm score, anomalies cho từng hàng, so với trung vị của cùng cỡ."""
+    """Add score and anomalies to each row, against the median of the same size."""
     by_size = {}
     for (s, size), row in rows.items():
         by_size.setdefault(size, []).append(row)
@@ -193,11 +193,11 @@ def main(argv):
         fscore = round(statistics.mean(fb[s]), 2) if s in fb else None
         notes = []
         if row["anomalies"]:
-            notes.append("bất thường: " + ", ".join(row["anomalies"]))
+            notes.append("anomaly: " + ", ".join(row["anomalies"]))
         if trend > 0:
-            notes.append("chậm dần")
+            notes.append("slowing down")
         if fscore is not None and fscore < 3:
-            notes.append("góp ý thấp")
+            notes.append("low feedback")
         result.append(dict(subject=s, size=size, runs=row["runs"], score=row["score"], trend=trend,
                            anomalies=row["anomalies"], feedback=fscore,
                            metrics={k: (round(v, 3) if isinstance(v, float) else v) for k, v in row.items()
@@ -208,15 +208,15 @@ def main(argv):
     if "--json" in flags:
         print(json.dumps({"weights": WEIGHTS, "ranking": result}, ensure_ascii=False, indent=2))
         return 0
-    print("# Xếp hạng cần chú ý\n")
-    print("| # | Đối tượng | Cỡ | Lần chạy | Điểm | Xu hướng | Góp ý | Ghi chú |")
+    print("# Attention ranking\n")
+    print("| # | Subject | Size | Runs | Score | Trend | Feedback | Notes |")
     print("|---|---|---|---|---|---|---|---|")
-    arrow = {1: "↑ chậm hơn", -1: "↓ nhanh hơn", 0: "→"}
+    arrow = {1: "↑ slower", -1: "↓ faster", 0: "→"}
     for r in result:
         print(f"| {r['rank']} | {r['subject']} | {r['size']} | {r['runs']} | {r['score']} | {arrow[r['trend']]} | "
               f"{r['feedback'] if r['feedback'] is not None else '—'} | {'; '.join(r['notes']) or '—'} |")
     if not result:
-        print("| — | (chưa có số liệu) | | | | | | |")
+        print("| — | (no data yet) | | | | | | |")
     return 0
 
 

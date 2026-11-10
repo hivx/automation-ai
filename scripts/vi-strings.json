@@ -340,5 +340,29 @@
   "plugins.recommended": "name@marketplace",
   "notes": "Khe → ghi chú một dòng (giá trị chưa chắc, lý do)",
   "packages": "Monorepo: thư mục → profile ghi đè một phần"
+ },
+ "guide": {
+  "skills_head": "| Lệnh | Ai gọi được | Vai trò chạy | Artifact sinh ra | Dùng khi nào |",
+  "who_human": "người",
+  "who_claude": "Claude",
+  "who_both": "cả hai",
+  "main_session": "team-leader (phiên chính)",
+  "agents_head": "| Vai trò | Việc chính | Không được làm | Model / effort | maxTurns |",
+  "playbooks_head": "| Playbook | Dùng khi | Chuỗi | Cổng |",
+  "gates_head": "| Cổng | Artifact phải duyệt | Cách duyệt | Mặc định |",
+  "gate_g5": "dòng `Approved-by-prod: <tên> <YYYY-MM-DD>` trong 20 dòng đầu (luôn là người)",
+  "gate_how": "dòng `Approved-by: <tên> <YYYY-MM-DD>` trong 20 dòng đầu, hoặc comment `@claude approve {code}` trên issue",
+  "on": "bật",
+  "off": "tắt",
+  "config_head": "| Khóa | Kiểu | Mặc định | Ý nghĩa |",
+  "std_head": "| Mã | Mức | Quy tắc (tiếng Việt) |",
+  "std_note": "Thông báo chặn không có mã STD: `BLOCKED (role-policy)` = vai đó không được ghi/chạy/gọi việc này (xem `hooks/role-policy.json`); `BLOCKED (research)` = `research.md` thiếu mục `## Sources` có URL.",
+  "anchors_note": "Các mốc sau do script và cổng đọc bằng máy: **không bao giờ dịch**, dù `output_language` là `vi` hay `en`.",
+  "stat_version": "- Phiên bản kit: {version}",
+  "stat_counts": "- Skill: {skills} · agent: {agents} · playbook: {playbooks} (+ {batch} lô) · script: {scripts}",
+  "stat_words": "- Số từ trung vị (tiếng Anh): skill nạp thường xuyên {always}, skill khác {full}, agent {agent}",
+  "stat_commit": "- Commit: {commit}",
+  "stat_date_label": "Ngày sinh file",
+  "stat_date": "- {label}: {date}"
  }
 }

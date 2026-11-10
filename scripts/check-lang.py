@@ -4,7 +4,7 @@
 1. Anchors: no translated form of a machine-read anchor (scripts/anchors.txt) appears in any checked file.
 2. Zones: Vietnamese prose (Vietnamese diacritics) appears only in the allowlist:
    the guide file named in scripts/vi-guide.conf, scripts/vi-strings.json, templates/artifacts/vi/**,
-   docs/requirements/**, docs/acceptance/**, and CHANGELOG.md entries for versions up to 0.3.0.
+   docs/requirements/**, docs/acceptance/**, CHANGELOG.md entries for versions up to 0.3.0, and line 1 of README.md.
 Files checked: git-tracked and untracked-not-ignored text files, minus the owner's input files (automation-ai_*.md).
 Usage: check-lang.py [--anchors-only | --zones-only] ; exit 0 when clean, 1 otherwise.
 """
@@ -76,6 +76,8 @@ def main(argv):
             for n, line in enumerate(lines, 1):
                 if start is not None and n > start:
                     break
+                if f == "README.md" and n == 1:
+                    continue  # the pointer to the owner's guide ("Tiếng Việt: see GUIDE-VI.md")
                 if VI.search(line):
                     bad_zone.append(f"{f}:{n}: Vietnamese text outside the allowlist")
     for msg in bad_anchor:

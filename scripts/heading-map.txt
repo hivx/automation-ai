@@ -1,36 +1,37 @@
 # Heading map Vietnamese -> English for the P9 language switch.
 # Used permanently by scripts/diff-structure.py to compare pre-p9 (Vietnamese) with the English tree.
-# While "transition: on", kit-metrics.py and validate.sh also accept the Vietnamese form (so each
+# While "transition: off", kit-metrics.py and validate.sh also accept the Vietnamese form (so each
 # converted group can be committed green). Set "transition: off" when the conversion is complete.
-transition: on
-## Tổng quan = ## Overview
-## Quy trình = ## Process
-## Lý do tự bào chữa thường gặp = ## Common rationalizations
-## Kiểm chứng = ## Verification
-## Khi nào dùng (và khi nào không) = ## When to use (and when not)
-## Tìm hiểu stack trước = ## Discover the stack first
-## Đầu vào và điều kiện trước = ## Inputs and preconditions
-## Đầu ra = ## Outputs
-## Dấu hiệu sai = ## Red flags
-## Xem thêm = ## See also
-## 1. Danh tính = ## 1. Identity
-## 2. Đầu vào bắt buộc = ## 2. Inputs you must receive
-## 3. Tìm hiểu stack trước = ## 3. Discover the stack first
-## 4. Quy trình = ## 4. Procedure
-## 5. Đầu ra = ## 5. Outputs
-## 6. Tiêu chí xong = ## 6. Done criteria
-## 7. Không bao giờ = ## 7. Never
-## 8. Lý do tự bào chữa thường gặp = ## 8. Common rationalizations
-## 9. Dấu hiệu sai = ## 9. Red flags
-## 10. Dừng và leo thang = ## 10. When to stop and escalate
-## Khi nào áp dụng = ## When it applies
-## Cỡ mặc định = ## Default size
-## Chuỗi = ## Chain
-## Cổng = ## Gates
-## Điểm dừng = ## Stop points
-## Tiêu chí xong = ## Done criteria
-## Lỗi thường gặp = ## Common mistakes
-## Playbook liên quan = ## Related playbooks
-contains:Ví dụ = contains:Example
-prefix:Dùng khi = prefix:Use when
+# The Vietnamese side is stored with \\uXXXX escapes so the file itself stays ASCII (scripts/check-lang.py).
+transition: off
+## T\u1ed5ng quan = ## Overview
+## Quy tr\xecnh = ## Process
+## L\xfd do t\u1ef1 b\xe0o ch\u1eefa th\u01b0\u1eddng g\u1eb7p = ## Common rationalizations
+## Ki\u1ec3m ch\u1ee9ng = ## Verification
+## Khi n\xe0o d\xf9ng (v\xe0 khi n\xe0o kh\xf4ng) = ## When to use (and when not)
+## T\xecm hi\u1ec3u stack tr\u01b0\u1edbc = ## Discover the stack first
+## \u0110\u1ea7u v\xe0o v\xe0 \u0111i\u1ec1u ki\u1ec7n tr\u01b0\u1edbc = ## Inputs and preconditions
+## \u0110\u1ea7u ra = ## Outputs
+## D\u1ea5u hi\u1ec7u sai = ## Red flags
+## Xem th\xeam = ## See also
+## 1. Danh t\xednh = ## 1. Identity
+## 2. \u0110\u1ea7u v\xe0o b\u1eaft bu\u1ed9c = ## 2. Inputs you must receive
+## 3. T\xecm hi\u1ec3u stack tr\u01b0\u1edbc = ## 3. Discover the stack first
+## 4. Quy tr\xecnh = ## 4. Procedure
+## 5. \u0110\u1ea7u ra = ## 5. Outputs
+## 6. Ti\xeau ch\xed xong = ## 6. Done criteria
+## 7. Kh\xf4ng bao gi\u1edd = ## 7. Never
+## 8. L\xfd do t\u1ef1 b\xe0o ch\u1eefa th\u01b0\u1eddng g\u1eb7p = ## 8. Common rationalizations
+## 9. D\u1ea5u hi\u1ec7u sai = ## 9. Red flags
+## 10. D\u1eebng v\xe0 leo thang = ## 10. When to stop and escalate
+## Khi n\xe0o \xe1p d\u1ee5ng = ## When it applies
+## C\u1ee1 m\u1eb7c \u0111\u1ecbnh = ## Default size
+## Chu\u1ed7i = ## Chain
+## C\u1ed5ng = ## Gates
+## \u0110i\u1ec3m d\u1eebng = ## Stop points
+## Ti\xeau ch\xed xong = ## Done criteria
+## L\u1ed7i th\u01b0\u1eddng g\u1eb7p = ## Common mistakes
+## Playbook li\xean quan = ## Related playbooks
+contains:V\xed d\u1ee5 = contains:Example
+prefix:D\xf9ng khi = prefix:Use when
 prefix:Giao khi = prefix:Delegate when

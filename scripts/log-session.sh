@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# log-session.sh — hook PostCompact và SessionEnd: số liệu phiên vào docs/team/metrics/sessions.jsonl.
-# PostCompact: {ts, event:"compact", session_id, feature, stage, trigger}; đếm số lần nén của phiên.
+# log-session.sh — PostCompact and SessionEnd hook: session metrics into docs/team/metrics/sessions.jsonl.
+# PostCompact: {ts, event:"compact", session_id, feature, stage, trigger}; counts the session's compactions.
 # SessionEnd:  {ts, event:"end", session_id, feature, stage, reason, duration_s, compactions}.
-# Dùng: log-session.sh [--root DIR] < hook.json ; log-session.sh --help
+# Usage: log-session.sh [--root DIR] < hook.json ; log-session.sh --help
 set -uo pipefail
 . "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 [[ ${1:-} == --help || ${1:-} == -h ]] && { show_help "$0"; exit 0; }

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# format.sh — hook PostToolUse (Edit|Write|NotebookEdit): chạy formatter theo đuôi file từ formatters_by_ext.
-# Thay {file} bằng đường dẫn tương đối; thiếu formatter hay formatter lỗi → bỏ qua. Luôn thoát 0.
-# Dùng: format.sh [--root DIR] < hook.json ; format.sh --help
+# format.sh — PostToolUse hook (Edit|Write|NotebookEdit): runs the formatter for the file extension from formatters_by_ext.
+# Replaces {file} with the relative path; a missing or failing formatter is skipped. Always exits 0.
+# Usage: format.sh [--root DIR] < hook.json ; format.sh --help
 set -uo pipefail
 . "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 [[ ${1:-} == --help || ${1:-} == -h ]] && { show_help "$0"; exit 0; }

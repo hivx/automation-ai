@@ -1,4 +1,4 @@
-"""Unit test cho scripts/measure.py — chạy: python3 -m unittest discover -s scripts/tests -p 'test_*.py'."""
+"""Unit tests for scripts/measure.py — run: python3 -m unittest discover -s scripts/tests -p 'test_*.py'."""
 import contextlib
 import io
 import json
@@ -74,7 +74,7 @@ class EndToEnd(unittest.TestCase):
         with contextlib.redirect_stdout(buf):
             code = measure.main(["--runs", "/nonexistent", "--feedback", "/nonexistent", "--scorecard", "/nonexistent"])
         self.assertEqual(code, 0)
-        self.assertIn("chưa có số liệu", buf.getvalue())
+        self.assertIn("no data yet", buf.getvalue())
 
 
 if __name__ == "__main__":

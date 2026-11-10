@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Sinh bảng vai trong docs/02-team.md từ frontmatter của agents/*.md (chỉ stdlib).
+"""Generates the role table in docs/02-team.md from the frontmatter of agents/*.md (stdlib only).
 
-Bảng nằm giữa <!-- team-table:start --> và <!-- team-table:end -->.
-Dùng: scripts/gen-team-table.py           ghi đè bảng trong docs/02-team.md
-      scripts/gen-team-table.py --check   mã thoát 1 nếu bảng lệch
+The table sits between <!-- team-table:start --> and <!-- team-table:end -->.
+Usage: scripts/gen-team-table.py           overwrite the table in docs/02-team.md
+       scripts/gen-team-table.py --check   exit code 1 if the table is stale
 """
 import pathlib
 import re
@@ -14,6 +14,7 @@ DOC = ROOT / "docs" / "02-team.md"
 START, END = "<!-- team-table:start -->", "<!-- team-table:end -->"
 ORDER = ["team-leader", "tech-lead", "coach", "analyst", "researcher", "architect", "designer",
          "dev", "reviewer", "qa", "writer", "maintainer", "devops"]
+LEGACY_PREFIX = "Giao khi "  # Vietnamese "Delegate when " of agents not yet converted (P9 transition)
 
 
 def frontmatter(path):
@@ -33,13 +34,15 @@ def frontmatter(path):
 def render():
     files = {p.stem: p for p in (ROOT / "agents").glob("*.md")}
     names = [n for n in ORDER if n in files] + sorted(set(files) - set(ORDER))
-    rows = ["| Vai | Giao khi | Tools | Model | Effort | maxTurns | Memory | Isolation | Skills nạp sẵn |",
+    rows = ["| Role | Delegate when | Tools | Model | Effort | maxTurns | Memory | Isolation | Preloaded skills |",
             "|---|---|---|---|---|---|---|---|---|"]
     for n in names:
         fm = frontmatter(files[n])
         desc = fm.get("description", "").replace("|", "\\|")
-        if desc.startswith("Giao khi "):
-            desc = desc[len("Giao khi "):]
+        for p in ("Delegate when ", LEGACY_PREFIX):
+            if desc.startswith(p):
+                desc = desc[len(p):]
+                break
         skills = fm.get("skills", [])
         skills = ", ".join(skills) if isinstance(skills, list) else skills
         rows.append(f"| [{n}](../agents/{n}.md) | {desc} | {fm.get('tools', 'inherit')} | "

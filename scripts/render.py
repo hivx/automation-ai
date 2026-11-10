@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
-"""render.py — dựng file dự án từ templates/project/ của kit (chỉ thư viện chuẩn). onboard gọi script này.
+"""render.py — builds project files from the kit's templates/project/ (standard library only). Called by onboard.
 
-Chỗ thay: {{a.b}} lấy từ .team/profile.json (rồi .team/config.json); {{kit}} = thư mục kit
-(dạng //đường/dẫn khi nằm trong luật quyền). Danh sách ghép bằng ", ". Thiếu giá trị → chuỗi rỗng.
-Template JSON (--json): phần tử mảng "{{cmd.*}}" nở thành Bash(<lệnh> *) cho mọi khe cmd.* khác rỗng;
-phần tử chứa "{{protected_paths}}" nở thành một phần tử cho mỗi đường dẫn bảo vệ.
+Placeholders: {{a.b}} comes from .team/profile.json (then .team/config.json); {{kit}} = the kit directory
+(as //absolute/path inside permission rules). Lists are joined with ", ". A missing value → empty string.
+JSON templates (--json): an array element "{{cmd.*}}" expands to Bash(<command> *) for every non-empty cmd.* slot;
+an element containing "{{protected_paths}}" expands to one element per protected path.
 
-Dùng:
-  render.py --template T [--root R] [--kit K] [--out O]            văn bản
-  render.py --template T --json [--merge-into F]                     JSON; gộp vào F (giá trị cũ thắng,
-                                                                     mảng hợp nhất bỏ trùng)
-  render.py --template T --insert-block F                           chèn/thay khối <!-- team:start -->…<!-- team:end -->
-                                                                     trong F, không đụng phần còn lại
+Usage:
+  render.py --template T [--root R] [--kit K] [--out O]            text
+  render.py --template T --json [--merge-into F]                     JSON; merged into F (existing values win,
+                                                                     arrays are unioned without duplicates)
+  render.py --template T --insert-block F                           insert/replace the <!-- team:start -->…<!-- team:end -->
+                                                                     block in F, leaving the rest untouched
 """
 import json
 import os
@@ -44,8 +44,8 @@ def lookup(ctx, dotted):
 
 
 def subst(text, ctx):
-    """{{a.b}}, {{a.b|or:x}} (rỗng → x), {{a.b|lines:N}} (mảng → mỗi phần tử một dòng, thụt N).
-    Bỏ qua ${{ ... }} của GitHub Actions."""
+    """{{a.b}}, {{a.b|or:x}} (empty → x), {{a.b|lines:N}} (array → one element per line, indented N).
+    Leaves GitHub Actions ${{ ... }} alone."""
     def rep(m):
         key, filt = m.group(1), (m.group(2) or "")
         if filt.startswith("lines:"):
@@ -100,7 +100,7 @@ def expand_json(node, ctx, profile):
 
 
 def merge(old, new):
-    """Gộp new vào old: giá trị đã có của old thắng; dict đệ quy; mảng hợp nhất bỏ trùng."""
+    """Merge new into old: values already in old win; dicts recurse; arrays are unioned without duplicates."""
     if isinstance(old, dict) and isinstance(new, dict):
         out = dict(old)
         for k, v in new.items():

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# detect-stack.sh — tầng T0 của takeover: siêu dữ liệu repo dạng JSON, không đọc nội dung file, không LLM.
-# Mặc định: manifests, ngôn ngữ theo số file, file cấu hình linter/formatter, file CI, thư mục gốc,
-#   nhánh mặc định, số dòng CLAUDE.md/AGENTS.md (ai_files). --deep thêm: commit 90 ngày, 10 đường dẫn nóng, số tác giả, số TODO/FIXME,
-#   số dấu skip test (theo test.skip_markers của profile, thiếu profile thì gộp từ profiles/ của kit),
-#   nhánh chưa gộp, tag gần nhất.
-# Dùng: detect-stack.sh [--root DIR] [--deep] ; detect-stack.sh --help
+# detect-stack.sh — takeover tier T0: repository metadata as JSON, without reading file contents, without an LLM.
+# Default: manifests, languages by file count, linter/formatter config files, CI files, root directories,
+#   default branch, line counts of CLAUDE.md/AGENTS.md (ai_files). --deep adds: 90-day commits, 10 hot paths, author count, TODO/FIXME count,
+#   test skip-marker counts (from the profile's test.skip_markers; without a profile, merged from the kit's profiles/),
+#   unmerged branches, latest tags.
+# Usage: detect-stack.sh [--root DIR] [--deep] ; detect-stack.sh --help
 set -uo pipefail
 . "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 [[ ${1:-} == --help || ${1:-} == -h ]] && { show_help "$0"; exit 0; }
@@ -63,7 +63,7 @@ result = {
     "root_dirs": sorted({f.split("/", 1)[0] for f in files if "/" in f}),
     "default_branch": head or current or None,
     "current_branch": current or None,
-    # K-08: máy đếm dòng file chỉ dẫn AI (LLM hay đếm sai)
+    # K-08: the machine counts lines of AI instruction files (LLMs often miscount)
     "ai_files": {f: sum(1 for _ in open(f, encoding="utf-8", errors="replace"))
                  for f in ("CLAUDE.md", "AGENTS.md", ".claude/CLAUDE.md", "CLAUDE.local.md") if os.path.isfile(f)},
 }

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# log-run.sh — skill gọi ở cuối giai đoạn: ghi một dòng vào docs/team/metrics/runs.jsonl.
-# Cờ (đều tùy chọn): --feature ID --stage S --agent A --skill K --result R --duration SEC
-#   --turns N --rework N --size S|M|L --root DIR. Thiếu feature/stage → lấy từ .team/current.json.
-# Dùng: log-run.sh --skill analyze --result SPECIFIED ; log-run.sh --help
+# log-run.sh — called by a skill at the end of a stage: appends one line to docs/team/metrics/runs.jsonl.
+# Flags (all optional): --feature ID --stage S --agent A --skill K --result R --duration SEC
+#   --turns N --rework N --size S|M|L --root DIR. Missing feature/stage → taken from .team/current.json.
+# Usage: log-run.sh --skill analyze --result SPECIFIED ; log-run.sh --help
 set -uo pipefail
 . "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 [[ ${1:-} == --help || ${1:-} == -h ]] && { show_help "$0"; exit 0; }
@@ -21,4 +21,4 @@ log_event "$(jq -nc --arg ts "$(date -Iseconds)" --argjson f "$(str "${v[feature
   --argjson z "$(str "${v[size]}")" --argjson d "$(num "${v[duration]}")" --argjson t "$(num "${v[turns]}")" \
   --argjson w "$(num "${v[rework]}")" \
   '{ts:$ts, feature:$f, stage:$s, size:$z, agent:$a, skill:$k, turns:$t, duration_s:$d, result:$r, rework_round:$w}')"
-echo "log-run: đã ghi docs/team/metrics/runs.jsonl"
+echo "log-run: wrote docs/team/metrics/runs.jsonl"

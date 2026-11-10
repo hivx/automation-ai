@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
-"""team.py — trạng thái đội tính từ artifact (chỉ thư viện chuẩn). Không lưu con trỏ.
+"""team.py — team state computed from the artifacts (standard library only). No stored pointer.
 
-Lệnh con:
-  status [<ID>] [--brief] [--waiting]   bảng giai đoạn từng feature + dòng "Chờ người"
-  next <ID>                             lệnh skill kế tiếp
-  metrics                               gộp docs/team/metrics/runs.jsonl theo agent/skill/cỡ
-  scorecard                             ghi docs/team/metrics/scorecard.json
-Cờ chung: --root DIR (mặc định $CLAUDE_PROJECT_DIR hoặc thư mục hiện tại), --json.
+Subcommands:
+  status [<ID>] [--brief] [--waiting]   stage table per feature + "Waiting on the human" lines
+  next <ID>                             the next skill command
+  metrics                               aggregate docs/team/metrics/runs.jsonl by agent/skill/size
+  scorecard                             write docs/team/metrics/scorecard.json
+Common flags: --root DIR (default $CLAUDE_PROJECT_DIR or the current directory), --json.
 
-Giai đoạn (SPEC §4): intaken → specified → [researched] → [architected] → [designed] → planned
-→ built → verified → released. Cổng bật mà chưa có `Approved-by:` (G5: `Approved-by-prod:`) chặn
-MỌI giai đoạn sau, kể cả khi artifact sau đã có. Cỡ S không qua G1, G3 (ADJ-09);
-playbook refactor và data-migration luôn bật G2b (ADJ-16).
+Stages (SPEC §4): intaken → specified → [researched] → [architected] → [designed] → planned
+→ built → verified → released. An enabled gate without `Approved-by:` (G5: `Approved-by-prod:`) blocks
+EVERY later stage, even when later artifacts already exist. Size S skips G1, G3 (ADJ-09);
+the refactor and data-migration playbooks always enable G2b (ADJ-16).
+Intake labels are read in English (`Size:`, `Mode:`, `Verdict:`) and, for older projects, in Vietnamese.
 """
 import json
 import os
@@ -23,6 +24,11 @@ ID_RE = re.compile(r"^[A-Za-z][A-Za-z0-9]*-[A-Za-z0-9-]+$")
 APPROVED = re.compile(r"^\s*(?:[-*]\s*)?\**Approved-by\**\s*:\s*\**\s*(\S.*?\d{4}-\d{2}-\d{2}.*)$", re.M)
 APPROVED_PROD = re.compile(r"^\s*(?:[-*]\s*)?\**Approved-by-prod\**\s*:\s*\**\s*(\S.*?\d{4}-\d{2}-\d{2}.*)$", re.M)
 TASK = re.compile(r"^\s*-\s*\[( |x|X)\]\s*[*_`]*(T\d+)\b(.*)$", re.M)
+# Vietnamese labels of pre-English projects, still accepted when reading (escaped: scripts stay English).
+LEGACY_INTAKE = "ti\u1ebfp nh\u1eadn"                            # title prefix "intake"
+LEGACY_REQUEST = ("Y\u00eau c\u1ea7u", "Y\u00eau c\u1ea7u g\u1ed1c")      # "Request", "Original request"
+LEGACY_SIZE, LEGACY_MODE = "c\u1ee1", "ch\u1ebf \u0111\u1ed9"          # "Size", "Mode"
+LEGACY_VERDICT = "ph\u00e1n quy\u1ebft"                          # "Verdict"
 
 
 def read(path):
@@ -73,11 +79,11 @@ def title_of(fid, intake, spec):
         m = re.search(r"(?m)^#\s+(.+)$", text or "")
         if m:
             t = m.group(1).strip()
-            t = re.sub(r"(?i)^(intake|spec|tiếp nhận)\s*[:\-—]?\s*", "", t)
+            t = re.sub(rf"(?i)^(intake|spec|{LEGACY_INTAKE})\s*[:\-—]?\s*", "", t)
             t = re.sub(rf"^{re.escape(fid)}\s*[—–:\-]?\s*", "", t).strip()
             if t and t != fid:
                 return t
-    req = field(intake, "Yêu cầu", "Request", "Yêu cầu gốc")
+    req = field(intake, LEGACY_REQUEST[0], "Request", LEGACY_REQUEST[1])
     return req.strip('"“”') or "—"
 
 
@@ -96,11 +102,11 @@ def feature_state(root, fid, cfg):
                                                   "design.md", "plan.md", "tasks.md", "acceptance.md",
                                                   "asbuilt.md", "questions.md")}
     intake = art["intake.md"] or ""
-    size_m = re.search(r"(?i)(?:cỡ|size)\**\s*:\**\s*\**\s*([SML])\b", intake)
+    size_m = re.search(rf"(?i)(?:{LEGACY_SIZE}|size)\**\s*:\**\s*\**\s*([SML])\b", intake)
     size = size_m.group(1).upper() if size_m else ""
     pb_m = re.search(r"(?i)playbook\**\s*:\**\s*\[?`?([a-z][a-z-]*)", intake)
     playbook = pb_m.group(1).lower() if pb_m else ""
-    mode_m = re.search(r"(?i)(?:chế độ|mode)\**\s*:\**\s*\**\s*(ask|decide)\b", intake)
+    mode_m = re.search(rf"(?i)(?:{LEGACY_MODE}|mode)\**\s*:\**\s*\**\s*(ask|decide)\b", intake)
     mode = mode_m.group(1).lower() if mode_m else ""
     gates_cfg = dict(cfg.get("gates") or {})
     if playbook in ("refactor", "data-migration"):
@@ -113,7 +119,7 @@ def feature_state(root, fid, cfg):
     tasks = TASK.findall(art["tasks.md"] or "")
     done = [t for t in tasks if t[0].lower() == "x"]
     blocked_task = next((t[1] for t in tasks if t[0] == " " and "BLOCKED" in t[2]), None)
-    verdict_m = re.search(r"(?i)(?:verdict|phán quyết)\**\s*:\**\s*\**\s*(accepted|rework|design-defect)", art["acceptance.md"] or "")
+    verdict_m = re.search(rf"(?i)(?:verdict|{LEGACY_VERDICT})\**\s*:\**\s*\**\s*(accepted|rework|design-defect)", art["acceptance.md"] or "")
     verdict = verdict_m.group(1).lower() if verdict_m else ""
     arch_ref = "architecture.md" in (intake + (art["spec.md"] or "") + (art["design.md"] or ""))
     cond = {
@@ -128,9 +134,9 @@ def feature_state(root, fid, cfg):
         "released": art["asbuilt.md"] is not None and re.search(r"(?m)^\s*(?:[-*]\s*)?\**Released\**\s*:\s*\S", art["asbuilt.md"]) is not None,
     }
     optional = {"researched", "architected", "designed"} | ({"planned"} if size == "S" else set())
-    if playbook in NO_SPEC_PLAYBOOKS:  # chuỗi SPEC §5 không có analyze (K-47)
+    if playbook in NO_SPEC_PLAYBOOKS:  # the SPEC §5 chain has no analyze (K-47)
         optional.add("specified")
-    if playbook in NO_PLAN_PLAYBOOKS:  # chuỗi không có plan: build một task / clean ghi tasks.md (K-47)
+    if playbook in NO_PLAN_PLAYBOOKS:  # chain without plan: one-task build / clean writes tasks.md (K-47)
         optional.add("planned")
     order = ["intaken", "specified", "researched", "architected", "designed", "planned", "built", "verified", "released"]
     gate_of = {s: (g, f) for s, g, f in GATES}
@@ -180,23 +186,23 @@ def feature_state(root, fid, cfg):
 def next_cmd(st, cond):
     fid, s, pb, size = st["id"], st["stage"], st["playbook"], st["size"]
     if st["status"] == "WAITING_FOR_APPROVAL":
-        return f"Duyệt {st['waiting_file']} ({st['gate']}): thêm `Approved-by: <tên> <YYYY-MM-DD>`, rồi /team:run {fid}"
+        return f"Approve {st['waiting_file']} ({st['gate']}): add `Approved-by: <name> <YYYY-MM-DD>`, then /team:run {fid}"
     if st["status"] == "WAITING_FOR_ANSWER":
-        return f"Trả lời {st['waiting_file']}, rồi /team:run {fid}"
+        return f"Answer {st['waiting_file']}, then /team:run {fid}"
     if st["status"] == "BLOCKED":
-        return f"Gỡ chặn {st['waiting_file']}, rồi /team:build {fid}"
+        return f"Unblock {st['waiting_file']}, then /team:build {fid}"
     if st["status"] == "REWORK":
         return f"/team:build {fid}"
     if st["status"] == "DESIGN_DEFECT":
         return f"/team:design {fid}"
     if s == "—":
-        return f"/team:intake (chưa có intake.md cho {fid})"
+        return f"/team:intake (no intake.md yet for {fid})"
     if s == "intaken":
         return {"bug-fix": f"/team:build {fid}", "hotfix": f"/team:build {fid}",
                 "refactor": f"/team:design {fid} --short", "dependency-upgrade": f"/team:research {fid}",
                 "integration": f"/team:research {fid}", "spike": f"/team:research {fid}",
                 "ci-fix": "/team:ci fix", "change-request": f"/team:analyze {fid} --amend",
-                "docs-only": f"team-leader giao writer (playbook docs-only), rồi /team:pr {fid}"}.get(pb, f"/team:analyze {fid}")
+                "docs-only": f"team-leader hands off to writer (playbook docs-only), then /team:pr {fid}"}.get(pb, f"/team:analyze {fid}")
     if s == "specified":
         if not cond["researched"] and pb in ("integration", "dependency-upgrade", "new-project"):
             return f"/team:research {fid}"
@@ -205,11 +211,11 @@ def next_cmd(st, cond):
         if size == "L" and not cond["architected"]:
             return f"/team:architect {fid}"
         if pb == "client-docs":
-            return f"team-leader giao writer (playbook client-docs), rồi /team:pr {fid}"
+            return f"team-leader hands off to writer (playbook client-docs), then /team:pr {fid}"
         return f"/team:design {fid}"
     if s == "researched":
         if pb == "spike":
-            return "Xong spike: đọc research.md; đề xuất ADR nếu cần"
+            return "Spike done: read research.md; propose an ADR if needed"
         if pb == "dependency-upgrade":
             return f"/team:plan {fid}"
         if size == "L" or pb in ("integration", "new-project"):
@@ -227,10 +233,10 @@ def next_cmd(st, cond):
         if not st["has_asbuilt"]:
             return f"/team:asbuilt {fid}"
         if not st["g5_approved"]:
-            return f"/team:pr {fid}, rồi /team:release {fid} (staging); prod cần `Approved-by-prod:` trong asbuilt.md"
+            return f"/team:pr {fid}, then /team:release {fid} (staging); prod needs `Approved-by-prod:` in asbuilt.md"
         return f"/team:release {fid} prod"
     if s == "released":
-        return "Đã phát hành — không còn việc."
+        return "Released — nothing left to do."
     return f"/team:run {fid}"
 
 
@@ -243,15 +249,15 @@ def features(root):
 
 def waiting_lines(st):
     if st["status"] == "WAITING_FOR_APPROVAL":
-        extra = f" (artifact sau đã có nhưng bị chặn: {', '.join(st['blocked_later'])})" if st["blocked_later"] else ""
-        return [f"Chờ người: duyệt {st['gate']} — {st['waiting_file']}{extra}"]
+        extra = f" (later artifacts exist but are blocked: {', '.join(st['blocked_later'])})" if st["blocked_later"] else ""
+        return [f"Waiting on the human: approve {st['gate']} — {st['waiting_file']}{extra}"]
     if st["status"] in ("WAITING_FOR_ANSWER", "BLOCKED", "DESIGN_DEFECT", "REWORK"):
-        return [f"Chờ người: {st['status']} — {st['waiting_file']}"]
+        return [f"Waiting on the human: {st['status']} — {st['waiting_file']}"]
     return []
 
 
 def table(rows):
-    head = ["ID", "Tiêu đề", "Playbook", "Cỡ", "Cổng áp dụng", "Giai đoạn", "Trạng thái", "Tiếp theo"]
+    head = ["ID", "Title", "Playbook", "Size", "Applicable gates", "Stage", "Status", "Next"]
     body = [[r["id"], r["title"][:40], r["playbook"], r["size"], ",".join(g.split("_")[0] for g in r["gates"]) or "—", r["stage"],
              r["status"] + (f" {r['gate']}" if r["gate"] else ""), r["next"]] for r in rows]
     widths = [max(len(str(x)) for x in col) for col in zip(head, *body)] if body else [len(h) for h in head]
@@ -326,7 +332,7 @@ def main(argv):
         rows = [feature_state(root, f, cfg) for f in ids]
         if sub == "next":
             if not rows:
-                print("/team:intake \"<yêu cầu>\"")
+                print("/team:intake \"<request>\"")
                 return 0
             print(json.dumps({"id": rows[0]["id"], "next": rows[0]["next"]}, ensure_ascii=False) if as_json else rows[0]["next"])
             return 0
@@ -339,11 +345,11 @@ def main(argv):
                     print(l)
             return 0
         if not rows:
-            print("team: chưa có feature nào — bắt đầu bằng /team:intake \"<yêu cầu>\".")
+            print("team: no features yet — start with /team:intake \"<request>\".")
             return 0
         if "--brief" in flags:
             for r in rows[:5]:
-                print(f"team: {r['id']} · {r['stage']} · {r['status']}{(' ' + r['gate']) if r['gate'] else ''} · cổng áp dụng {','.join(g.split('_')[0] for g in r['gates']) or '—'} → {r['next']}")
+                print(f"team: {r['id']} · {r['stage']} · {r['status']}{(' ' + r['gate']) if r['gate'] else ''} · applicable gates {','.join(g.split('_')[0] for g in r['gates']) or '—'} → {r['next']}")
             return 0
         print(table(rows))
         lines = [l for r in rows for l in waiting_lines(r)]
@@ -366,7 +372,7 @@ def main(argv):
         if as_json:
             print(json.dumps(agg, ensure_ascii=False, indent=2))
             return 0
-        print("| Đối tượng | Cỡ | Lần gọi | Lượt (trung vị) | Thời gian s (trung vị) | Rework | Bị từ chối |")
+        print("| Subject | Size | Calls | Turns (median) | Duration s (median) | Rework | Rejected |")
         print("|---|---|---|---|---|---|---|")
         for a in agg:
             print(f"| {a['subject']} | {a['size']} | {a['calls']} | {a['median_turns']} | {a['median_duration_s']} | {a['rework']} | {a['rejections']} |")
@@ -376,7 +382,7 @@ def main(argv):
 
 
 class _LocalPrefix:
-    """Cài cục bộ (kit nằm trong .claude/team-kit): lệnh là /team-<tên> thay cho /team:<tên>."""
+    """Local install (kit inside .claude/team-kit): commands are /team-<name> instead of /team:<name>."""
     def __init__(self, stream):
         self.stream = stream
 

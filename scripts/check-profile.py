@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Kiểm một file JSON theo JSON Schema (tập con draft-07, chỉ thư viện chuẩn).
+"""Checks JSON files against a JSON Schema (draft-07 subset, standard library only).
 
-Hỗ trợ: type (kể cả danh sách kiểu), enum, required, properties, additionalProperties
-(bool hoặc schema), items, minimum, minLength, pattern.
-Dùng: scripts/check-profile.py <schema.json> <file.json> [<file.json> ...]
-In mỗi vấn đề một dòng `<file>: <đường dẫn JSON>: <vấn đề>`; mã thoát 1 khi có vấn đề.
+Supported: type (including a list of types), enum, required, properties, additionalProperties
+(bool or schema), items, minimum, minLength, pattern.
+Usage: scripts/check-profile.py <schema.json> <file.json> [<file.json> ...]
+Prints one line per problem `<file>: <JSON path>: <problem>`; exit code 1 when there are problems.
 """
 import json
 import re

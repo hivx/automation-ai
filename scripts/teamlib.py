@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""teamlib.py — logic dùng chung cho hook của kit `team` (chỉ thư viện chuẩn).
+"""teamlib.py — shared logic for the hooks of the `team` kit (standard library only).
 
-Lệnh con:
-  relpath --root R <path>              in đường dẫn tương đối (rỗng nếu ngoài R)
-  is-protected --root R <rel>          thoát 0 nếu khớp protected_paths/.git/**; in mẫu khớp
-  allowed-root --root R <rel>          thoát 0 nếu nằm dưới structure.allowed_new_file_roots
-  test-glob <naming.test_file>         đổi mẫu tên test ({name}) thành glob
-  check-git --root R                   đọc JSON hook (stdin), kiểm lệnh git trong tool_input.command
-  role-policy --root R --policy F      đọc JSON hook (stdin), kiểm giới hạn theo vai (agent_type)
-  protect-bash --root R                đọc JSON hook (stdin), chặn lệnh Bash ghi/xóa vùng cấm (K-24)
-Mã thoát của check-git/role-policy/protect-bash: 0 cho qua, 2 chặn (lý do ở stderr).
+Subcommands:
+  relpath --root R <path>              print the relative path (empty if outside R)
+  is-protected --root R <rel>          exit 0 if it matches protected_paths/.git/**; print the matching pattern
+  allowed-root --root R <rel>          exit 0 if it is under structure.allowed_new_file_roots
+  test-glob <naming.test_file>         turn a test-name pattern ({name}) into a glob
+  check-git --root R                   read hook JSON (stdin), check git commands in tool_input.command
+  role-policy --root R --policy F      read hook JSON (stdin), check per-role limits (agent_type)
+  protect-bash --root R                read hook JSON (stdin), block Bash commands that write/delete forbidden areas (K-24)
+Exit codes of check-git/role-policy/protect-bash: 0 allow, 2 block (reason on stderr).
 """
 import fnmatch
 import json
@@ -25,7 +25,7 @@ NEVER_WRITABLE = [".git/**", ".claude/settings.json", ".claude/settings.local.js
 COMMIT_RE = re.compile(r"^(feat|fix|refactor|docs|test|chore|ci|build|perf)(\(.+\))?: .+ \((FEAT|BUG|CHG)-\d+\)$")
 
 
-# ---------- đọc cấu hình ----------
+# ---------- configuration ----------
 def load_json(path, default=None):
     try:
         with open(path, encoding="utf-8") as fh:
@@ -54,7 +54,7 @@ def get(d, dotted, default=None):
     return d
 
 
-# ---------- đường dẫn và glob ----------
+# ---------- paths and globs ----------
 def relpath(root, path):
     path = path.replace("\\", "/")
     full = os.path.normpath(path if os.path.isabs(path) else os.path.join(root, path))
@@ -66,12 +66,12 @@ def relpath(root, path):
     rel = os.path.relpath(full, root).replace(os.sep, "/")
     parts = rel.split("/")
     if len(parts) > 3 and parts[0] == ".claude" and parts[1] == "worktrees":
-        rel = "/".join(parts[3:])  # worktree của subagent: luật áp như ở gốc repo
+        rel = "/".join(parts[3:])  # a subagent's worktree: rules apply as at the repo root
     return rel
 
 
 def in_worktree(root, path):
-    """Đường dẫn nằm trong một worktree của subagent (.claude/worktrees/<n>/...)."""
+    """The path is inside a subagent worktree (.claude/worktrees/<n>/...)."""
     path = path.replace("\\", "/")
     full = os.path.normpath(path if os.path.isabs(path) else os.path.join(root, path))
     wt = os.path.join(os.path.normpath(root), ".claude", "worktrees") + os.sep
@@ -97,7 +97,7 @@ def glob_re(pat):
 
 
 def glob_match(rel, pat):
-    """Gần với gitignore: mẫu không có '/' khớp bất kỳ thành phần nào của đường dẫn."""
+    """Close to gitignore: a pattern without '/' matches any component of the path."""
     pat = pat.strip()
     if not pat:
         return False
@@ -124,7 +124,7 @@ def allowed_root(root, rel):
     prof = profile(root)
     roots = get(prof, "structure.allowed_new_file_roots", None) if prof else None
     if roots is None:
-        return True  # chưa onboard: không giới hạn
+        return True  # not onboarded yet: no limit
     for r in roots:
         r = r.strip().rstrip("/")
         if r in ("", "."):
@@ -138,12 +138,12 @@ def test_glob(pattern):
     return re.sub(r"\{[A-Za-z_]+\}", "*", pattern or "")
 
 
-# ---------- phân tích lệnh shell ----------
+# ---------- shell command parsing ----------
 SEPARATORS = {"&&", "||", ";", "|", "&", "\n", ";;", "|&"}
 
 
 def segments(command):
-    """Tách lệnh thành các đoạn (danh sách token) theo toán tử điều khiển."""
+    """Split a command into segments (token lists) at control operators."""
     lex = shlex.shlex(command.replace("\n", " ; "), posix=True, punctuation_chars=";&|<>")
     lex.whitespace_split = True
     try:
@@ -164,7 +164,7 @@ def segments(command):
 
 
 def strip_prefix(tokens):
-    """Bỏ gán biến môi trường và các tiền tố như env, command, time, sudo."""
+    """Drop environment assignments and prefixes such as env, command, time, sudo."""
     i = 0
     while i < len(tokens) and (re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", tokens[i])
                                or tokens[i] in ("env", "command", "exec", "time", "nohup", "sudo")):
@@ -173,7 +173,7 @@ def strip_prefix(tokens):
 
 
 def git_parts(tokens):
-    """Trả (thư mục -C, subcommand, args) nếu đoạn là lệnh git, ngược lại None."""
+    """Return (-C directory, subcommand, args) if the segment is a git command, else None."""
     tokens = strip_prefix(tokens)
     if not tokens or os.path.basename(tokens[0]) != "git":
         return None
@@ -202,7 +202,7 @@ def branch_matches(name, patterns):
 
 
 def check_git(root, data):
-    """Trả (mã thoát, thông điệp, cảnh báo)."""
+    """Return (exit code, message, warnings)."""
     cmd = get(data, "tool_input.command", "") or ""
     cwd = data.get("cwd") or root
     cfg = config(root)
@@ -215,11 +215,11 @@ def check_git(root, data):
         cdir, sub, args = parts
         bad_c = [seg[i + 1] for i, t in enumerate(seg[:-1]) if t == "-c" and re.match(r"^(alias\.|core\.hooksPath|core\.sshCommand|core\.pager|core\.editor|core\.fsmonitor|diff\.external|credential\.helper)", seg[i + 1], re.I)]
         if bad_c or "--exec-path" in " ".join(seg):
-            return 2, f"BLOCKED (STD-GIT-2): `git -c {bad_c[0] if bad_c else '--exec-path'}` có thể bỏ qua hook hoặc chạy lệnh tùy ý.", warnings
+            return 2, f"BLOCKED (STD-GIT-2): `git -c {bad_c[0] if bad_c else '--exec-path'}` can bypass hooks or run arbitrary commands.", warnings
         wd = os.path.join(cwd, cdir) if cdir else cwd
         current = git_out(wd, "rev-parse", "--abbrev-ref", "HEAD")
         if sub in ("filter-branch", "filter-repo"):
-            return 2, f"BLOCKED (STD-GIT-4): `git {sub}` viết lại lịch sử — không bao giờ.", warnings
+            return 2, f"BLOCKED (STD-GIT-4): `git {sub}` rewrites history — never.", warnings
         if sub == "push":
             code, msg = check_push(args, wd, current, protected)
             if code:
@@ -239,18 +239,18 @@ def check_git(root, data):
                 if a.startswith("--message="):
                     msgs.append(a.split("=", 1)[1])
                 elif a == "--no-verify" or (re.match(r"^-[A-Za-z]+$", a) and "n" in a[1:]):
-                    return 2, "BLOCKED (STD-GIT-2): `git commit --no-verify` bị cấm; sửa lỗi mà hook commit báo.", warnings
+                    return 2, "BLOCKED (STD-GIT-2): `git commit --no-verify` is forbidden; fix what the commit hook reports.", warnings
             if msgs:
                 subject = msgs[0].split("\n", 1)[0].strip()
                 if not COMMIT_RE.match(subject):
-                    warnings.append(f"WARN (STD-NAME-5): message '{subject}' không đúng dạng "
-                                    "`type(scope): description (<ID>)`, ví dụ `feat(text): add reverse (FEAT-001)`.")
+                    warnings.append(f"WARN (STD-NAME-5): message '{subject}' does not follow "
+                                    "`type(scope): description (<ID>)`, for example `feat(text): add reverse (FEAT-001)`.")
         elif sub == "rebase" and any(a in ("-i", "--interactive") for a in args):
             if branch_matches(current, protected):
-                return 2, f"BLOCKED (STD-GIT-4): `git rebase -i` trên nhánh bảo vệ `{current}`.", warnings
+                return 2, f"BLOCKED (STD-GIT-4): `git rebase -i` on protected branch `{current}`.", warnings
         elif sub == "reset" and "--hard" in args:
             if branch_matches(current, protected):
-                return 2, f"BLOCKED (STD-GIT-4): `git reset --hard` trên nhánh bảo vệ `{current}`.", warnings
+                return 2, f"BLOCKED (STD-GIT-4): `git reset --hard` on protected branch `{current}`.", warnings
     return 0, "", warnings
 
 
@@ -258,17 +258,17 @@ def check_push(args, wd, current, protected):
     positional, tags_only = [], False
     for a in args:
         if a in ("--force", "--force-if-includes", "--mirror", "--all", "--prune") or a.startswith("--force-with-lease"):
-            return 2, f"BLOCKED (STD-GIT-4): `git push {a}` bị cấm (không force-push, không đẩy hàng loạt)."
+            return 2, f"BLOCKED (STD-GIT-4): `git push {a}` is forbidden (no force-push, no bulk push)."
         if a in ("--delete", "-d"):
-            return 2, "BLOCKED (STD-GIT-3): `git push --delete` bị cấm; người xóa nhánh trên remote."
+            return 2, "BLOCKED (STD-GIT-3): `git push --delete` is forbidden; the human deletes remote branches."
         if a == "--tags":
             tags_only = True
             continue
         if re.match(r"^-[A-Za-z]+$", a):
             if "f" in a[1:]:
-                return 2, "BLOCKED (STD-GIT-4): `git push -f` bị cấm."
+                return 2, "BLOCKED (STD-GIT-4): `git push -f` is forbidden."
             if "d" in a[1:]:
-                return 2, "BLOCKED (STD-GIT-3): `git push -d` bị cấm."
+                return 2, "BLOCKED (STD-GIT-3): `git push -d` is forbidden."
             continue
         if a.startswith("-"):
             continue
@@ -280,10 +280,10 @@ def check_push(args, wd, current, protected):
         refspecs = [current or "HEAD"]
     for spec in refspecs:
         if spec.startswith("+"):
-            return 2, f"BLOCKED (STD-GIT-4): refspec `{spec}` là force-push."
+            return 2, f"BLOCKED (STD-GIT-4): refspec `{spec}` is a force-push."
         src, _, dst = spec.partition(":")
         if spec.startswith(":"):
-            return 2, f"BLOCKED (STD-GIT-3): `{spec}` xóa nhánh trên remote."
+            return 2, f"BLOCKED (STD-GIT-3): `{spec}` deletes a remote branch."
         dst = dst or src
         if dst in ("HEAD", "@"):
             dst = current
@@ -293,12 +293,12 @@ def check_push(args, wd, current, protected):
         if fnmatch.fnmatchcase(dst, "team/*"):
             continue
         if branch_matches(dst, protected):
-            return 2, f"BLOCKED (STD-GIT-3): push vào nhánh bảo vệ `{dst}`. Chỉ push `team/*`, rồi mở PR (`/team:pr`)."
-        return 2, f"BLOCKED (STD-GIT-3): chỉ push nhánh `team/*` (nhận `{dst}`)."
+            return 2, f"BLOCKED (STD-GIT-3): push to protected branch `{dst}`. Push only `team/*`, then open a PR (`/team:pr`)."
+        return 2, f"BLOCKED (STD-GIT-3): push only `team/*` branches (got `{dst}`)."
     return 0, ""
 
 
-# ---------- giới hạn theo vai ----------
+# ---------- per-role limits ----------
 READONLY_GIT = {"status", "log", "diff", "show", "branch", "rev-parse", "ls-files", "blame", "grep",
                 "shortlog", "rev-list", "tag", "describe", "merge-base", "remote", "symbolic-ref", "cat-file",
                 "ls-tree", "for-each-ref", "show-ref", "worktree", "name-rev", "count-objects"}
@@ -307,7 +307,7 @@ READONLY_GH = {("issue", "view"), ("issue", "list"), ("pr", "view"), ("pr", "lis
 
 
 def git_listing_only(sub, args):
-    """branch/tag/remote chỉ-đọc khi chỉ liệt kê; các subcommand khác trong READONLY_GIT luôn chỉ-đọc."""
+    """branch/tag/remote are read-only only when listing; the other READONLY_GIT subcommands are always read-only."""
     if sub == "worktree":
         return bool(args) and args[0] == "list"
     if sub not in ("branch", "tag", "remote"):
@@ -324,7 +324,7 @@ def git_listing_only(sub, args):
 
 
 def redirect_targets(seg):
-    """Tách chuyển hướng: trả (token còn lại, đích ghi). `N>&M` (nhân bản fd) không phải đích ghi."""
+    """Split off redirections: return (remaining tokens, write targets). `N>&M` (fd duplication) is not a write target."""
     targets, clean, i = [], [], 0
     while i < len(seg):
         t = seg[i]
@@ -333,12 +333,12 @@ def redirect_targets(seg):
             if nxt:
                 targets.append(nxt)
             if clean and re.match(r"^\d$", clean[-1]):
-                clean.pop()  # "2 >" do shlex tách "2>"
+                clean.pop()  # "2 >" because shlex splits "2>"
             i += 2
             continue
         if t in (">&", "<&"):
             if nxt and not re.match(r"^(\d+|-)$", nxt) and t == ">&":
-                targets.append(nxt)  # `>&file` = ghi file
+                targets.append(nxt)  # `>&file` = writes a file
             if clean and re.match(r"^\d$", clean[-1]):
                 clean.pop()
             i += 2
@@ -352,7 +352,7 @@ def redirect_targets(seg):
 
 
 def sed_scripts(args):
-    """Trả (danh sách script sed, có -f/--file không)."""
+    """Return (list of sed scripts, whether -f/--file is present)."""
     scripts, has_file, explicit, i = [], False, False, 0
     positional = []
     while i < len(args):
@@ -377,17 +377,17 @@ SED_S_RE = re.compile(r"s(.)(?:\\.|(?!\1).)*\1(?:\\.|(?!\1).)*\1([A-Za-z0-9]*)")
 
 
 def sed_writes_or_runs(script):
-    """Script sed có lệnh e/w/W hoặc cờ s///e, s///w không (chạy lệnh, ghi file)."""
+    """Whether a sed script has an e/w/W command or an s///e, s///w flag (runs commands, writes files)."""
     for m in SED_S_RE.finditer(script):
         if set(m.group(2)) & {"e", "w"}:
             return True
     rest = SED_S_RE.sub(";", script)
-    rest = re.sub(r"\\?/(?:\\.|[^/])*/", " ", rest)  # bỏ địa chỉ /regex/
+    rest = re.sub(r"\\?/(?:\\.|[^/])*/", " ", rest)  # drop /regex/ addresses
     return bool(re.search(r"[ewW]", rest))
 
 
 def kit_script(script, kits):
-    """Tên script nếu `script` nằm đúng trong <kit>/scripts/ của một kit đã biết, ngược lại ''."""
+    """The script name if `script` sits exactly in <kit>/scripts/ of a known kit, else ''."""
     if not script:
         return ""
     full = os.path.realpath(script)
@@ -398,7 +398,7 @@ def kit_script(script, kits):
 
 
 def readonly_script_map(policy):
-    """readonly_scripts: {tên: glob đích ghi | '' | {"write": glob, "when": [lệnh con]}}; chấp nhận dạng danh sách cũ."""
+    """readonly_scripts: {name: write-target glob | '' | {"write": glob, "when": [subcommands]}}; the old list form is accepted."""
     rs = policy.get("readonly_scripts", {})
     return {n: "" for n in rs} if isinstance(rs, list) else dict(rs)
 
@@ -407,7 +407,7 @@ SAFE_ENV = {"LC_ALL", "LANG", "LANGUAGE", "TZ", "NO_COLOR", "TERM", "COLUMNS", "
 
 
 def unsafe_prefix(tokens):
-    """Tiền tố có thể chạy lệnh: biến môi trường ngoài SAFE_ENV (GIT_EXTERNAL_DIFF, GIT_CONFIG_*, BASH_ENV, PAGER…), sudo."""
+    """A prefix that can run commands: an environment variable outside SAFE_ENV (GIT_EXTERNAL_DIFF, GIT_CONFIG_*, BASH_ENV, PAGER…), sudo."""
     for t in tokens:
         m = re.match(r"^([A-Za-z_][A-Za-z0-9_]*)=", t)
         if m:
@@ -429,7 +429,7 @@ def is_readonly(seg, policy, kit, kits=None, writable=None):
     if not seg:
         return True
     if any(("$(" in t or "`" in t or "<(" in t or ">(" in t) for t in seg):
-        return False  # thay thế lệnh có thể chạy bất cứ gì
+        return False  # command substitution can run anything
     head = os.path.basename(seg[0])
     args = seg[1:]
     if head == "git":
@@ -443,14 +443,14 @@ def is_readonly(seg, policy, kit, kits=None, writable=None):
         if any(a in ("-c", "-m") for a in args):
             return False
         script = next((a for a in args if not a.startswith("-")), "")
-        name = kit_script(script, kits or [kit])  # K-40: đúng đường dẫn <kit>/scripts/, không theo tên
+        name = kit_script(script, kits or [kit])  # K-40: by the real <kit>/scripts/ path, not by name
         scripts = readonly_script_map(policy)
         if not name or name not in scripts:
             return False
         dest = scripts[name]
-        if isinstance(dest, dict):  # chỉ ghi với vài lệnh con, ví dụ team.py scorecard
+        if isinstance(dest, dict):  # writes only for some subcommands, e.g. team.py scorecard
             dest = dest.get("write", "") if any(a in dest.get("when", []) for a in args) else ""
-        if dest:  # script có ghi: vai phải được ghi đích của nó; không cho đổi gốc
+        if dest:  # a writing script: the role must be allowed its target; no root override
             if "--root" in args:
                 return False
             return bool(writable and writable(dest.replace("**", "x")))
@@ -462,11 +462,11 @@ def is_readonly(seg, policy, kit, kits=None, writable=None):
             return False
         scripts, has_file = sed_scripts(args)
         return not has_file and not any(sed_writes_or_runs(s) for s in scripts)
-    if head == "sort":  # -o ghi file; --compress-program chạy lệnh; GNU nhận tên dài viết tắt
+    if head == "sort":  # -o writes a file; --compress-program runs a command; GNU accepts abbreviated long options
         return not any(a.startswith(("--o", "--com")) or (a.startswith("-") and not a.startswith("--") and "o" in a[1:])
                        for a in args)
     if head == "uniq":
-        return len([a for a in args if not a.startswith("-")]) <= 1  # uniq IN OUT ghi OUT
+        return len([a for a in args if not a.startswith("-")]) <= 1  # uniq IN OUT writes OUT
     if head == "tree":
         return not any(a == "-o" or a.startswith("-o") for a in args)
     if head == "rg":
@@ -483,9 +483,9 @@ WRITE_DEST = {"cp", "install", "ln"}
 
 
 def bash_write_targets(command):
-    """Đích ghi nhận ra được trong lệnh Bash (K-24, nỗ lực tốt nhất): trả [(thư mục cd, đích)].
-    Nhận: chuyển hướng, tee, rm/touch/truncate/..., mv (cả nguồn), cp/install/ln (đích, -t),
-    sed -i, chmod/chown, dd of=. Không nhận được: ghi bên trong script/chương trình khác."""
+    """Recognizable write targets in a Bash command (K-24, best effort): return [(cd directory, target)].
+    Recognized: redirection, tee, rm/touch/truncate/..., mv (sources too), cp/install/ln (destination, -t),
+    sed -i, chmod/chown, dd of=. Not recognized: writes inside another script/program."""
     out, cwd = [], ""
     for seg in segments(command):
         clean, targets = redirect_targets(seg)
@@ -531,34 +531,34 @@ def bash_write_targets(command):
 
 
 def protect_bash(root, data):
-    """Áp luật protect.sh cho đích ghi của lệnh Bash: .git/, settings, profile/config, protected_paths."""
+    """Apply the protect.sh rules to the write targets of a Bash command: .git/, settings, profile/config, protected_paths."""
     command = (data.get("tool_input") or {}).get("command", "")
     base = data.get("cwd") or root
     stage = (load_json(os.path.join(root, ".team", "current.json"), {}) or {}).get("stage", "")
     for cwd, t in bash_write_targets(command):
         if t in ("/dev/null", "/dev/stdout", "/dev/stderr", "-") or "$" in t:
-            continue  # biến shell không giải được: ngoài phạm vi kiểm (ghi rõ trong docs)
+            continue  # unresolvable shell variable: outside the check's scope (documented)
         full = t if os.path.isabs(t) else os.path.join(base, cwd, t)
         rel = relpath(root, full)
         if not rel or rel == ".":
             continue
         if rel == ".git" or rel.startswith(".git/"):
-            return 2, "BLOCKED (STD-SEC-1): không ghi vào .git/ bằng shell."
+            return 2, "BLOCKED (STD-SEC-1): do not write into .git/ from the shell."
         if rel in (".claude/settings.json", ".claude/settings.local.json"):
-            return 2, f"BLOCKED (STD-SEC-1): {rel} chỉ đổi qua /team:onboard hoặc do người sửa."
+            return 2, f"BLOCKED (STD-SEC-1): {rel} changes only through /team:onboard or by the human."
         if rel in (".team/profile.json", ".team/config.json") and stage != "onboard":
-            return 2, f"BLOCKED (STD-SEC-1): {rel} chỉ đổi qua /team:onboard hoặc do người sửa."
+            return 2, f"BLOCKED (STD-SEC-1): {rel} changes only through /team:onboard or by the human."
         if rel.startswith("docs/team/") or rel == "CHANGELOG.md":
             continue
         pat = protected_match(root, rel)
         if pat:
-            return 2, (f"BLOCKED (STD-SEC-1): lệnh shell ghi/xóa '{rel}' khớp protected_paths ('{pat}'). "
-                       "Người sửa tay, hoặc sửa protected_paths trong .team/profile.json nếu khai nhầm.")
+            return 2, (f"BLOCKED (STD-SEC-1): the shell command writes/deletes '{rel}', which matches protected_paths ('{pat}'). "
+                       "The human edits it by hand, or fixes protected_paths in .team/profile.json if it was declared by mistake.")
     return 0, ""
 
 
 def cp_from_templates(seg, kits):
-    """`cp` mà mọi nguồn nằm dưới <kit>/templates/ (đích là đối số cuối)."""
+    """A `cp` whose sources all lie under <kit>/templates/ (the destination is the last argument)."""
     toks = strip_prefix(seg)
     if not toks or os.path.basename(toks[0]) != "cp":
         return False
@@ -570,7 +570,7 @@ def cp_from_templates(seg, kits):
 
 
 def is_temp_agent(root, agent):
-    """Agent dự án do /team:make-agent tạo: .claude/agents/<tên>.md có dấu `team: temp`."""
+    """A project agent created by /team:make-agent: .claude/agents/<name>.md carries the `team: temp` marker."""
     name = agent.split(":", 1)[-1]
     if not re.match(r"^[a-z0-9][a-z0-9-]*$", name):
         return False
@@ -593,12 +593,12 @@ def cmd_prefixes(root):
 def role_policy(root, data, policy_path):
     agent = data.get("agent_type") or ""
     if agent and policy_path and not os.path.isfile(policy_path):
-        return 2, f"BLOCKED (role-policy): không đọc được {policy_path} — hook an toàn không cho qua khi thiếu luật."
+        return 2, f"BLOCKED (role-policy): cannot read {policy_path} — a safety hook does not allow anything without its rules."
     policy = load_json(policy_path, {})
     roles = policy.get("roles") or {}
-    role = roles.get(agent) or roles.get(f"team:{agent}")  # cài cục bộ: agent không có tiền tố plugin
+    role = roles.get(agent) or roles.get(f"team:{agent}")  # local install: agents have no plugin prefix
     if not role and agent and is_temp_agent(root, agent):
-        role = roles.get("_temp")  # agent tạm của make-agent: giới hạn mặc định, không phải tự do
+        role = roles.get("_temp")  # make-agent temp agent: default limits, not free rein
     if not role:
         return 0, ""
     stage = (load_json(os.path.join(root, ".team", "current.json"), {}) or {}).get("stage", "")
@@ -612,22 +612,22 @@ def role_policy(root, data, policy_path):
     def writable(path):
         rel = relpath(root, path)
         if rel != "" and role.get("worktree_write") and in_worktree(root, path):
-            return True  # POC của researcher: chỉ trong worktree riêng (.claude/worktrees/<n>/), protect.sh vẫn áp
+            return True  # researcher POC: only inside its own worktree (.claude/worktrees/<n>/); protect.sh still applies
         return rel != "" and any(glob_match(rel, p) for p in writes)
 
     if tool in ("Edit", "Write", "NotebookEdit"):
         path = tin.get("file_path") or tin.get("notebook_path") or ""
         if "*" in writes or writable(path):
             return 0, ""
-        return 2, (f"BLOCKED (role-policy): {agent} chỉ được ghi {', '.join(writes) or '(không gì)'}; "
-                   f"nhận `{relpath(root, path) or path}`. Giao cho vai đúng.")
+        return 2, (f"BLOCKED (role-policy): {agent} may only write {', '.join(writes) or '(nothing)'}; "
+                   f"got `{relpath(root, path) or path}`. Hand it to the right role.")
     if tool == "Agent":
         target = tin.get("subagent_type") or "general-purpose"
         allowed = role.get("agents", [])
         names = {target, target if target.startswith("team:") or target in ("Explore", "Plan", "general-purpose") else f"team:{target}"}
         if any(fnmatch.fnmatchcase(n, p) for n in names for p in allowed):
             return 0, ""
-        return 2, f"BLOCKED (role-policy): {agent} không được gọi `{target}` (cho phép: {', '.join(allowed) or 'không ai'})."
+        return 2, f"BLOCKED (role-policy): {agent} may not call `{target}` (allowed: {', '.join(allowed) or 'none'})."
     if tool == "Bash":
         if bash == "any":
             return 0, ""
@@ -640,14 +640,14 @@ def role_policy(root, data, policy_path):
         except OSError:
             kit_path = kit
         for form in ('"$(cat .team/plugin_root)"', "$(cat .team/plugin_root)"):
-            command = command.replace(form, kit_path)  # cách skill gọi script của kit; thay thế khác vẫn bị chặn
+            command = command.replace(form, kit_path)  # how skills call kit scripts; any other substitution is still blocked
         base, cwd = data.get("cwd") or root, ""
         for seg in segments(command):
             clean, targets = redirect_targets(seg)
             for t in targets:
-                full = t if os.path.isabs(t) else os.path.join(base, cwd, t)  # tính cả `cd` trước đó
+                full = t if os.path.isabs(t) else os.path.join(base, cwd, t)  # includes an earlier `cd`
                 if t not in ("/dev/null",) and not writable(full):
-                    return 2, f"BLOCKED (role-policy): {agent} không được ghi `{t}` bằng chuyển hướng."
+                    return 2, f"BLOCKED (role-policy): {agent} may not write `{t}` through a redirection."
             ct = strip_prefix(clean)
             if ct and ct[0] == "cd":
                 dest = next((a for a in ct[1:] if not a.startswith("-")), "")
@@ -656,13 +656,13 @@ def role_policy(root, data, policy_path):
             if is_readonly(clean, policy, kit, [kit, kit_path], writable):
                 continue
             if "cp-from-kit-templates" in extra and cp_from_templates(clean, [kit, kit_path]):
-                continue  # onboard: chỉ chép từ <kit>/templates/ (K-26)
+                continue  # onboard: copy only from <kit>/templates/ (K-26)
             if any(p not in ("cmd.*", "cp-from-kit-templates") and fnmatch.fnmatchcase(text, p) for p in extra):
                 continue
             if any(text == p or text.startswith(p + " ") for p in prefixes if p):
                 continue
-            return 2, (f"BLOCKED (role-policy): {agent} chỉ chạy lệnh chỉ-đọc"
-                       f"{' hoặc ' + ', '.join(extra) if extra else ''}; nhận `{text[:120]}`.")
+            return 2, (f"BLOCKED (role-policy): {agent} may only run read-only commands"
+                       f"{' or ' + ', '.join(extra) if extra else ''}; got `{text[:120]}`.")
     return 0, ""
 
 
@@ -704,7 +704,8 @@ def main(argv):
         except ValueError:
             if sub == "check-git":
                 return 0
-            print(f"BLOCKED ({sub}): JSON hook hỏng — hook an toàn không cho qua khi không đọc được đầu vào.", file=sys.stderr)
+            label = "STD-SEC-1" if sub == "protect-bash" else sub  # protect-bash enforces STD-SEC-1
+            print(f"BLOCKED ({label}): malformed hook JSON — a safety hook does not allow what it cannot read.", file=sys.stderr)
             return 2
         if sub == "check-git":
             code, msg, warns = check_git(root, data)

@@ -53,7 +53,7 @@ def load_map():
         for line in fh:
             if " = " in line and not line.startswith("# "):
                 a, b = line.rstrip("\n").split(" = ", 1)
-                m[a.strip()] = b.strip()
+                m[a.strip().encode("ascii").decode("unicode_escape")] = b.strip()
     return m
 
 

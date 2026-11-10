@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Sinh skills/README.md, docs/guides/want-x-type-y.md, docs/guides/decision-tree.md (chỉ stdlib).
+"""Generates skills/README.md, docs/guides/want-x-type-y.md, docs/guides/decision-tree.md (stdlib only).
 
-Nguồn: frontmatter + mục '## Đầu ra' của skills/*/SKILL.md; bảng playbook trong workflows/README.md.
-Dùng: scripts/gen-guides.py           ghi ba file
-      scripts/gen-guides.py --check   mã thoát 1 nếu file nào lệch (in tên file lệch)
+Sources: frontmatter + the '## Outputs' section of skills/*/SKILL.md; the playbook table in workflows/README.md.
+Usage: scripts/gen-guides.py           write the three files
+       scripts/gen-guides.py --check   exit code 1 if any file is stale (prints the stale file names)
 """
 import pathlib
 import re
@@ -11,9 +11,11 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 GEN = "<!-- GENERATED — do not edit; run scripts/gen-guides.py -->"
-# Vai chạy skill khi skill không fork sang một agent.
-MAIN_ROLE = {"commit": "dev, maintainer", "handbook": "mọi vai (nạp sẵn)",
-             "using-team": "team-leader, tech-lead (nạp sẵn)"}
+# Role that runs a skill when the skill does not fork to an agent.
+MAIN_ROLE = {"commit": "dev, maintainer", "handbook": "every role (preloaded)",
+             "using-team": "team-leader, tech-lead (preloaded)"}
+# Vietnamese forms of skills not yet converted (P9 transition), escaped so this file stays English.
+LEGACY_OUTPUTS, LEGACY_PREFIX = "\u0110\u1ea7u ra", "D\u00f9ng khi "  # "Outputs", "Use when "
 PB_START, PB_END = "<!-- playbook-table:start -->", "<!-- playbook-table:end -->"
 
 
@@ -46,29 +48,29 @@ def skills():
         fm, body = frontmatter((d / "SKILL.md").read_text(encoding="utf-8"))
         name = fm.get("name", d.name)
         if fm.get("disable-model-invocation") == "true":
-            who = "người"
+            who = "human"
         elif fm.get("user-invocable") == "false":
             who = "Claude"
         else:
-            who = "cả hai"
+            who = "both"
         agent = fm.get("agent", "")
         role = agent.split(":", 1)[1] if agent.startswith("team:") else MAIN_ROLE.get(name, "team-leader")
         outs = []
-        outsec = re.sub(r"```.*?```", "", section(body, "Đầu ra"), flags=re.S)  # bỏ khối ví dụ tin trả
+        outsec = re.sub(r"```.*?```", "", section(body, "Outputs") or section(body, LEGACY_OUTPUTS), flags=re.S)  # drop example return-message blocks
         for p in re.findall(r"`([^`\n]+)`", outsec):
             if ("/" in p or p.endswith((".md", ".json", ".jsonl"))) and p not in outs:
                 outs.append(p)
         desc = fm.get("description", "")
-        when = desc[len("Dùng khi "):] if desc.startswith("Dùng khi ") else desc
+        when = next((desc[len(p):] for p in ("Use when ", LEGACY_PREFIX) if desc.startswith(p)), desc)
         rows.append(dict(name=name, who=who, role=role, outs=outs[:3], when=when.rstrip("."),
                          hint=fm.get("argument-hint", "")))
     return rows
 
 
 def render_skills_readme(rows):
-    out = [GEN, "# Skills của plugin `team`", "",
-           "Mỗi thư mục là một lệnh `/team:<tên>`. Cài cục bộ thì gõ `/team-<tên>`.", "",
-           "| Skill | Ai gọi | Vai chạy | Artifact |", "|---|---|---|---|"]
+    out = [GEN, "# Skills of the `team` plugin", "",
+           "Each folder is a `/team:<name>` command. With a local install, type `/team-<name>`.", "",
+           "| Skill | Invoked by | Runs as role | Artifacts |", "|---|---|---|---|"]
     for r in rows:
         arts = ", ".join(f"`{cell(a)}`" for a in r["outs"]) or "—"
         out.append(f"| [`{r['name']}`]({r['name']}/SKILL.md) | {r['who']} | {r['role']} | {arts} |")
@@ -76,9 +78,9 @@ def render_skills_readme(rows):
 
 
 def render_want(rows):
-    out = [GEN, "# Muốn X thì gõ Y", "",
-           "Bảng sinh từ `skills/*/SKILL.md`. Cài cục bộ (không qua marketplace): gõ `/team-<tên>` thay cho `/team:<tên>`.", "",
-           "| Khi | Gõ | Vai chạy | Để lại |", "|---|---|---|---|"]
+    out = [GEN, "# Want X, type Y", "",
+           "Table generated from `skills/*/SKILL.md`. Local install (without the marketplace): type `/team-<name>` instead of `/team:<name>`.", "",
+           "| When | Type | Runs as role | Leaves behind |", "|---|---|---|---|"]
     for r in rows:
         if r["who"] == "Claude":
             continue
@@ -94,11 +96,11 @@ def render_tree():
         raise SystemExit("workflows/README.md: missing playbook-table markers")
     table = text.split(PB_START, 1)[1].split(PB_END, 1)[0].strip("\n")
     table = re.sub(r"\]\((?!http)([^)]+)\)", r"](../../workflows/\1)", table)
-    out = [GEN, "# Chọn playbook nào", "",
-           "team-leader chọn ở `/team:intake`: xét từ trên xuống, dòng đầu tiên khớp thắng; rồi mới định cỡ.",
-           "Nguồn: `workflows/README.md`. Chuỗi skill, cổng, điểm dừng của từng playbook nằm trong file playbook.", "",
+    out = [GEN, "# Which playbook", "",
+           "team-leader chooses at `/team:intake`: read from the top, the first matching row wins; size comes after.",
+           "Source: `workflows/README.md`. Each playbook's skill chain, gates and stop points live in the playbook file.", "",
            table, "",
-           "Chạy không người trông: `workflows/batch/` (build-all-tasks, verify-all, weekly-retro, clean-sweep)."]
+           "Unattended runs: `workflows/batch/` (build-all-tasks, verify-all, weekly-retro, clean-sweep)."]
     return "\n".join(out) + "\n"
 
 

@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
-# lib.sh — hàm dùng chung cho hook và script của kit `team`. Chỉ bash + jq + python3 stdlib.
-# Dùng: . "$(dirname "${BASH_SOURCE[0]}")/lib.sh"; team_init "$@"
+# lib.sh — shared functions for the hooks and scripts of the `team` kit. Only bash + jq + python3 stdlib.
+# Usage: . "$(dirname "${BASH_SOURCE[0]}")/lib.sh"; team_init "$@"
 #
-#   team_init [--root DIR]   đặt TEAM_ROOT: --root > $CLAUDE_PROJECT_DIR > $PWD
-#   read_input               đọc JSON hook từ stdin một lần vào HOOK_INPUT
-#   input_get <jq-path>      lấy trường từ HOOK_INPUT (rỗng nếu không có)
-#   profile_get <jq-path>    đọc .team/profile.json
-#   config_get <jq-path>     đọc .team/config.json (thiếu thì đọc config mặc định của kit)
-#   rel_path <path>          đường dẫn tương đối so với TEAM_ROOT (rỗng nếu nằm ngoài)
-#   is_protected <rel>       0 nếu khớp protected_paths hoặc .git/**
-#   under_allowed_roots <rel> 0 nếu nằm dưới structure.allowed_new_file_roots
-#   log_event <json>         nối một dòng vào docs/team/metrics/runs.jsonl
-#   current_stage / current_feature   đọc .team/current.json
-#   block <msg>              in stderr, thoát 2 (hook chặn)
-#   allow                    thoát 0
+#   team_init [--root DIR]   sets TEAM_ROOT: --root > $CLAUDE_PROJECT_DIR > $PWD
+#   read_input               reads the hook JSON from stdin once into HOOK_INPUT
+#   input_get <jq-path>      gets a field from HOOK_INPUT (empty if absent)
+#   profile_get <jq-path>    reads .team/profile.json
+#   config_get <jq-path>     reads .team/config.json (falls back to the kit's default config)
+#   rel_path <path>          path relative to TEAM_ROOT (empty if outside)
+#   is_protected <rel>       0 if it matches protected_paths or .git/**
+#   under_allowed_roots <rel> 0 if it is under structure.allowed_new_file_roots
+#   log_event <json>         appends one line to docs/team/metrics/runs.jsonl
+#   current_stage / current_feature   read .team/current.json
+#   block <msg>              prints to stderr, exits 2 (the hook blocks)
+#   allow                    exits 0
 
 KIT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEAMLIB="$KIT_DIR/scripts/teamlib.py"
@@ -33,7 +33,7 @@ team_init() {
   export TEAM_ROOT
 }
 
-show_help() { # show_help <script>: in khối chú thích đầu file
+show_help() { # show_help <script>: prints the comment block at the top of the file
   sed -n '2,/^[^#]/p' "$1" | sed '$d' | sed 's/^# \{0,1\}//'
 }
 

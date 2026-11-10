@@ -1,5 +1,5 @@
-# Ngân sách chữ thân (bỏ frontmatter), đếm theo khoảng trắng. Dòng: <lớp> <min> <max> [thành viên...]
-# always = skill nạp thường xuyên; full = mọi skill còn lại; agent = mọi file agents/*.md.
+# Body word budget (frontmatter excluded), counted by whitespace. Line: <class> <min> <max> [members...]
+# always = frequently loaded skills; full = every other skill; agent = every agents/*.md file.
 always 0 400 handbook using-team status run intake feedback
 full 1200 2500
 agent 600 1200

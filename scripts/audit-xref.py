@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""audit-xref.py — kiểm chéo tên và tham chiếu trong toàn bộ kit (chỉ thư viện chuẩn).
+"""audit-xref.py — cross-checks names and references across the whole kit (standard library only).
 
-Báo (mỗi dòng `<file>: <vấn đề>`, thoát 1 nếu có):
-  1. tên skill / agent / playbook / template / script được nhắc trong .md mà không tồn tại;
-  2. artifact skill ghi ra mà không có template (trừ danh sách NO_TEMPLATE);
-  3. template trong templates/artifacts/ mà không skill/agent nào ghi;
-  4. mã STD trích trong agents/skills/workflows/templates/hooks không có trong handbook/STD.md;
-  5. khóa config/profile nhắc trong scripts/skills/agents/workflows/templates không có trong schema;
-  6. hook trỏ tới script không có;
-  7. trang docs/ không được liên kết từ docs/00-overview.md hoặc README.md.
-Dùng: scripts/audit-xref.py [--root DIR]
+Reports (one line `<file>: <problem>` each, exit 1 if any):
+  1. a skill / agent / playbook / template / script named in a .md file that does not exist;
+  2. an artifact a skill writes that has no template (except the NO_TEMPLATE list);
+  3. a template in templates/artifacts/ that no skill/agent writes;
+  4. an STD code cited in agents/skills/workflows/templates/hooks that is not in handbook/STD.md;
+  5. a config/profile key named in scripts/skills/agents/workflows/templates that is not in the schema;
+  6. a hook pointing to a missing script;
+  7. a docs/ page not linked from docs/00-overview.md or README.md.
+Usage: scripts/audit-xref.py [--root DIR]
 """
 import json
 import os
@@ -17,7 +17,7 @@ import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# Artifact → template (tên file trong templates/artifacts/); None = cố ý không có template.
+# Artifact → template (file name in templates/artifacts/); None = intentionally without a template.
 ARTIFACT_TEMPLATE = {
     "intake.md": "intake", "spec.md": "spec", "research.md": "research", "architecture.md": "architecture",
     "arch-impact.md": "arch-impact", "design.md": "design", "plan.md": "plan", "tasks.md": "tasks",
@@ -35,6 +35,7 @@ NO_TEMPLATE = {"diff.patch", "pr-body.md", "feedback.jsonl", "runs.jsonl", "sess
 TEXT_DIRS = ["agents", "skills", "workflows", "handbook", "docs", "templates", "evals"]
 TOP_FILES = ["README.md", "CLAUDE.md"]
 EXTS = (".md", ".json", ".yml", ".tmpl", ".sh", ".py")
+LEGACY_OUTPUTS = "\u0110\u1ea7u ra"  # Vietnamese "Outputs" heading of not-yet-converted skills (P9 transition)
 
 
 def walk(root, dirs, exts=(".md",)):
@@ -90,24 +91,24 @@ def main(argv):
     files = list(walk(root, TEXT_DIRS, EXTS)) + [os.path.join(root, f) for f in TOP_FILES]
     md_files = [f for f in files if f.endswith((".md", ".tmpl"))]
 
-    # 1. tên không tồn tại
+    # 1. names that do not exist
     for f in md_files:
         t = read(f)
         for m in re.finditer(r"(?<![\w/-])team:([a-z][a-z-]*)\b", t):
             name = m.group(1)
             if name in ("intake", "run", "ask", "decide", "needs-answer", "size", "start", "end") or name.startswith("size"):
-                continue  # nhãn GitHub
+                continue  # GitHub labels
             if name not in agents and name not in skills:
-                say(f, f"`team:{name}` không phải agent hay skill")
+                say(f, f"`team:{name}` is neither an agent nor a skill")
         for m in re.finditer(r"[Pp]laybook\s+`([a-z][a-z-]*)`", t):
             if m.group(1) not in playbooks:
-                say(f, f"playbook `{m.group(1)}` không có trong workflows/")
+                say(f, f"playbook `{m.group(1)}` is not in workflows/")
         for m in re.finditer(r"templates/artifacts/([a-z][a-z-]*)\.md", t):
             if m.group(1) not in templates:
-                say(f, f"template {m.group(1)}.md không tồn tại")
+                say(f, f"template {m.group(1)}.md does not exist")
         for m in re.finditer(r"(?<![\w.-])scripts/([a-z][a-z0-9-]*\.(?:sh|py))", t):
             if not os.path.isfile(os.path.join(root, "scripts", m.group(1))):
-                say(f, f"script scripts/{m.group(1)} không tồn tại")
+                say(f, f"script scripts/{m.group(1)} does not exist")
 
     # 2–3. artifact ↔ template
     written = set()
@@ -117,7 +118,7 @@ def main(argv):
             continue
         t = read(p)
         written |= set(re.findall(r"templates/artifacts/([a-z][a-z-]*)\.md", t))
-        for path in re.findall(r"`([^`\s]+)`", section(t, "Đầu ra")):
+        for path in re.findall(r"`([^`\s]+)`", section(t, "Outputs") or section(t, LEGACY_OUTPUTS)):
             base = path.rstrip("/").split("/")[-1]
             if not re.search(r"\.(md|json|jsonl|patch)$", base):
                 continue
@@ -125,23 +126,23 @@ def main(argv):
                 continue
             tmpl = ARTIFACT_TEMPLATE.get(base)
             if tmpl is None:
-                say(p, f"artifact `{path}` không có template (thêm template hoặc vào NO_TEMPLATE)")
+                say(p, f"artifact `{path}` has no template (add a template or list it in NO_TEMPLATE)")
             elif tmpl not in templates:
-                say(p, f"artifact `{path}` cần templates/artifacts/{tmpl}.md")
+                say(p, f"artifact `{path}` needs templates/artifacts/{tmpl}.md")
             else:
                 written.add(tmpl)
     for f in walk(root, ["agents"]):
         written |= set(re.findall(r"templates/artifacts/([a-z][a-z-]*)\.md", read(f)))
     for t in sorted(templates - written):
-        say(f"templates/artifacts/{t}.md", "không skill hay agent nào ghi template này")
+        say(f"templates/artifacts/{t}.md", "no skill or agent writes this template")
 
-    # 4. mã STD
+    # 4. STD codes
     for f in walk(root, ["agents", "skills", "workflows", "templates", "hooks"], EXTS):
         for code in set(re.findall(r"STD-[A-Z]+-\d+", read(f))):
             if code not in std_codes:
-                say(f, f"{code} không có trong handbook/STD.md")
+                say(f, f"{code} is not in handbook/STD.md")
 
-    # 5. khóa config/profile
+    # 5. config/profile keys
     prof = schema_paths(json.load(open(os.path.join(root, "templates", "schemas", "profile.schema.json"))))
     conf = schema_paths(json.load(open(os.path.join(root, "templates", "schemas", "config.schema.json"))))
     valid = prof | conf
@@ -156,10 +157,10 @@ def main(argv):
             key = m.group(1)
             if key.endswith("_") or key not in valid and not any(v.startswith(key + ".") for v in valid):
                 if key not in valid:
-                    say(f, f"khóa `{key}` không có trong schema profile/config")
+                    say(f, f"key `{key}` is not in the profile/config schema")
         for m in cfg_re.finditer(t):
             if m.group(1) not in conf and m.group(1) not in ("json", "schema", "yml", "yaml", "md", "toml"):
-                say(f, f"khóa `config.{m.group(1)}` không có trong config.schema.json")
+                say(f, f"key `config.{m.group(1)}` is not in config.schema.json")
 
     # 6. hook → script
     hooks = json.load(open(os.path.join(root, "hooks", "hooks.json")))
@@ -168,9 +169,9 @@ def main(argv):
             for h in g.get("hooks", []):
                 for s in re.findall(r"scripts/([A-Za-z0-9_.-]+)", h.get("command", "")):
                     if not os.path.isfile(os.path.join(root, "scripts", s)):
-                        say("hooks/hooks.json", f"script scripts/{s} không tồn tại")
+                        say("hooks/hooks.json", f"script scripts/{s} does not exist")
 
-    # 7. docs được liên kết
+    # 7. docs are linked
     index = read(os.path.join(root, "docs", "00-overview.md")) + read(os.path.join(root, "README.md"))
     for f in walk(root, ["docs"]):
         r = rel(root, f)
@@ -178,11 +179,11 @@ def main(argv):
             continue
         name = os.path.basename(f)
         if name not in index and r not in index:
-            say(f, "không được liên kết từ docs/00-overview.md hoặc README.md")
+            say(f, "not linked from docs/00-overview.md or README.md")
 
     for p in sorted(set(problems)):
         print(p)
-    print(f"audit-xref: {len(set(problems))} vấn đề")
+    print(f"audit-xref: {len(set(problems))} problems")
     return 1 if problems else 0
 
 

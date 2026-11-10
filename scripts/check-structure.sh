@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
-# check-structure.sh — kiểm cấu trúc thay đổi so với config.base_branch (STD-STRUCT-1, STD-NAME-3).
-#   1. Mọi file MỚI (đã commit, staged hoặc untracked) nằm dưới structure.allowed_new_file_roots
-#      (trừ docs/team/, .team/, .claude/).
-#   2. File test mới khớp naming.test_file (trong structure.tests, hoặc tên chứa "test" khi colocated).
-#   3. Không stage file sinh ra: *.pyc, node_modules/, dist/, build/ (trừ khi thư mục đó là allowed root).
-# In mỗi vấn đề một dòng; thoát 1 nếu có vấn đề, 0 nếu sạch.
-# Dùng: check-structure.sh [--root DIR] ; check-structure.sh --help
+# check-structure.sh — checks the structure of changes against config.base_branch (STD-STRUCT-1, STD-NAME-3).
+#   1. Every NEW file (committed, staged or untracked) is under structure.allowed_new_file_roots
+#      (except docs/team/, .team/, .claude/).
+#   2. A new test file matches naming.test_file (under structure.tests, or a name containing "test" when colocated).
+#   3. No generated files staged (STD-GIT-5): *.pyc, node_modules/, dist/, build/ (unless that directory is an allowed root).
+# Prints one line per problem; exits 1 when there are problems, 0 when clean.
+# Usage: check-structure.sh [--root DIR] ; check-structure.sh --help
 set -uo pipefail
 . "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 [[ ${1:-} == --help || ${1:-} == -h ]] && { show_help "$0"; exit 0; }
 team_init "$@"
 cd "$TEAM_ROOT" || exit 0
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0
-[[ -f .team/profile.json ]] || { echo "check-structure: .team/profile.json chưa có — bỏ qua"; exit 0; }
+[[ -f .team/profile.json ]] || { echo "check-structure: no .team/profile.json yet — skipped"; exit 0; }
 base="$(config_get '.base_branch')"; base="${base:-main}"
 git rev-parse --verify -q "$base" >/dev/null || base="HEAD"
 tests_dir="$(profile_get '.structure.tests')"
@@ -26,7 +26,7 @@ mapfile -t newfiles < <( { git diff --name-only --diff-filter=A "$base"...HEAD 2
 for f in "${newfiles[@]}"; do
   [[ -z $f ]] && continue
   case "$f" in docs/team/*|.team/*|.claude/*) continue ;; esac
-  under_allowed_roots "$f" || report "$f: file mới ngoài allowed_new_file_roots (STD-STRUCT-1)"
+  under_allowed_roots "$f" || report "$f: new file outside allowed_new_file_roots (STD-STRUCT-1)"
   name="$(basename "$f")"; stem="${name%%.*}"
   case "$stem" in __init__|conftest|setup|fixtures|helpers|utils) continue ;; esac
   [[ -z $test_glob ]] && continue
@@ -34,7 +34,7 @@ for f in "${newfiles[@]}"; do
   if [[ -n $tests_dir && $tests_dir != colocated && $f == "$tests_dir"/* && $name == *.* && ${name##*.} != md ]]; then is_test=1; fi
   if [[ $tests_dir == colocated && ${name,,} == *test* ]]; then is_test=1; fi
   # shellcheck disable=SC2053
-  if (( is_test )) && [[ $name != $test_glob ]]; then report "$f: tên file test không khớp naming.test_file '$test_glob' (STD-NAME-3)"; fi
+  if (( is_test )) && [[ $name != $test_glob ]]; then report "$f: test file name does not match naming.test_file '$test_glob' (STD-NAME-3)"; fi
 done
 
 while IFS= read -r f; do
@@ -42,8 +42,8 @@ while IFS= read -r f; do
   top="${f%%/*}"
   skip=0; for r in "${roots[@]}"; do [[ $top == "${r%%/*}" ]] && skip=1; done
   case "$f" in
-    *.pyc|*/__pycache__/*) report "$f: file sinh ra đang được stage" ;;
-    node_modules/*|*/node_modules/*|dist/*|build/*) (( skip )) || report "$f: thư mục build/phụ thuộc đang được stage" ;;
+    *.pyc|*/__pycache__/*) report "$f: generated file is staged (STD-GIT-5)" ;;
+    node_modules/*|*/node_modules/*|dist/*|build/*) (( skip )) || report "$f: build/dependency directory is staged (STD-GIT-5)" ;;
   esac
 done < <(git diff --cached --name-only)
 

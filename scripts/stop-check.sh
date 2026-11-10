@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# stop-check.sh — hook Stop / SubagentStop: chưa xanh thì chưa được dừng.
-# stop_hook_active = true → cho dừng (tránh vòng lặp).
-# Khi có .team/active-build: lấy file code đã đổi so với config.base_branch (bỏ docs, .team, .claude,
-#   .github, thư mục build/cache, file không phải code, file phụ trợ __init__/conftest/setup/fixtures/
-#   helpers/utils); chạy cmd.lint, cmd.typecheck (nếu có), cmd.test_one cho mỗi file test đã đổi
-#   (khớp naming.test_file), check-structure.sh. Lỗi → thoát 2 với 40 dòng đầu.
-# Khi stage hiện tại là research: research.md phải có '## Sources' kèm ít nhất một URL http.
-# Lệnh chạy trong thư mục `cwd` của hook (worktree của dev), cấu hình đọc từ gốc dự án.
-# Dùng: stop-check.sh [--root DIR] < hook.json ; stop-check.sh --help
+# stop-check.sh — Stop / SubagentStop hook: no stopping until the build is green.
+# stop_hook_active = true → allow the stop (avoids a loop).
+# When .team/active-build exists: takes the code files changed against config.base_branch (skipping docs, .team, .claude,
+#   .github, build/cache directories, non-code files, helper files __init__/conftest/setup/fixtures/
+#   helpers/utils); runs cmd.lint, cmd.typecheck (if set), cmd.test_one for each changed test file
+#   (matching naming.test_file), check-structure.sh. Failure → exit 2 with the first 40 lines.
+# When the current stage is research: research.md must have '## Sources' with at least one http URL.
+# Commands run in the hook's `cwd` (the dev's worktree); configuration is read from the project root.
+# Usage: stop-check.sh [--root DIR] < hook.json ; stop-check.sh --help
 set -uo pipefail
 . "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 [[ ${1:-} == --help || ${1:-} == -h ]] && { show_help "$0"; exit 0; }
@@ -20,7 +20,7 @@ stage="$(current_stage)"
 if [[ $stage == research ]]; then
   f="$TEAM_ROOT/docs/team/features/$(current_feature)/research.md"
   if [[ ! -f $f ]] || ! awk '/^## Sources/{s=1;next} s && /https?:\/\//{ok=1} END{exit ok?0:1}' "$f"; then
-    block "BLOCKED (research): ${f#"$TEAM_ROOT"/} phải có mục '## Sources' với ít nhất một URL http kèm ngày truy cập."
+    block "BLOCKED (research): ${f#"$TEAM_ROOT"/} must have a '## Sources' section with at least one http URL and its access date."
   fi
 fi
 
@@ -47,7 +47,7 @@ done )
 
 out="$(mktemp)"; trap 'rm -f "$out"' EXIT
 fail=0
-run() { # run <nhãn> <lệnh>
+run() { # run <label> <command>
   echo "\$ $2" >>"$out"
   if ! timeout 540 bash -c "$2" >>"$out" 2>&1; then echo "FAIL: $1" >>"$out"; fail=1; fi
 }
@@ -63,7 +63,7 @@ if [[ -n $one && -n $test_glob ]]; then
 fi
 run structure "bash $(printf '%q' "$KIT_DIR/scripts/check-structure.sh") --root $(printf '%q' "$WD")"
 if (( fail )); then
-  { echo "BLOCKED (stop-check): build chưa sạch — sửa rồi mới dừng (STD-STYLE-2, STD-TEST-3, STD-STRUCT-6)."; head -n 40 "$out"; } >&2
+  { echo "BLOCKED (STD-TEST-3): the build is not clean — fix it before stopping (also STD-STYLE-2, STD-STRUCT-6)."; head -n 40 "$out"; } >&2
   exit 2
 fi
 allow
