@@ -1,30 +1,30 @@
 # Playbook: ci-fix
 
-## Khi nào áp dụng
-- Pipeline CI đỏ trên nhánh chính hoặc trên PR không đổi phần liên quan.
-- Workflow CI cần sửa hoặc thêm bước.
+## When it applies
+- The CI pipeline is red on the main branch or on a PR that does not touch the related parts.
+- A CI workflow needs fixing or a new step.
 
-## Cỡ mặc định
+## Default size
 S.
 
-## Chuỗi
+## Chain
 0. `/team:intake` → team-leader → `intake.md`.
-1. `/team:ci fix` → devops: chẩn đoán, PHÂN LOẠI trước theo STD-CI-4 (code / test chập chờn / môi trường / cấu hình / phụ thuộc).
-2. Lỗi thật trong code → chuyển `bug-fix`. Còn lại → devops sửa CI.
-3. `/team:pr` → tech-lead → PR RIÊNG cho thay đổi CI; `docs/team/ci.md` cập nhật.
+1. `/team:ci fix` → devops: diagnose, CLASSIFY first per STD-CI-4 (code / flaky test / environment / configuration / dependency).
+2. A real defect in the code → switch to `bug-fix`. Anything else → devops fixes CI.
+3. `/team:pr` → tech-lead → a SEPARATE PR for the CI change; `docs/team/ci.md` is updated.
 
-## Cổng
-Không cổng riêng; review PR theo luật repo.
+## Gates
+No dedicated gate; the PR is reviewed under the repo's rules.
 
-## Điểm dừng
-- Lỗi thật trong code; thiếu quyền hoặc secret.
+## Stop points
+- A real defect in the code; missing permissions or secrets.
 
-## Tiêu chí xong
-- CI xanh trên PR sửa; phân loại và trích log ghi trong `docs/team/ci.md`.
+## Done criteria
+- CI is green on the fix PR; the classification and log excerpt are recorded in `docs/team/ci.md`.
 
-## Lỗi thường gặp
-- Tắt bước test để cho xanh.
-- Chạy lại nhiều lần thay vì phân loại.
+## Common mistakes
+- Disabling the test step to get green.
+- Re-running repeatedly instead of classifying.
 
-## Playbook liên quan
+## Related playbooks
 `bug-fix`, `release`.

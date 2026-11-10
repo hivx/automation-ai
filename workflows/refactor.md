@@ -1,32 +1,32 @@
 # Playbook: refactor
 
-## Khi nào áp dụng
-- Cần dọn cấu trúc, tên, code chết, phụ thuộc thừa mà KHÔNG đổi hành vi.
-- Nợ trong `docs/team/debt.md` đến lượt xử lý.
+## When it applies
+- Structure, names, dead code or unneeded dependencies need cleaning up WITHOUT changing behavior.
+- A debt item in `docs/team/debt.md` is next in line.
 
-## Cỡ mặc định
+## Default size
 M.
 
-## Chuỗi
+## Chain
 0. `/team:intake` → team-leader → `intake.md`.
-1. `/team:design` (bản ngắn) → designer → `design.md`: phạm vi, touchpoints, cách chứng minh hành vi không đổi.
-2. `/team:clean <kind>` → maintainer → commit; một loại dọn dẹp mỗi lần.
-3. `/team:verify` → qa → `acceptance.md`: đầu ra `cmd.test` trước == sau.
+1. `/team:design` (short version) → designer → `design.md`: scope, touchpoints, how to prove behavior is unchanged.
+2. `/team:clean <kind>` → maintainer → commits; one kind of cleanup per run.
+3. `/team:verify` → qa → `acceptance.md`: `cmd.test` output before == after.
 4. `/team:pr` → tech-lead → PR.
 
-## Cổng
-G2b BẬT cho playbook này (người duyệt `design.md`); G4 nếu bật.
+## Gates
+G2b is ON for this playbook (the human approves `design.md`); G4 if enabled.
 
-## Điểm dừng
-- Test trước và sau khác nhau.
-- Dọn dẹp buộc phải đổi hành vi: tách thành `new-feature` hoặc `change-request`.
+## Stop points
+- Test output differs before and after.
+- The cleanup forces a behavior change: split it into `new-feature` or `change-request`.
 
-## Tiêu chí xong
-- Hai đầu ra `cmd.test` (trước/sau) giống nhau được dán; lint/typecheck sạch; mỗi PR một loại.
+## Done criteria
+- Two identical `cmd.test` outputs (before/after) are pasted; lint/typecheck is clean; one kind per PR.
 
-## Lỗi thường gặp
-- Trộn sửa lỗi vào refactor.
-- Dọn toàn repo trong một PR.
+## Common mistakes
+- Mixing bug fixes into the refactor.
+- Cleaning the whole repo in one PR.
 
-## Playbook liên quan
+## Related playbooks
 `bug-fix`, `dependency-upgrade`.

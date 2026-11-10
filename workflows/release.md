@@ -1,31 +1,31 @@
 # Playbook: release
 
-## Khi nào áp dụng
-- Một hay nhiều feature đã accepted, cần đóng gói và đưa lên môi trường.
+## When it applies
+- One or more features are accepted and need to be packaged and shipped to an environment.
 
-## Cỡ mặc định
-Không áp dụng.
+## Default size
+Not applicable.
 
-## Chuỗi
-1. `/team:asbuilt` → writer → release notes, mục CHANGELOG.
-2. `/team:release` → devops: merge PR đã duyệt → gắn tag.
+## Chain
+1. `/team:asbuilt` → writer → release notes, CHANGELOG entry.
+2. `/team:release` → devops: merge the approved PR → tag.
 3. `deploy.staging` → `deploy.smoke` (devops).
-4. UAT: người kiểm trên staging.
-5. Prod: chỉ khi có `Approved-by-prod:`; sau đó `deploy.smoke`; ghi dấu Released vào `asbuilt.md`.
+4. UAT: the human checks on staging.
+5. Prod: only when `Approved-by-prod:` is present; then `deploy.smoke`; write the `Released:` mark into `asbuilt.md`.
 
-## Cổng
-G4 (đã accepted), G5 luôn là người.
+## Gates
+G4 (already accepted), G5 is always a human.
 
-## Điểm dừng
-- CI không xanh; smoke staging đỏ; chưa có `Approved-by-prod:`.
-- Smoke prod đỏ: đề xuất rollback ngay.
+## Stop points
+- CI is not green; the staging smoke test is red; `Approved-by-prod:` is not present yet.
+- The prod smoke test is red: propose a rollback immediately.
 
-## Tiêu chí xong
-- Tag có; smoke staging và prod xanh, đầu ra được dán; dấu Released có.
+## Done criteria
+- The tag exists; staging and prod smoke tests are green with their output pasted; the `Released:` mark exists.
 
-## Lỗi thường gặp
-- Deploy prod trước khi UAT xong.
-- Không có lệnh rollback đã kiểm.
+## Common mistakes
+- Deploying to prod before UAT is done.
+- No tested rollback command.
 
-## Playbook liên quan
+## Related playbooks
 `hotfix`, `data-migration`.

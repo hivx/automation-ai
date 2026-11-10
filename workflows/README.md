@@ -1,38 +1,38 @@
-# Playbook — chọn theo tín hiệu
+# Playbooks — pick by signal
 
-team-leader dùng bảng này ở `/team:intake`: xét LOẠI việc trước (dòng đầu tiên khớp, từ trên xuống), rồi mới định cỡ S/M/L. `scripts/gen-guides.py` đọc bảng giữa hai dấu dưới đây để sinh `docs/guides/decision-tree.md`.
+team-leader uses this table in `/team:intake`: look at the KIND of work first (first matching row wins, top to bottom), and only then set size S/M/L. `scripts/gen-guides.py` reads the table between the two markers below to generate `docs/guides/decision-tree.md`.
 
 <!-- playbook-table:start -->
-| Tín hiệu | Playbook | Cỡ mặc định |
+| Signal | Playbook | Default size |
 |---|---|---|
-| Repo có code, đội chưa từng làm (chưa có `.team/profile.json`) | [takeover](takeover.md) | — |
-| Repo rỗng, dựng hệ thống từ đầu | [new-project](new-project.md) | L |
-| Production đang hỏng, cần chữa ngay | [hotfix](hotfix.md) | S |
-| Hành vi sai so với spec, tái hiện được, không gấp | [bug-fix](bug-fix.md) | S |
-| Pipeline CI đỏ hoặc cần sửa workflow CI | [ci-fix](ci-fix.md) | S |
-| Đổi yêu cầu của feature đã duyệt G1 | [change-request](change-request.md) | M |
-| Nối với API/dịch vụ bên ngoài | [integration](integration.md) | M |
-| Chuyển đổi hay nạp dữ liệu giữa schema/hệ thống | [data-migration](data-migration.md) | M |
-| Nâng phiên bản thư viện, framework, runtime | [dependency-upgrade](dependency-upgrade.md) | M |
-| Dọn code, không đổi hành vi | [refactor](refactor.md) | M |
-| Chỉ tài liệu kỹ thuật, README | [docs-only](docs-only.md) | S |
-| Tài liệu cho khách hàng/người dùng cuối | [client-docs](client-docs.md) | S |
-| Chưa biết làm được không, cần thử | [spike](spike.md) | S |
-| Đóng gói và đưa feature đã accepted lên môi trường | [release](release.md) | — |
-| Nhìn lại cách đội làm việc | [retro](retro.md) | — |
-| Hành vi mới cho hệ thống đang chạy (mọi trường hợp còn lại) | [new-feature](new-feature.md) | theo intake |
+| Repo has code the team has never worked on (no `.team/profile.json` yet) | [takeover](takeover.md) | — |
+| Empty repo, building a system from scratch | [new-project](new-project.md) | L |
+| Production is broken and needs a fix now | [hotfix](hotfix.md) | S |
+| Behavior differs from the spec, reproducible, not urgent | [bug-fix](bug-fix.md) | S |
+| CI pipeline is red or a CI workflow needs fixing | [ci-fix](ci-fix.md) | S |
+| Change to the requirements of a feature that passed G1 | [change-request](change-request.md) | M |
+| Connecting to an external API/service | [integration](integration.md) | M |
+| Converting or loading data between schemas/systems | [data-migration](data-migration.md) | M |
+| Upgrading a library, framework or runtime version | [dependency-upgrade](dependency-upgrade.md) | M |
+| Cleaning up code without changing behavior | [refactor](refactor.md) | M |
+| Technical docs or README only | [docs-only](docs-only.md) | S |
+| Docs for clients/end users | [client-docs](client-docs.md) | S |
+| Unknown whether it can be done, needs a trial | [spike](spike.md) | S |
+| Packaging an accepted feature and shipping it to an environment | [release](release.md) | — |
+| Looking back at how the team works | [retro](retro.md) | — |
+| New behavior for a running system (every other case) | [new-feature](new-feature.md) | from intake |
 <!-- playbook-table:end -->
 
-## Định cỡ
-- **S**: mô tả diff bằng một câu; ≤ 3 file; không đổi schema/API.
-- **M**: một module; đổi dữ liệu hoặc API; 1–5 người-ngày.
-- **L**: nhiều module; NFR mới; > 5 người-ngày.
-Người ép cỡ bằng `--size` hoặc nhãn `team:size:*`.
+## Sizing
+- **S**: the diff fits in one sentence; ≤ 3 files; no schema/API change.
+- **M**: one module; data or API change; 1–5 person-days.
+- **L**: several modules; new NFRs; > 5 person-days.
+The human forces a size with `--size` or a `team:size:*` label.
 
-## Chạy không người trông (`batch/`)
-| File | Dùng khi |
+## Unattended runs (`batch/`)
+| File | Use when |
 |---|---|
-| [batch/build-all-tasks.md](batch/build-all-tasks.md) | Plan đã duyệt G3; build hết task qua đêm |
-| [batch/verify-all.md](batch/verify-all.md) | Nghiệm thu lại mọi feature đang ở trạng thái built |
-| [batch/weekly-retro.md](batch/weekly-retro.md) | Retro định kỳ hằng tuần |
-| [batch/clean-sweep.md](batch/clean-sweep.md) | Dọn dẹp một loại nợ trong `debt.md` |
+| [batch/build-all-tasks.md](batch/build-all-tasks.md) | Plan passed G3; build every task overnight |
+| [batch/verify-all.md](batch/verify-all.md) | Re-run acceptance for every feature in the built state |
+| [batch/weekly-retro.md](batch/weekly-retro.md) | Recurring weekly retro |
+| [batch/clean-sweep.md](batch/clean-sweep.md) | Clean up one kind of debt from `debt.md` |

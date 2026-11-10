@@ -1,32 +1,32 @@
 # Playbook: bug-fix
 
-## Khi nào áp dụng
-- Hành vi sai so với spec hoặc tài liệu; tái hiện được.
-- Không gấp đến mức phải chữa thẳng trên prod.
+## When it applies
+- Behavior differs from the spec or the docs; it is reproducible.
+- It is not urgent enough to fix directly on prod.
 
-## Cỡ mặc định
+## Default size
 S.
 
-## Chuỗi
-0. `/team:intake --type bug` → team-leader → `intake.md`, mục mới trong `docs/team/defects.md`.
-1. `/team:build` → dev (1 task): viết test hỏng tái hiện lỗi TRƯỚC, dán đầu ra đỏ → sửa → `cmd.test_one` xanh → reviewer.
-2. `/team:verify` → qa (cỡ S: kiểm tự động) → `acceptance.md`.
+## Chain
+0. `/team:intake --type bug` → team-leader → `intake.md`, a new entry in `docs/team/defects.md`.
+1. `/team:build` → dev (1 task): write a failing test that reproduces the bug FIRST, paste the red output → fix → `cmd.test_one` green → reviewer.
+2. `/team:verify` → qa (size S: automated checks) → `acceptance.md`.
 3. `/team:pr` → tech-lead → PR.
 
-## Cổng
-G4 nếu bật; G5 khi phát hành prod.
+## Gates
+G4 if enabled; G5 when releasing to prod.
 
-## Điểm dừng
-- Không tái hiện được lỗi: dừng, hỏi thêm dữ liệu.
-- Sửa cần đổi thiết kế: chuyển sang `change-request`.
+## Stop points
+- The bug cannot be reproduced: stop, ask for more data.
+- The fix needs a design change: switch to `change-request`.
 
-## Tiêu chí xong
-- Có đầu ra đỏ trước và xanh sau của test tái hiện; `cmd.test` xanh; `defects.md` cập nhật.
+## Done criteria
+- The reproducing test has red output before and green after; `cmd.test` is green; `defects.md` is updated.
 
-## Lỗi thường gặp
-- Sửa trước, viết test sau.
-- Test chỉ kiểm triệu chứng, không kiểm nguyên nhân.
-- Sửa thêm chỗ khác "tiện tay".
+## Common mistakes
+- Fixing first, writing the test afterwards.
+- A test that checks the symptom, not the cause.
+- Fixing other things "while I'm here".
 
-## Playbook liên quan
+## Related playbooks
 `hotfix`, `change-request`.

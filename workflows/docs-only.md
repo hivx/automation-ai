@@ -1,28 +1,28 @@
 # Playbook: docs-only
 
-## Khi nào áp dụng
-- Chỉ đổi tài liệu kỹ thuật, README, comment; không đổi code chạy.
+## When it applies
+- Only technical docs, README or comments change; no running code changes.
 
-## Cỡ mặc định
+## Default size
 S.
 
-## Chuỗi
+## Chain
 0. `/team:intake` → team-leader → `intake.md`.
-1. writer (team-leader gọi qua Agent) → `docs/**`, `README.md`.
-2. `/team:pr` → tech-lead → PR; bật tự merge khi CI xanh (`gh pr merge --auto`), vẫn theo luật bảo vệ nhánh.
+1. writer (team-leader calls it through Agent) → `docs/**`, `README.md`.
+2. `/team:pr` → tech-lead → PR; enable auto-merge on green CI (`gh pr merge --auto`), still under the branch protection rules.
 
-## Cổng
-Không.
+## Gates
+None.
 
-## Điểm dừng
-- Diff chạm file ngoài `docs/**` và `README.md`: chuyển playbook khác.
+## Stop points
+- The diff touches files outside `docs/**` and `README.md`: switch to another playbook.
 
-## Tiêu chí xong
-- PR chỉ chứa tài liệu; CI xanh; nội dung khớp code hiện tại.
+## Done criteria
+- The PR contains only docs; CI is green; the content matches the current code.
 
-## Lỗi thường gặp
-- Lén sửa code trong PR tài liệu.
-- Tài liệu mô tả hành vi chưa có.
+## Common mistakes
+- Sneaking code changes into a docs PR.
+- Docs describing behavior that does not exist yet.
 
-## Playbook liên quan
+## Related playbooks
 `client-docs`.

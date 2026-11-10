@@ -1,34 +1,34 @@
 # Playbook: integration
 
-## Khi nào áp dụng
-- Nối với API, dịch vụ hay hệ thống bên ngoài.
-- Có xác thực, giới hạn tần suất, webhook hoặc đồng bộ dữ liệu.
+## When it applies
+- Connecting to an external API, service or system.
+- Authentication, rate limits, webhooks or data sync are involved.
 
-## Cỡ mặc định
-M (L khi nhiều hệ thống).
+## Default size
+M (L when several systems are involved).
 
-## Chuỗi
+## Chain
 0. `/team:intake` → team-leader → `intake.md`.
-1. `/team:research` → researcher → `research.md`: API, xác thực, giới hạn, môi trường sandbox.
+1. `/team:research` → researcher → `research.md`: API, authentication, limits, sandbox environment.
 2. `/team:architect` (impact) → architect → `arch-impact.md`.
-3. `/team:design` → designer → `design.md`: hợp đồng, retry, idempotency, timeout.
+3. `/team:design` → designer → `design.md`: contract, retry, idempotency, timeout.
 4. `/team:plan` → tech-lead → `tasks.md`.
 5. `/team:build` → tech-lead → dev, reviewer.
-6. `/team:verify` → qa → `acceptance.md`: chạy trên sandbox của bên ngoài.
+6. `/team:verify` → qa → `acceptance.md`: runs against the external party's sandbox.
 7. `/team:release` → devops.
 
-## Cổng
-G2, G3, G4, G5 (+ G1 khi có spec mới).
+## Gates
+G2, G3, G4, G5 (+ G1 when there is a new spec).
 
-## Điểm dừng
-- Chưa có tài khoản sandbox hoặc secret: dừng, báo người.
+## Stop points
+- No sandbox account or secret yet: stop, tell the human.
 
-## Tiêu chí xong
-- Kiểm trên sandbox đạt; retry và timeout có test; secret không nằm trong repo.
+## Done criteria
+- Checks against the sandbox pass; retry and timeout have tests; no secret lives in the repo.
 
-## Lỗi thường gặp
-- Test gọi thẳng API thật.
-- Retry không idempotent.
+## Common mistakes
+- Tests that call the real API directly.
+- Retries that are not idempotent.
 
-## Playbook liên quan
+## Related playbooks
 `new-feature`, `data-migration`.

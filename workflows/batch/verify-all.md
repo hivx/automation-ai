@@ -1,16 +1,16 @@
 # Batch: verify-all
 
-## Khi nào áp dụng
-- Có feature ở trạng thái built chưa nghiệm thu.
-- Sau khi nâng phụ thuộc, muốn chạy lại nghiệm thu mọi feature đang mở.
+## When it applies
+- Some features are in the built state without acceptance yet.
+- After a dependency upgrade, you want acceptance re-run for every open feature.
 
-## Cỡ mặc định
-Không áp dụng.
+## Default size
+Not applicable.
 
-## Chuỗi
-Chế độ `decide` bắt buộc; không `--bare`.
-1. `python3 "$(cat .team/plugin_root)/scripts/team.py" status` lấy danh sách feature built.
-2. Với từng feature: `/team:verify <ID> --decide` → qa → `acceptance.md`.
+## Chain
+`decide` mode is mandatory; no `--bare`.
+1. `python3 "$(cat .team/plugin_root)/scripts/team.py" status` lists the built features.
+2. For each feature: `/team:verify <ID> --decide` → qa → `acceptance.md`.
 
 ```bash
 claude -p "/team:verify FEAT-012 --decide" \
@@ -19,17 +19,17 @@ claude -p "/team:verify FEAT-012 --decide" \
   --max-turns 80 --max-budget-usd 8 --output-format json
 ```
 
-## Cổng
-Viết `acceptance.md` nhưng KHÔNG duyệt G4; người duyệt.
+## Gates
+Writes `acceptance.md` but does NOT approve G4; the human approves.
 
-## Điểm dừng
-- Môi trường không chạy được; hết ngân sách.
+## Stop points
+- The environment cannot run; the budget runs out.
 
-## Tiêu chí xong
-Sáng hôm sau: mỗi feature có `acceptance.md` với phán quyết; `/team:status` liệt kê G4 đang chờ người.
+## Done criteria
+The next morning: every feature has an `acceptance.md` with a verdict; `/team:status` lists the G4 gates waiting for the human.
 
-## Lỗi thường gặp
-- Coi accepted là đã duyệt G4.
+## Common mistakes
+- Treating accepted as G4 approved.
 
-## Playbook liên quan
+## Related playbooks
 `batch/build-all-tasks.md`, `release`.

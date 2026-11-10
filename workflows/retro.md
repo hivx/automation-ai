@@ -1,31 +1,31 @@
 # Playbook: retro
 
-## Khi nào áp dụng
-- Định kỳ (xem `batch/weekly-retro.md`), hoặc sau feature có nhiều rework.
-- Góp ý vượt ngưỡng hai lần; scorecard có bất thường.
+## When it applies
+- On a schedule (see `batch/weekly-retro.md`), or after a feature with a lot of rework.
+- Feedback crossed the threshold twice; the scorecard shows an anomaly.
 
-## Cỡ mặc định
-Không áp dụng.
+## Default size
+Not applicable.
 
-## Chuỗi
-1. `/team:retro` → coach: `measure.py` → journal → điểm nghẽn → chẩn đoán 5 nguyên nhân.
-2. coach → `docs/team/proposals/<date>/<agent-or-skill>.md`: overlay + eval trước/sau.
-3. Người duyệt đề xuất.
-4. Canary trên N việc cỡ S; coach so với baseline.
-5. Giữ / rollback / thay / bỏ — người quyết.
+## Chain
+1. `/team:retro` → coach: `measure.py` → journal → bottlenecks → diagnosis across the 5 causes.
+2. coach → `docs/team/proposals/<date>/<agent-or-skill>.md`: overlay + before/after eval.
+3. The human approves the proposal.
+4. Canary on N size-S jobs; coach compares against the baseline.
+5. Keep / roll back / replace / drop — the human decides.
 
-## Cổng
-Người duyệt mỗi đề xuất trước canary và trước khi giữ.
+## Gates
+The human approves each proposal before the canary and before keeping it.
 
-## Điểm dừng
-- Thiếu số liệu; canary xấu hơn baseline.
+## Stop points
+- Missing metrics; the canary is worse than the baseline.
 
-## Tiêu chí xong
-- `docs/team/retro/<date>.md` có; mỗi đề xuất có bằng chứng, eval, canary, rollback; quyết định của người được ghi.
+## Done criteria
+- `docs/team/retro/<date>.md` exists; every proposal has evidence, an eval, a canary and a rollback; the human's decision is recorded.
 
-## Lỗi thường gặp
-- Sửa agent ngay khi thấy một lần chậm.
-- Không có baseline để so.
+## Common mistakes
+- Changing an agent the first time it looks slow.
+- No baseline to compare against.
 
-## Playbook liên quan
+## Related playbooks
 `batch/weekly-retro.md`.

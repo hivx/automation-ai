@@ -1,40 +1,40 @@
 # Playbook: new-project
 
-## Khi nào áp dụng
-- Repo rỗng hoặc chỉ có README.
-- Người mô tả một hệ thống cần dựng từ đầu.
+## When it applies
+- The repo is empty or holds only a README.
+- The human describes a system to be built from scratch.
 
-## Cỡ mặc định
+## Default size
 L.
 
-## Chuỗi
+## Chain
 1. `/team:onboard --new` → team-leader → `.team/`, `.claude/`, `docs/team/`.
 2. `/team:intake --size L` → team-leader → `intake.md`.
-3. `/team:analyze` → analyst → `spec.md` (có DoD, NFR).
+3. `/team:analyze` → analyst → `spec.md` (with DoD, NFRs).
 4. `/team:research` → researcher → `research.md`.
 5. `/team:architect` → architect → `docs/team/architecture.md`, `docs/team/adr/ADR-NNN.md`.
 6. `/team:design` → designer → `design.md`.
-7. `/team:plan` → tech-lead → `plan.md`, `tasks.md`; task 1 là walking skeleton.
-8. `/team:build` → tech-lead → dev, reviewer → commit, `review-NN.md`.
+7. `/team:plan` → tech-lead → `plan.md`, `tasks.md`; task 1 is the walking skeleton.
+8. `/team:build` → tech-lead → dev, reviewer → commits, `review-NN.md`.
 9. `/team:verify` → qa → `acceptance.md`.
 10. `/team:asbuilt` → writer → `asbuilt.md`, CHANGELOG.
 11. `/team:pr` → tech-lead → PR.
-12. `/team:release` → devops → staging, rồi prod khi có `Approved-by-prod:`.
+12. `/team:release` → devops → staging, then prod once `Approved-by-prod:` is present.
 
-## Cổng
-G1 (spec), G2 (kiến trúc), G2b nếu bật, G3 (plan), G4 (nghiệm thu), G5 (prod) — người duyệt theo `approvers` trong config.
+## Gates
+G1 (spec), G2 (architecture), G2b if enabled, G3 (plan), G4 (acceptance), G5 (prod) — approved by the humans listed in `approvers` in config.
 
-## Điểm dừng
-- Mỗi cổng bật.
-- Walking skeleton không chạy được đầu-cuối: dừng trước task 2.
+## Stop points
+- Every enabled gate.
+- The walking skeleton does not run end to end: stop before task 2.
 
-## Tiêu chí xong
-- Walking skeleton chạy đầu-cuối; mọi tiêu chí trong `acceptance.md` đạt; CI xanh; staging smoke xanh.
+## Done criteria
+- The walking skeleton runs end to end; every criterion in `acceptance.md` passes; CI is green; the staging smoke test is green.
 
-## Lỗi thường gặp
-- Bỏ walking skeleton, xây từng tầng riêng.
-- Chọn công nghệ trước khi có NFR.
-- Kiến trúc cho nhu cầu chưa có.
+## Common mistakes
+- Skipping the walking skeleton and building one layer at a time.
+- Choosing technology before the NFRs exist.
+- Architecting for needs that do not exist yet.
 
-## Playbook liên quan
+## Related playbooks
 `new-feature`, `integration`, `release`.

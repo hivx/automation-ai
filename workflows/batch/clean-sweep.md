@@ -1,16 +1,16 @@
 # Batch: clean-sweep
 
-## Khi nào áp dụng
-- `docs/team/debt.md` có mục loại dọn dẹp lặp lại (code chết, tên, phụ thuộc thừa...).
-- Muốn dọn định kỳ, mỗi lần một loại.
+## When it applies
+- `docs/team/debt.md` has entries of a recurring cleanup kind (dead code, names, unneeded dependencies...).
+- You want periodic cleanup, one kind at a time.
 
-## Cỡ mặc định
-S hoặc M.
+## Default size
+S or M.
 
-## Chuỗi
-Chế độ `decide` bắt buộc; không `--bare`.
-1. `/team:clean <kind> --decide` → maintainer: `cmd.test` trước → dọn → `cmd.test` sau.
-2. `/team:pr` → tech-lead → PR một loại dọn dẹp.
+## Chain
+`decide` mode is mandatory; no `--bare`.
+1. `/team:clean <kind> --decide` → maintainer: `cmd.test` before → clean up → `cmd.test` after.
+2. `/team:pr` → tech-lead → a PR for one kind of cleanup.
 
 ```bash
 claude -p "/team:clean dead-code --decide" \
@@ -19,17 +19,17 @@ claude -p "/team:clean dead-code --decide" \
   --max-turns 120 --max-budget-usd 6 --output-format json
 ```
 
-## Cổng
-G2b nếu bật; merge PR do người.
+## Gates
+G2b if enabled; the human merges the PR.
 
-## Điểm dừng
-- Test trước và sau khác nhau; dọn dẹp buộc đổi hành vi.
+## Stop points
+- Test output differs before and after; the cleanup forces a behavior change.
 
-## Tiêu chí xong
-Sáng hôm sau: một PR mở, mô tả có đầu ra test trước/sau; `debt.md` cập nhật.
+## Done criteria
+The next morning: one open PR whose description has the before/after test output; `debt.md` is updated.
 
-## Lỗi thường gặp
-- Gộp nhiều loại trong một lần chạy.
+## Common mistakes
+- Bundling several kinds into one run.
 
-## Playbook liên quan
+## Related playbooks
 `refactor`.

@@ -1,33 +1,33 @@
 # Playbook: data-migration
 
-## Khi nào áp dụng
-- Chuyển, biến đổi hoặc nạp dữ liệu giữa schema/hệ thống.
-- Có rủi ro mất hoặc sai dữ liệu.
+## When it applies
+- Moving, transforming or loading data between schemas/systems.
+- There is a risk of losing or corrupting data.
 
-## Cỡ mặc định
-M (L khi nhiều hệ thống).
+## Default size
+M (L when several systems are involved).
 
-## Chuỗi
+## Chain
 0. `/team:intake` → team-leader → `intake.md`.
-1. `/team:analyze` → analyst → `spec.md`: phạm vi dữ liệu, số lượng, quy tắc đối soát.
-2. `/team:design` → designer → `design.md`: ánh xạ trường, migration, rollback.
+1. `/team:analyze` → analyst → `spec.md`: data scope, volumes, reconciliation rules.
+2. `/team:design` → designer → `design.md`: field mapping, migration, rollback.
 3. `/team:plan` → tech-lead → `tasks.md`.
-4. `/team:build` → dev: chạy thử trên BẢN SAO dữ liệu (`cmd.migrate`), không đụng dữ liệu thật.
-5. `/team:verify` → qa → `acceptance.md`: đối soát số lượng; migration lên/xuống.
-6. `/team:release` → devops → chạy trong khung giờ đã hẹn, có kế hoạch rollback.
+4. `/team:build` → dev: trial runs on a COPY of the data (`cmd.migrate`), never touching real data.
+5. `/team:verify` → qa → `acceptance.md`: count reconciliation; migration up/down.
+6. `/team:release` → devops → runs in the agreed time window, with a rollback plan.
 
-## Cổng
-G1, G2b (bật cho playbook này), G3, G4, G5.
+## Gates
+G1, G2b (enabled for this playbook), G3, G4, G5.
 
-## Điểm dừng
-- Đối soát lệch; không có rollback đã kiểm; chưa có khung giờ.
+## Stop points
+- Reconciliation does not match; no tested rollback; no agreed time window yet.
 
-## Tiêu chí xong
-- Đối soát khớp trên bản sao và trên thật; rollback đã chạy thử.
+## Done criteria
+- Reconciliation matches on the copy and on real data; rollback has been rehearsed.
 
-## Lỗi thường gặp
-- Chạy thử trên dữ liệu thật.
-- Migration không có chiều xuống.
+## Common mistakes
+- Trial runs on real data.
+- A migration with no down direction.
 
-## Playbook liên quan
+## Related playbooks
 `release`, `integration`.

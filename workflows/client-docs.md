@@ -1,31 +1,31 @@
 # Playbook: client-docs
 
-## Khi nào áp dụng
-- Tài liệu cho khách hàng hay người dùng cuối: hướng dẫn, giới thiệu, ghi chú phát hành.
-- Người đọc không phải dev.
+## When it applies
+- Docs for clients or end users: guides, introductions, release notes.
+- The readers are not developers.
 
-## Cỡ mặc định
-S (M khi nhiều tài liệu).
+## Default size
+S (M when there are several documents).
 
-## Chuỗi
+## Chain
 0. `/team:intake` → team-leader → `intake.md`.
-1. `/team:analyze` → analyst → `spec.md`: người đọc, phạm vi, mức chi tiết, định dạng.
-2. writer (team-leader gọi qua Agent) → tài liệu trong `docs/**`.
-3. Người duyệt nội dung (review nội dung, không phải review code).
+1. `/team:analyze` → analyst → `spec.md`: audience, scope, level of detail, format.
+2. writer (team-leader calls it through Agent) → documents in `docs/**`.
+3. The human approves the content (a content review, not a code review).
 4. `/team:pr` → tech-lead → PR.
 
-## Cổng
-G1 (người đọc và phạm vi); duyệt nội dung ở bước 3.
+## Gates
+G1 (audience and scope); content approval at step 3.
 
-## Điểm dừng
-- Chưa rõ người đọc; nội dung cần thông tin nghiệp vụ đội không có.
+## Stop points
+- The audience is unclear; the content needs business knowledge the team does not have.
 
-## Tiêu chí xong
-- Người duyệt nội dung; mọi bước trong tài liệu khớp hành vi thật.
+## Done criteria
+- The human approved the content; every step in the docs matches real behavior.
 
-## Lỗi thường gặp
-- Viết cho dev thay vì cho người đọc đã nêu.
-- Ảnh chụp lỗi thời.
+## Common mistakes
+- Writing for developers instead of the stated audience.
+- Outdated screenshots.
 
-## Playbook liên quan
+## Related playbooks
 `docs-only`, `release`.
