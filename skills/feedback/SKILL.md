@@ -1,33 +1,33 @@
 ---
 name: feedback
-description: Dùng khi người hoặc một vai muốn ghi nhận xét về một agent hay skill của đội: tốt, chậm, sai, khó dùng.
-argument-hint: "<agent|skill> <1-5> \"<nhận xét>\" [<ID>]"
+description: Use when the human or a role wants to record feedback on one of the team's agents or skills: good, slow, wrong, hard to use.
+argument-hint: "<agent|skill> <1-5> \"<comment>\" [<ID>]"
 allowed-tools: Bash(jq *) Bash(cat *) Bash(date *) Bash(mkdir *) Bash(tail *)
 ---
 
-# Ghi góp ý
+# Record feedback
 
-## Tổng quan
-Ghi một dòng góp ý có cấu trúc về một agent hay skill để coach đo. `$ARGUMENTS`: đối tượng (`agent:<tên>` hoặc `skill:<tên>`), điểm 1–5, nhận xét, mã feature (tùy chọn).
+## Overview
+Write one structured feedback line about an agent or skill so coach can measure it. `$ARGUMENTS`: the subject (`agent:<name>` or `skill:<name>`), a score 1–5, a comment, a feature ID (optional).
 
-## Quy trình
-1. Kiểm đối tượng tồn tại trong `agents/`/`skills/` của kit hoặc `.claude/` của dự án; không có → báo, dừng.
-2. Lấy `feature`, `stage` từ `.team/current.json` nếu không truyền.
-3. Đọc `docs/team/metrics/feedback.jsonl` (có thể chưa có), rồi Write lại file với một dòng JSON mới ở cuối:
-   `{"ts": "<ISO>", "from": "<human|vai>", "about": "<agent|skill>:<tên>", "feature": "<ID>", "stage": "<stage>", "score": <1-5>, "note": "<nhận xét>"}`.
-4. Kiểm dòng cuối hợp lệ: `tail -n 1 docs/team/metrics/feedback.jsonl | jq .`.
-5. Điểm ≤ 2 → nhắc: hai lần vượt ngưỡng cho cùng đối tượng sẽ kích hoạt `/team:retro`.
+## Process
+1. Check that the subject exists in the kit's `agents/`/`skills/` or the project's `.claude/`; if not → report it, stop.
+2. Take `feature`, `stage` from `.team/current.json` when not passed.
+3. Read `docs/team/metrics/feedback.jsonl` (it may not exist yet), then Write the file back with one new JSON line at the end:
+   `{"ts": "<ISO>", "from": "<human|role>", "about": "<agent|skill>:<name>", "feature": "<ID>", "stage": "<stage>", "score": <1-5>, "note": "<comment>"}`.
+4. Check that the last line is valid: `tail -n 1 docs/team/metrics/feedback.jsonl | jq .`.
+5. Score ≤ 2 → remind: two scores past the threshold for the same subject trigger `/team:retro`.
 
-## Lý do tự bào chữa thường gặp
-| Ý nghĩ | Làm đúng |
+## Common rationalizations
+| Thought | Correct action |
 |---|---|
-| "Sửa luôn agent theo góp ý" | Chỉ ghi; coach chẩn đoán, người duyệt. |
-| "Nối nhanh bằng `jq >>`" | Write; headless từ chối chuyển hướng. |
-| "Viết lại cả file cho sạch" | Giữ mọi dòng cũ, chỉ thêm một dòng. |
-| "Bỏ điểm vì khó chọn" | Điểm bắt buộc 1–5. |
-| "Ghi chung chung 'chậm'" | Nêu việc, feature, stage cụ thể. |
-| "Góp ý về dự án, không về đội" | Chỉ về agent/skill; lỗi dự án vào `debt.md`. |
+| "Fix the agent right away based on the feedback" | Only record it; coach diagnoses, the human approves. |
+| "Append quickly with `jq >>`" | Use Write; headless mode refuses redirection. |
+| "Rewrite the whole file to clean it up" | Keep every old line, add exactly one. |
+| "Skip the score, it's hard to pick" | A score 1–5 is mandatory. |
+| "Just write 'slow'" | Name the concrete task, feature and stage. |
+| "The feedback is about the project, not the team" | Only agents/skills; project defects go in `debt.md`. |
 
-## Kiểm chứng
-- `jq` đọc được dòng cuối — dán đầu ra.
-- Số dòng file tăng đúng 1 (`wc -l` trước/sau).
+## Verification
+- `jq` parses the last line — paste the output.
+- The file's line count grew by exactly 1 (`wc -l` before/after).

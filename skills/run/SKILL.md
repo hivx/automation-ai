@@ -1,37 +1,37 @@
 ---
 name: run
-description: Dùng khi người muốn đội chạy tiếp feature tới giai đoạn hoặc cổng kế tiếp, hoặc chạy liên tục tới khi bị chặn.
+description: Use when the human wants the team to move a feature on to the next stage or gate, or to keep running until it is blocked.
 argument-hint: "[<ID>] [--until-blocked]"
 disable-model-invocation: true
 allowed-tools: Bash(python3 *) Bash(cat *)
 ---
 
-# Chạy tiếp feature
+# Move a feature forward
 
-## Tổng quan
-Chạy giai đoạn kế tiếp của feature theo playbook và cổng. `$ARGUMENTS`: mã feature (mặc định từ `.team/current.json`), `--until-blocked` để lặp tới khi bị chặn. Không bao giờ vượt cổng.
+## Overview
+Run the feature's next stage according to its playbook and gates. `$ARGUMENTS`: a feature ID (default from `.team/current.json`), `--until-blocked` to loop until blocked. Never pass a gate.
 
-## Quy trình
-1. Kiểm `docs/team/features/<ID>/intake.md` có; không có → in `/team:intake`, dừng.
-2. Bash: `python3 "<kit>/scripts/team.py" next <ID>` và `status <ID>` (`<kit>` = đường dẫn đọc từ `.team/plugin_root`, gõ thẳng).
-3. Cổng: CHỈ theo đầu ra `team.py` (đã tính theo cỡ: S bỏ G1, G3; refactor/data-migration bật G2b). Không tự đọc `gates` trong config. `WAITING_FOR_*` → dừng, in việc người cần làm.
-4. Lệnh kế là skill chỉ người gọi được (`/team:release`, `/team:ci`) → in lệnh, dừng.
-5. Ghi journal một câu lý do (Write), rồi gọi skill kế (Skill). Cỡ S vẫn đi qua `/team:build` để có reviewer.
-6. Sau skill: chạy lại `team.py status <ID>`; giai đoạn không đổi → dừng và báo (không chạy lại cùng skill).
-7. Ghi số liệu: `bash "<kit>/scripts/log-run.sh" --skill <skill> --result <kết quả>`.
-8. `--until-blocked` → về bước 2; không → dừng.
+## Process
+1. Check that `docs/team/features/<ID>/intake.md` exists; if not → print `/team:intake`, stop.
+2. Bash: `python3 "<kit>/scripts/team.py" next <ID>` and `status <ID>` (`<kit>` = the path read from `.team/plugin_root`, typed literally).
+3. Gates: ONLY from the `team.py` output (already adjusted for size: S skips G1, G3; refactor/data-migration enable G2b). Do not read `gates` in config yourself. `WAITING_FOR_*` → stop and print what the human must do.
+4. The next command is a human-only skill (`/team:release`, `/team:ci`) → print the command, stop.
+5. Write a one-sentence reason in the journal (Write), then call the next skill (Skill). Size S still goes through `/team:build` so a reviewer runs.
+6. After the skill: rerun `team.py status <ID>`; if the stage did not change → stop and report (do not rerun the same skill).
+7. Log metrics: `bash "<kit>/scripts/log-run.sh" --skill <skill> --result <result>`.
+8. `--until-blocked` → back to step 2; otherwise → stop.
 
-## Lý do tự bào chữa thường gặp
-| Ý nghĩ | Làm đúng |
+## Common rationalizations
+| Thought | Correct action |
 |---|---|
-| "Cổng chắc sẽ được duyệt" | Dừng ở cổng. |
-| "Config bật G1 nên phải chờ" | Tin `team.py`; cỡ S không có G1. |
-| "Cỡ S, gọi thẳng dev cho nhanh" | Vẫn `/team:build` (dev + reviewer). |
-| "Status chưa đổi, chạy lại build" | Dừng và báo; artifact có thể sai định dạng. |
-| "Feature khác chờ cổng nên dừng hết" | Cổng chỉ chặn feature của nó. |
-| "Bỏ log-run cho nhanh" | Số liệu là đầu vào của retro. |
+| "The gate will surely be approved" | Stop at the gate. |
+| "Config enables G1, so we must wait" | Trust `team.py`; size S has no G1. |
+| "Size S, call dev directly to save time" | Still `/team:build` (dev + reviewer). |
+| "Status didn't change, rerun build" | Stop and report; an artifact may be malformed. |
+| "Another feature waits on a gate, so stop everything" | A gate blocks only its own feature. |
+| "Skip log-run to go faster" | Metrics are the input to retro. |
 
-## Kiểm chứng
-- Dán đầu ra `team.py status <ID>` sau mỗi giai đoạn.
-- Mỗi skill đã gọi có một dòng journal.
-- Lần dừng nêu: lý do, việc nào, ai làm gì, lệnh chạy tiếp.
+## Verification
+- The `team.py status <ID>` output is pasted after each stage.
+- Every skill called has a journal line.
+- Every stop uses the 4-line stop message: `STOP: <reason>` / `Work: <item>` / `Who does what: <who>` / `Resume: <command>`.

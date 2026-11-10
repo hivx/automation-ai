@@ -1,33 +1,33 @@
 ---
 name: using-team
-description: Dùng khi bắt đầu bất kỳ việc gì không tầm thường trong dự án có đội team, trước khi hành động hay hỏi lại: kiểm skill và playbook phù hợp.
+description: Use when starting any non-trivial work in a project that has the team, before acting or asking a clarifying question: check for a matching skill and playbook.
 ---
 
-# Dùng đúng skill trước khi tự làm
+# Use the right skill before doing it yourself
 
-## Tổng quan
-Đội làm theo skill `/team:*` và playbook, không theo trí nhớ. Nạp sẵn cho team-leader và tech-lead; **subagent khác không khám phá lại**, chỉ dùng skill được giao.
+## Overview
+The team works from `/team:*` skills and playbooks, not from memory. This skill is preloaded for team-leader and tech-lead; **other subagents do not rediscover skills**, they use only the skill they were given.
 
-## Quy trình
-1. Trước mọi việc không tầm thường — trước cả câu hỏi làm rõ và trước khi gọi Explore — xác định loại việc:
-   yêu cầu thô → `/team:intake`; repo chưa có profile → `/team:takeover`; cần spec → `/team:analyze`; đổi spec đã duyệt → `/team:analyze --amend`; đã có spec/design → `/team:plan`; có task → `/team:build`; hỏi tiến độ → `/team:status`.
-2. Liệt kê skill tạm trong `.claude/skills/` (xem `docs/team/skills-registry.md`). Thứ tự ưu tiên: lời người > skill quy trình của kit > skill tạm > hành vi mặc định.
-3. Có playbook cho loại việc trong `<kit>/workflows/` (`<kit>` = nội dung `.team/plugin_root`) → theo chuỗi của nó; skill cho các bước chi tiết. Lệch nhau → theo skill, báo `/team:feedback`.
-4. Nhiều skill khớp → chạy nối tiếp, ghi cả chuỗi; không trộn hai quy trình.
-5. Ghi một dòng journal `docs/team/journal/<ID>.md` (Write) TRƯỚC khi sửa artifact đầu tiên: skill/playbook đã chọn và vì sao.
-6. Không skill nào khớp → ghi "không có skill phù hợp" + skill gần nhất đã loại + lý do; việc sẽ lặp lại → đề xuất `/team:make-skill`.
+## Process
+1. Before any non-trivial work — even before a clarifying question and before calling Explore — classify the work:
+   raw request → `/team:intake`; repo without a profile → `/team:takeover`; spec needed → `/team:analyze`; change to an approved spec → `/team:analyze --amend`; spec/design exists → `/team:plan`; tasks exist → `/team:build`; progress question → `/team:status`.
+2. List the temp skills in `.claude/skills/` (see `docs/team/skills-registry.md`). Priority: the human's words > kit process skills > temp skills > default behavior.
+3. If `<kit>/workflows/` has a playbook for this kind of work (`<kit>` = contents of `.team/plugin_root`) → follow its chain; skills govern the detailed steps. If they disagree → follow the skill and report it with `/team:feedback`.
+4. Several skills match → run them one after another and record the whole chain; never blend two processes.
+5. Write one journal line in `docs/team/journal/<ID>.md` (Write) BEFORE editing the first artifact: which skill/playbook you chose and why.
+6. No skill matches → write "no matching skill" + the closest skill you ruled out + the reason; if the work will recur → propose `/team:make-skill`.
 
-## Lý do tự bào chữa thường gặp
-| Ý nghĩ | Làm đúng |
+## Common rationalizations
+| Thought | Correct action |
 |---|---|
-| "Chỉ là câu hỏi, không phải việc" | Câu hỏi dẫn tới hành động là việc; kiểm skill trước. |
-| "Đọc repo cho có bối cảnh đã" | Skill chỉ cách khám phá; kiểm trước, rồi Explore. |
-| "Tôi nhớ skill này rồi" | Skill có thể đã đổi; đọc bản hiện tại. |
-| "Làm trước, ghi journal sau" | Ghi trước lần sửa đầu tiên; "sau" là không bao giờ. |
-| "Hai skill gần giống, gộp lại" | Chạy một, nối tiếp cái kia. |
-| "Tôi là subagent, nên khảo sát mọi skill" | Dùng skill được giao; khám phá là việc của team-leader. |
+| "It's just a question, not work" | A question that leads to action is work; check skills first. |
+| "Let me read the repo for context first" | Skills say how to explore; check them first, then Explore. |
+| "I remember this skill" | Skills change; read the current version. |
+| "Do it now, journal later" | Write the line before the first edit; "later" means never. |
+| "Two skills look alike, merge them" | Run one, then chain the other. |
+| "I'm a subagent, so I should survey every skill" | Use the skill you were given; discovery is team-leader's job. |
 
-## Kiểm chứng
-- Journal có dòng nêu `/team:<skill>` hoặc playbook, đứng trước lần sửa artifact đầu tiên.
-- Skill được nêu tồn tại (`skills/<tên>/` hoặc `.claude/skills/<tên>/`).
-- "Không có skill" luôn kèm skill gần nhất đã loại và lý do.
+## Verification
+- The journal has a line naming `/team:<skill>` or a playbook, placed before the first artifact edit.
+- The skill named exists (`skills/<name>/` or `.claude/skills/<name>/`).
+- "No matching skill" always comes with the closest skill ruled out and the reason.
