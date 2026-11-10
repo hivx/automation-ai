@@ -42,7 +42,7 @@ def files():
 def anchors():
     pairs = []
     for line in open(os.path.join(ROOT, "scripts", "anchors.txt"), encoding="utf-8"):
-        if line.startswith("#") or "\t" not in line:
+        if line.startswith("# ") or "\t" not in line:
             continue
         anchor, forms = line.rstrip("\n").split("\t", 1)
         pairs += [(anchor, f.strip()) for f in forms.split(" | ") if f.strip()]

@@ -449,6 +449,11 @@ Các mốc sau do script và cổng đọc bằng máy: **không bao giờ dịc
 
 - `Approved-by:`
 - `Approved-by-prod:`
+- `## Sources`
+- `## Definition of Done`
+- `## Assumptions decided by the team`
+- `## Differences from design`
+- `## Touchpoints`
 - `- [ ] T<n> —`
 - `- [x]`
 - `Verdict: accepted`
@@ -470,6 +475,10 @@ Các mốc sau do script và cổng đọc bằng máy: **không bao giờ dịc
 - `Playbook:`
 - `Size:`
 - `Mode:`
+- `## Feature`
+- `## Why`
+- `## What changed`
+- `## How verified`
 - `JSON keys of profile.json, config.json, current.json, metrics/*.jsonl`
 - `file names of skills, agents, playbooks, scripts, templates`
 <!-- /gen:anchors -->
@@ -479,6 +488,6 @@ Các mốc sau do script và cổng đọc bằng máy: **không bao giờ dịc
 - Phiên bản kit: 0.3.0
 - Skill: 26 · agent: 13 · playbook: 16 (+ 4 lô) · script: 30
 - Số từ trung vị (tiếng Anh): skill nạp thường xuyên 346.0, skill khác 1509.0, agent 918
-- Commit: 1e33d50
+- Commit: 08526c0
 - Ngày sinh file: 2026-11-10
 <!-- /gen:stats -->

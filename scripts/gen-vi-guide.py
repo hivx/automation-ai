@@ -184,7 +184,7 @@ def gen_std(vs):
 def gen_anchors(vs):
     rows = [G["anchors_note"], ""]
     for line in rd("scripts", "anchors.txt").splitlines():
-        if line.startswith("#") or not line.strip():
+        if line.startswith("# ") or not line.strip():
             continue
         rows.append(f"- `{line.split(chr(9), 1)[0]}`")
     return rows
