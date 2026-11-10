@@ -149,7 +149,7 @@ def main(argv):
     key_re = re.compile(rf"(?<![\w/.-])\.?({ns}\.[A-Za-z_][A-Za-z0-9_]*)(?![\w-]*\.(?:md|yml|yaml|json|sh|py|txt)\b)")
     cfg_re = re.compile(r"(?<![\w-])config\.([a-z_][a-z0-9_]*)\b(?![\w-]*\.(?:md|yml|yaml|json|sh|py|txt)\b)(?!\.ya?ml)")
     for f in list(walk(root, ["scripts", "skills", "agents", "workflows", "templates", "hooks"], EXTS)):
-        if f.endswith("audit-xref.py") or "/tests/" in f:
+        if f.endswith(("audit-xref.py", "vi-strings.json")) or "/tests/" in f:
             continue
         t = read(f)
         for m in key_re.finditer(t):

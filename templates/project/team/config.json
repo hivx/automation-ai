@@ -10,6 +10,7 @@
   },
   "default_size": "auto",
   "default_mode": "ask",
+  "output_language": "vi",
   "base_branch": "main",
   "protected_branches": [
     "main",

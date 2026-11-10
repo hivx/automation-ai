@@ -68,6 +68,15 @@
         "decide"
       ]
     },
+    "output_language": {
+      "type": "string",
+      "enum": [
+        "vi",
+        "en"
+      ],
+      "default": "vi",
+      "description": "Language of artifact prose the team writes (vi or en). Machine-read anchors stay English (scripts/anchors.txt)."
+    },
     "base_branch": {
       "type": "string"
     },

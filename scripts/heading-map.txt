@@ -1,0 +1,36 @@
+# Heading map Vietnamese -> English for the P9 language switch.
+# Used permanently by scripts/diff-structure.py to compare pre-p9 (Vietnamese) with the English tree.
+# While "transition: on", kit-metrics.py and validate.sh also accept the Vietnamese form (so each
+# converted group can be committed green). Set "transition: off" when the conversion is complete.
+transition: on
+## Tổng quan = ## Overview
+## Quy trình = ## Process
+## Lý do tự bào chữa thường gặp = ## Common rationalizations
+## Kiểm chứng = ## Verification
+## Khi nào dùng (và khi nào không) = ## When to use (and when not)
+## Tìm hiểu stack trước = ## Discover the stack first
+## Đầu vào và điều kiện trước = ## Inputs and preconditions
+## Đầu ra = ## Outputs
+## Dấu hiệu sai = ## Red flags
+## Xem thêm = ## See also
+## 1. Danh tính = ## 1. Identity
+## 2. Đầu vào bắt buộc = ## 2. Inputs you must receive
+## 3. Tìm hiểu stack trước = ## 3. Discover the stack first
+## 4. Quy trình = ## 4. Procedure
+## 5. Đầu ra = ## 5. Outputs
+## 6. Tiêu chí xong = ## 6. Done criteria
+## 7. Không bao giờ = ## 7. Never
+## 8. Lý do tự bào chữa thường gặp = ## 8. Common rationalizations
+## 9. Dấu hiệu sai = ## 9. Red flags
+## 10. Dừng và leo thang = ## 10. When to stop and escalate
+## Khi nào áp dụng = ## When it applies
+## Cỡ mặc định = ## Default size
+## Chuỗi = ## Chain
+## Cổng = ## Gates
+## Điểm dừng = ## Stop points
+## Tiêu chí xong = ## Done criteria
+## Lỗi thường gặp = ## Common mistakes
+## Playbook liên quan = ## Related playbooks
+contains:Ví dụ = contains:Example
+prefix:Dùng khi = prefix:Use when
+prefix:Giao khi = prefix:Delegate when

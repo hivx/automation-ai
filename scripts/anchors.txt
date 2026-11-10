@@ -1,0 +1,38 @@
+# Machine-read anchors: NEVER translated, in any language zone (scripts, hooks and gates depend on them).
+# Format: <anchor>	<forbidden translated forms, separated by " | "> (TAB between the two columns).
+# scripts/check-lang.py fails when a forbidden form appears in any checked file (see check-lang.py for scope).
+# Lines with an empty second column document anchors that have no known translated form yet.
+Approved-by:	Duyệt bởi: | Duyệt-bởi: | Người duyệt: | Đã duyệt bởi: | Phê duyệt bởi:
+Approved-by-prod:	Duyệt prod bởi: | Duyệt-prod: | Duyệt production:
+## Sources	## Nguồn | ## Nguồn tham khảo | ## Tài liệu tham khảo
+## Definition of Done	## Định nghĩa hoàn thành | ## Định nghĩa xong | ## Tiêu chí hoàn thành (DoD)
+## Assumptions decided by the team	## Giả định tự quyết | ## Giả định đội tự quyết | ## Giả định do đội quyết
+## Differences from design	## Khác thiết kế | ## Khác biệt so với thiết kế | ## Điểm khác thiết kế
+## Touchpoints	## Điểm chạm | ## 7. Điểm chạm
+- [ ] T<n> —	- [ ] Việc | - [ ] Nhiệm vụ
+- [x]	- [đã]
+Verdict: accepted	Verdict: chấp nhận | Phán quyết: chấp nhận | Kết luận: chấp nhận
+Verdict: rework	Verdict: làm lại | Phán quyết: làm lại
+Verdict: design-defect	Verdict: lỗi thiết kế | Phán quyết: lỗi thiết kế
+approve	phán quyết: duyệt
+request-changes	phán quyết: yêu cầu sửa
+BLOCKED	BỊ CHẶN | ĐANG CHẶN
+WAITING_FOR_ANSWER	CHỜ_TRẢ_LỜI | CHỜ TRẢ LỜI
+WAITING_FOR_APPROVAL	CHỜ_DUYỆT | CHỜ DUYỆT
+DESIGN_CONFLICT	XUNG_ĐỘT_THIẾT_KẾ | XUNG ĐỘT THIẾT KẾ
+NEEDS_ANSWER	CẦN_TRẢ_LỜI
+NEEDS_CONTEXT	CẦN_NGỮ_CẢNH
+Released:	Đã phát hành: | Phát hành:
+STD-<AREA>-<n>	STD-CẤU-TRÚC | STD-TÊN | STD-KIỂM
+FEAT- / BUG- / CHG- / REF- / INT- IDs	TÍNH-NĂNG- | LỖI-
+team/<id>-<slug>	nhóm/ | đội/
+feat|fix|refactor|docs|test|chore|ci|build|perf	tính-năng( | sửa( | tài-liệu(
+Playbook:	Kịch bản:
+Size:
+Mode:
+## Feature	## Tính năng
+## Why	## Vì sao
+## What changed	## Đổi gì
+## How verified	## Cách kiểm
+JSON keys of profile.json, config.json, current.json, metrics/*.jsonl
+file names of skills, agents, playbooks, scripts, templates

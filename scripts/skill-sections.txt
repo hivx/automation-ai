@@ -1,16 +1,16 @@
-# Tiêu đề bắt buộc của SKILL.md theo lớp, đúng thứ tự. Dòng: <lớp> | <tiêu đề> [| rows>=N | bullets>=N | checks>=N]
-# rows = dòng bảng (trừ tiêu đề và gạch); bullets = dòng "- "; checks = dòng "- [ ]".
-always | ## Tổng quan
-always | ## Quy trình
-always | ## Lý do tự bào chữa thường gặp | rows>=6
-always | ## Kiểm chứng
-full | ## Tổng quan
-full | ## Khi nào dùng (và khi nào không)
-full | ## Tìm hiểu stack trước
-full | ## Đầu vào và điều kiện trước
-full | ## Quy trình
-full | ## Đầu ra
-full | ## Lý do tự bào chữa thường gặp | rows>=6
-full | ## Dấu hiệu sai | bullets>=5
-full | ## Kiểm chứng | checks>=4
-full | ## Xem thêm
+# Required SKILL.md headings per class, in order. Line: <class> | <heading> [| rows>=N | bullets>=N | checks>=N]
+# rows = table rows (excluding header and separator); bullets = "- " lines; checks = "- [ ]" lines.
+always | ## Overview
+always | ## Process
+always | ## Common rationalizations | rows>=6
+always | ## Verification
+full | ## Overview
+full | ## When to use (and when not)
+full | ## Discover the stack first
+full | ## Inputs and preconditions
+full | ## Process
+full | ## Outputs
+full | ## Common rationalizations | rows>=6
+full | ## Red flags | bullets>=5
+full | ## Verification | checks>=4
+full | ## See also

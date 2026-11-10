@@ -8,9 +8,9 @@
 set -euo pipefail
 
 # ---- Cấu hình (sửa ở đây, không sửa logic bên dưới) ----
-SKILL_DESC_PREFIX="Dùng khi"                       # tương đương "Use when" trong REPO_LANGUAGE
+SKILL_DESC_PREFIX="Use when"                       # skill descriptions (English, P9)
 DESC_MAX_CHARS=500
-AGENT_DESC_PREFIX="Giao khi"                       # tương đương "Delegate when"
+AGENT_DESC_PREFIX="Delegate when"                  # agent descriptions (English, P9)
 AGENT_DESC_MAX_CHARS=300
 # Chuẩn chất lượng skill/agent (chữ, tiêu đề, số dòng tự bào chữa/dấu hiệu sai/kiểm chứng): scripts/skill-budgets.txt,
 # scripts/skill-sections.txt, scripts/agent-sections.txt — kiểm bằng scripts/kit-metrics.py --check (mục 6c).
@@ -18,7 +18,7 @@ ALLOWED_TOOLS_FILE="scripts/allowed-tools.txt"
 SKILL_HEADING_EXEMPT="handbook using-team"         # skill nạp sẵn không cần argument-hint
 HUMAN_ONLY_SKILLS="takeover onboard run session retro audit-kit release ci"  # intake: team-leader nhận yêu cầu thô (ADJ-28, K-70)
 FORK_SKILLS="analyze=analyst research=researcher architect=architect design=designer plan=tech-lead build=tech-lead verify=qa asbuilt=writer clean=maintainer ci=devops retro=coach pr=tech-lead audit-kit=coach"
-WORKFLOW_HEADINGS="## Khi nào áp dụng|## Cỡ mặc định|## Chuỗi|## Cổng|## Điểm dừng|## Tiêu chí xong|## Lỗi thường gặp|## Playbook liên quan"
+WORKFLOW_HEADINGS="## When it applies|## Default size|## Chain|## Gates|## Stop points|## Done criteria|## Common mistakes|## Related playbooks"
 PLAYBOOKS="takeover new-project new-feature change-request bug-fix hotfix refactor dependency-upgrade data-migration integration ci-fix docs-only client-docs release spike retro"
 BATCH_FLOWS="build-all-tasks verify-all weekly-retro clean-sweep"
 PLAYBOOK_WORDS=300
@@ -95,6 +95,16 @@ import os, re, pathlib
 env = os.environ
 PREFIX = env["SKILL_DESC_PREFIX"]
 DESC_MAX = int(env["DESC_MAX_CHARS"])
+def _hmap():
+    p = pathlib.Path("scripts/heading-map.txt")
+    if not p.is_file() or "\ntransition: on" not in "\n" + p.read_text(encoding="utf-8"):
+        return {}
+    return dict(l.split(" = ", 1) for l in p.read_text(encoding="utf-8").splitlines() if " = " in l and not l.startswith("# "))
+HMAP = _hmap()
+ALT = {v.split(":", 1)[1]: k.split(":", 1)[1] for k, v in HMAP.items() if k.startswith("prefix:")}
+def pfx(desc, want):
+    return desc.startswith(want) or (want in ALT and desc.startswith(ALT[want]))
+
 SELF = "scripts/validate.sh"
 TEXT_EXT = {".md", ".sh", ".py", ".json", ".yml", ".yaml", ".tmpl", ".txt", ""}
 
@@ -175,10 +185,10 @@ for kind, f, expected in docs:
     else:
         if len(desc) > DESC_MAX:
             out("FAIL", str(f), f"description is {len(desc)} chars (max {DESC_MAX})")
-        if kind == "skill" and not desc.startswith(PREFIX):
+        if kind == "skill" and not pfx(desc, PREFIX):
             out("FAIL", str(f), f"description must start with '{PREFIX}'")
     if kind == "agent":
-        if desc and not desc.startswith(env["AGENT_DESC_PREFIX"]):
+        if desc and not pfx(desc, env["AGENT_DESC_PREFIX"]):
             out("FAIL", str(f), f"description must start with '{env['AGENT_DESC_PREFIX']}'")
         if len(desc) > int(env["AGENT_DESC_MAX_CHARS"]):
             out("FAIL", str(f), f"description is {len(desc)} chars (max {env['AGENT_DESC_MAX_CHARS']})")
@@ -245,6 +255,13 @@ BATCH_WORDS="$BATCH_WORDS" PLAYBOOKS="$PLAYBOOKS" BATCH_FLOWS="$BATCH_FLOWS" ALL
 PENDING_PATHS_FILE="$PENDING_PATHS_FILE" PATH_SCAN="$PATH_SCAN" \
 python3 -I - >>"$REPORT" <<'PY'
 import os, re, pathlib
+
+def _hmap():
+    p = pathlib.Path("scripts/heading-map.txt")
+    if not p.is_file() or "\ntransition: on" not in "\n" + p.read_text(encoding="utf-8"):
+        return {}
+    return dict(l.split(" = ", 1) for l in p.read_text(encoding="utf-8").splitlines() if " = " in l and not l.startswith("# "))
+HMAP = _hmap()
 env = os.environ
 
 def out(kind, f, msg):
@@ -313,7 +330,7 @@ for kind, names, budget in (("playbook", env["PLAYBOOKS"].split(), int(env["PLAY
             out("FAIL", str(f), f"{kind} missing")
             continue
         text = f.read_text(encoding="utf-8")
-        heads = [l.strip() for l in text.split("\n") if l.startswith("## ")]
+        heads = [HMAP.get(l.strip(), l.strip()) for l in text.split("\n") if l.startswith("## ")]
         if heads != wh:
             out("FAIL", str(f), "headings must be exactly, in order: " + " / ".join(wh))
         words = len("\n".join(text.split("\n")[1:]).split())

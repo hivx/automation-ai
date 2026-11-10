@@ -18,8 +18,28 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WEIGHTS = {"words": 40, "sections": 30, "rows": 10, "bullets": 10, "checks": 10}
-SKILL_PREFIX, SKILL_DESC_MAX = "Dùng khi", 500
-AGENT_PREFIX, AGENT_DESC_MAX = "Giao khi", 300
+SKILL_PREFIX, SKILL_DESC_MAX = "Use when", 500
+AGENT_PREFIX, AGENT_DESC_MAX = "Delegate when", 300
+
+
+def load_heading_map():
+    """scripts/heading-map.txt: Vietnamese -> English map; applied only while 'transition: on' (P9)."""
+    path = os.path.join(ROOT, "scripts", "heading-map.txt")
+    if not os.path.isfile(path):
+        return {}
+    with open(path, encoding="utf-8") as fh:
+        text = fh.read()
+    if "\ntransition: on" not in "\n" + text:
+        return {}
+    return dict(l.split(" = ", 1) for l in text.splitlines() if " = " in l and not l.startswith("# "))
+
+
+HMAP = load_heading_map()
+ALT_PREFIX = {v.split(":", 1)[1]: k.split(":", 1)[1] for k, v in HMAP.items() if k.startswith("prefix:")}
+
+
+def prefix_ok(desc, prefix):
+    return desc.startswith(prefix) or (prefix in ALT_PREFIX and desc.startswith(ALT_PREFIX[prefix]))
 
 
 def read(p):
@@ -84,7 +104,7 @@ def sections(body):
         if l.startswith("```"):
             in_code = not in_code
         if not in_code and l.startswith("## "):
-            cur = l.strip()
+            cur = HMAP.get(l.strip(), l.strip())
             out[cur] = []
             continue
         if cur:
@@ -133,7 +153,10 @@ def measure(kind, name, path, budgets, members, skill_rules, agent_rules, terms)
     for h, req in rules:
         for k, n in req.items():
             if k == "contains":
-                ok = h in secs and req["contains"] in "\n".join(secs[h])
+                alt = HMAP.get("contains:" + req["contains"] + "@", None)
+                text = "\n".join(secs.get(h, []))
+                alts = [req["contains"]] + [k.split(":", 1)[1] for k, v in HMAP.items() if v == "contains:" + req["contains"]]
+                ok = h in secs and any(a in text for a in alts)
                 counts[f"{h} contains"] = ok
                 needs[f"{h} contains"] = (ok, 1)
             else:
@@ -156,10 +179,10 @@ def measure(kind, name, path, budgets, members, skill_rules, agent_rules, terms)
     pat = re.compile("|".join(r"(?<![\w-])" + re.escape(t.rstrip()) + (r"(?=\s)" if t.endswith(" ") else r"(?![\w-])") for t in terms)) if terms else None
     refs = os.path.join(os.path.dirname(path), "references") if kind == "skill" else None
     at_bar = (gap["words"] == 0 and not missing and order_ok and all(v == 0 for k, v in gap.items() if k != "sections")
-              and not contains_fail and desc.startswith(prefix) and len(desc) <= dmax)
+              and not contains_fail and prefix_ok(desc, prefix) and len(desc) <= dmax)
     return dict(kind=kind, name=name, cls=cls, words=words, budget=[lo, hi], sections_present=len(present),
                 sections_required=len(want), missing=missing, order_ok=order_ok, counts=counts,
-                contains_fail=contains_fail, desc_len=len(desc), desc_prefix_ok=desc.startswith(prefix),
+                contains_fail=contains_fail, desc_len=len(desc), desc_prefix_ok=prefix_ok(desc, prefix),
                 references=len([f for f in os.listdir(refs)]) if refs and os.path.isdir(refs) else 0,
                 stack_hits=len(pat.findall(body)) if pat else 0, last_change=last_change(os.path.relpath(path, ROOT)),
                 score=score, at_bar=at_bar)

@@ -1,11 +1,11 @@
-# Tiêu đề bắt buộc của agents/*.md, đúng thứ tự. Dòng: <tiêu đề> [| rows>=N | bullets>=N | checks>=N | contains=<chuỗi>]
-## 1. Danh tính
-## 2. Đầu vào bắt buộc
-## 3. Tìm hiểu stack trước
-## 4. Quy trình
-## 5. Đầu ra | contains=Ví dụ
-## 6. Tiêu chí xong
-## 7. Không bao giờ | bullets>=4
-## 8. Lý do tự bào chữa thường gặp | rows>=6
-## 9. Dấu hiệu sai | bullets>=3
-## 10. Dừng và leo thang | contains=```
+# Required headings of agents/*.md, in order. Line: <heading> [| rows>=N | bullets>=N | checks>=N | contains=<text>]
+## 1. Identity
+## 2. Inputs you must receive
+## 3. Discover the stack first
+## 4. Procedure
+## 5. Outputs | contains=Example
+## 6. Done criteria
+## 7. Never | bullets>=4
+## 8. Common rationalizations | rows>=6
+## 9. Red flags | bullets>=3
+## 10. When to stop and escalate | contains=```
