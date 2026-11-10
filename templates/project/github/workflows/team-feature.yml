@@ -1,6 +1,6 @@
 # The `team` crew running on GitHub. Label team:intake / team:run on an issue, or a comment containing @claude.
 # Decide mode unless the issue has the team:ask label. Questions → a comment + the team:needs-answer label.
-# Replace <owner> with the owner of the automation-ai repo. Required secret: ANTHROPIC_API_KEY.
+# Kit marketplace: hivx/automation-ai (change it if you use a fork). Required secret: ANTHROPIC_API_KEY.
 name: team-feature
 
 on:
@@ -35,7 +35,7 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          plugin_marketplaces: "https://github.com/<owner>/automation-ai.git"
+          plugin_marketplaces: "https://github.com/hivx/automation-ai.git"
           plugins: "team@automation-ai"
           claude_args: "--agent team:team-leader --max-turns 120 --max-budget-usd 15 --allowedTools '${{ steps.tools.outputs.list }}'"
           prompt: |

@@ -2,7 +2,7 @@
 
 1. **Install** (inside Claude Code):
    ```
-   /plugin marketplace add <owner>/automation-ai
+   /plugin marketplace add hivx/automation-ai
    /plugin install team@automation-ai
    ```
 2. **Open the project**: `cd <project> && claude`.

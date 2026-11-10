@@ -37,20 +37,20 @@ Full specification: [`SPEC.md`](SPEC.md). Documentation: [`docs/`](docs/00-overv
 Way 1 — marketplace (recommended), typed inside Claude Code:
 
 ```
-/plugin marketplace add <owner>/automation-ai
+/plugin marketplace add hivx/automation-ai
 /plugin install team@automation-ai
 ```
 
 Way 2 — `npx skills` (optional, if that CLI is available). Installs skills only, without agents and hooks, so the machine rules do not run:
 
 ```
-npx skills add <owner>/automation-ai
+npx skills add hivx/automation-ai
 ```
 
 Way 3 — copy locally into the project's `.claude/` (no marketplace needed):
 
 ```
-git clone https://github.com/<owner>/automation-ai
+git clone https://github.com/hivx/automation-ai
 automation-ai/scripts/install-local.sh [--dry-run] [--force] /path/to/project
 ```
 
@@ -67,22 +67,22 @@ Step-by-step guide: [`docs/guides/first-day-on-existing-project.md`](docs/guides
 
 ## Everyday commands
 
-| Task | Command | Who does it |
-|---|---|---|
-| Take over an existing project | `/team:takeover` | team-leader (+ researcher) |
-| Configure the team for the project | `/team:onboard` | team-leader |
-| Hand in a new request | `/team:intake "<request>"` | team-leader |
-| Report a bug | `/team:intake --type bug "<description>"` | team-leader → dev |
-| Continue to the next gate | `/team:run` | team-leader → tech-lead |
-| See where things stand, who waits for whom | `/team:status` | team-leader |
-| Save / reload a session | `/team:session` | team-leader |
-| Acceptance | `/team:verify` | qa |
-| Open a pull request | `/team:pr` | tech-lead |
-| Release | `/team:release` | devops (a human approves prod) |
-| Fix a red CI | `/team:ci` | devops |
-| Clean up without changing behavior | `/team:clean` | maintainer |
-| Give feedback on the team | `/team:feedback "<feedback>"` | team-leader |
-| Look back and improve | `/team:retro` | coach |
+| Task                                       | Command                                     | Who does it                    |
+| ------------------------------------------ | ------------------------------------------- | ------------------------------ |
+| Take over an existing project              | `/team:takeover`                          | team-leader (+ researcher)     |
+| Configure the team for the project         | `/team:onboard`                           | team-leader                    |
+| Hand in a new request                      | `/team:intake "<request>"`                | team-leader                    |
+| Report a bug                               | `/team:intake --type bug "<description>"` | team-leader → dev             |
+| Continue to the next gate                  | `/team:run`                               | team-leader → tech-lead       |
+| See where things stand, who waits for whom | `/team:status`                            | team-leader                    |
+| Save / reload a session                    | `/team:session`                           | team-leader                    |
+| Acceptance                                 | `/team:verify`                            | qa                             |
+| Open a pull request                        | `/team:pr`                                | tech-lead                      |
+| Release                                    | `/team:release`                           | devops (a human approves prod) |
+| Fix a red CI                               | `/team:ci`                                | devops                         |
+| Clean up without changing behavior         | `/team:clean`                             | maintainer                     |
+| Give feedback on the team                  | `/team:feedback "<feedback>"`             | team-leader                    |
+| Look back and improve                      | `/team:retro`                             | coach                          |
 
 Full table: [`docs/guides/want-x-type-y.md`](docs/guides/want-x-type-y.md).
 

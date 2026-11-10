@@ -24,7 +24,7 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          plugin_marketplaces: "https://github.com/<owner>/automation-ai.git"
+          plugin_marketplaces: "https://github.com/hivx/automation-ai.git"
           plugins: "team@automation-ai"
           claude_args: "--max-turns 60 --max-budget-usd 5 --allowedTools '${{ steps.tools.outputs.list }}'"
           prompt: "/team:retro --decide"

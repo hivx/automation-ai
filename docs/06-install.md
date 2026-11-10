@@ -5,11 +5,11 @@ Requirements: Claude Code ≥ 2.1; `bash`, `python3`, `jq`, `git`; `gh` optional
 ## Three ways to install
 | Method | Command | Agents | Hooks | Command names |
 |---|---|---|---|---|
-| 1. Marketplace (recommended) | `/plugin marketplace add <owner>/automation-ai` then `/plugin install team@automation-ai` | yes | yes | `/team:<name>` |
-| 2. `npx skills` (optional) | `npx skills add <owner>/automation-ai` | no | no | `/<name>` |
+| 1. Marketplace (recommended) | `/plugin marketplace add hivx/automation-ai` then `/plugin install team@automation-ai` | yes | yes | `/team:<name>` |
+| 2. `npx skills` (optional) | `npx skills add hivx/automation-ai` | no | no | `/<name>` |
 | 3. Local copy | `scripts/install-local.sh [--dry-run] [--force] <project>` | yes (unprefixed names) | yes (merged into `.claude/settings.json`) | `/team-<name>` |
 
-- Method 1 also works from the shell: `claude plugin marketplace add <owner>/automation-ai`, `claude plugin install team@automation-ai`.
+- Method 1 also works from the shell: `claude plugin marketplace add hivx/automation-ai`, `claude plugin install team@automation-ai`.
 - Method 2 has no machine rules (hooks); it is only good for trying out the skills.
 - Method 3 copies `agents/` → `.claude/agents/`, `skills/` → `.claude/skills/`, the rest → `.claude/team-kit/`, and writes `.team/plugin_root`. Re-running is safe; files that differ from the target are skipped unless `--force` is given (exit code 1 when a file was skipped).
 - Trying the kit unpackaged: from the project directory, `claude --plugin-dir /path/to/automation-ai`.

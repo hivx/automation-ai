@@ -20,7 +20,7 @@ Các bảng giữa dấu `<!-- gen:… -->` do `scripts/gen-vi-guide.py` sinh t�
 - Đặc tả gốc: `SPEC.md` (không sửa); các quyết định ghi đè đặc tả: `SPEC-OVERRIDES.md`; yêu cầu gốc của anh: `docs/requirements/ban-hieu-yeu-cau.md`.
 
 ## 2. Bắt đầu trên một dự án
-1. Cài plugin (một lần cho mỗi máy, trong Claude Code): `/plugin marketplace add <owner>/automation-ai` rồi `/plugin install team@automation-ai`. Hoặc chép vào dự án: `bash <kit>/scripts/install-local.sh <thư-mục-dự-án>` (khi đó lệnh là `/team-<tên>`).
+1. Cài plugin (một lần cho mỗi máy, trong Claude Code): `/plugin marketplace add hivx/automation-ai` rồi `/plugin install team@automation-ai`. Hoặc chép vào dự án: `bash <kit>/scripts/install-local.sh <thư-mục-dự-án>` (khi đó lệnh là `/team-<tên>`).
 2. Mở Claude Code trong dự án, gõ `/team:takeover`. Đội chỉ quét và viết 5 báo cáo vào `docs/team/` (không sửa gì): `assessment.md` (làm gì / đến đâu / cần làm gì), `ai-readiness.md`, `profile-proposal.md`, `debt.md`, `open-questions.md`.
 3. Đọc `docs/team/ai-readiness.md` và `profile-proposal.md`. Đồng ý thì thêm vào 20 dòng đầu của `ai-readiness.md` một dòng: `Approved-by: <tên anh> <YYYY-MM-DD>` (đây là cổng G0). Nếu kết luận là `clean-first` (CLAUDE.md cũ sai lệch), nên dọn trước; muốn chạy luôn thì dùng cờ `--accept-clean-first`.
 4. Gõ `/team:onboard`. Đội tạo `.team/profile.json`, `.team/config.json` (có `output_language: "vi"`), khối luật trong `CLAUDE.md`, `.claude/settings.json`, rule, mẫu CI và khung `docs/team/`. Kiểm `docs/team/onboarding.md`, rồi commit.
