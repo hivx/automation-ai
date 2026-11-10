@@ -35,3 +35,18 @@ Bảng cập nhật cuối vòng ("SAU") nằm ở cuối file này.
 | **team — SAU vòng 1** | 303,5 (20 skill; 7 đã viết lại: 1.316–1.590) | **1.502,5** | 348 (13; 5 đã viết lại: 902–1.062) | 10 mục skill, 10 mục agent, 4 mục skill nạp thường xuyên |
 
 Ghi chú: chữ của team đếm theo âm tiết tiếng Việt (mỗi âm tiết là một từ khi tách bằng khoảng trắng), nên cùng một nội dung cho số "chữ" cao hơn tiếng Anh khoảng 1,3–1,5 lần.
+
+## Vòng 2 (2026-11-10)
+HEAD so bằng `git ls-remote`: 7/8 repo không đổi so với bảng trên (không học lại repo, nhưng đọc các file tham khảo CHƯA đọc ở vòng 1 cho 21 mục mới — danh sách trong `docs/research/kit-audit-round2.md`). `ryoppippi/ccusage` đổi HEAD → `c782234083efada49302b2421458b6f7b622ef43`; chưa học vì chỉ phục vụ `measure.py --logs`, không gắn skill/agent nào trong vòng này.
+
+## Nơi đi tới — SAU vòng 2 (2026-11-10)
+| Bộ | Trung vị chữ skill đầy đủ | Trung vị chữ skill kỷ luật | Trung vị chữ agent | % mục đạt chuẩn |
+|---|---|---|---|---|
+| addyosmani/agent-skills | 1.985 | — | 583 | — |
+| obra/superpowers | 1.246 | — | — | — |
+| wshobson/agents | — | — | 951 | — |
+| VoltAgent subagents | — | — | 901 | — |
+| **team — SAU vòng 1** | 303,5 | 1.502,5 | 348 | 46% (18/39) |
+| **team — SAU vòng 2** | **1.436,5** (20 skill; 1.249–1.590) | **1.502** | **924** (13; 830–1.105) | **100% (39/39)** |
+
+Số của team đo bằng `scripts/kit-metrics.py` (thân, bỏ frontmatter; tiếng Việt đếm theo âm tiết — xem ghi chú ở trên).

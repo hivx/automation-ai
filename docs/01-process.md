@@ -26,7 +26,7 @@ Artifact nằm ở `docs/team/features/<ID>/` trừ khi ghi khác.
 ## Cỡ việc
 | Cỡ | Dấu hiệu | Chuỗi |
 |---|---|---|
-| S | Mô tả diff bằng một câu; ≤ 3 file; không đổi schema/API | intake → analyze ngắn → build (1 dev) → verify tự động → release |
+| S | Mô tả diff bằng một câu; ≤ 3 file; không đổi schema/API | intake → analyze ngắn (không G1) → build (1 dev + reviewer) → verify (qa, bước kiểm thu gọn; tính trong trần 3 vai: analyst, tech-lead, qa — K-15) → release |
 | M | Một module; đổi dữ liệu hoặc API; 1–5 người-ngày | intake → analyze → [research] → design → plan → build → verify → release |
 | L | Nhiều module; NFR mới; > 5 người-ngày | đủ 9 giai đoạn; kiến trúc bắt buộc; task đầu là walking skeleton |
 

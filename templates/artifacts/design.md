@@ -28,9 +28,9 @@ Approved-by:
 - Đối soát: <...>
 
 ## 7. Touchpoints
-| file | change | task |
+| file | change | ghi chú |
 |---|---|---|
-| <đường/dẫn> | mới / sửa | T1 |
+| <đường/dẫn> | mới / sửa | <vì sao chạm; chia task là việc của tech-lead> |
 
 ## 8. Test plan
 | Tiêu chí | Test | Loại |

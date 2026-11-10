@@ -34,7 +34,7 @@ Không dùng khi:
 3. Resume từ đĩa: `.team/active-build` đã có → đọc `tasks.md` và `git log --oneline <base_branch>..team/<ID>` TRƯỚC mọi việc; task đã tick không làm lại.
 
 ## Đầu vào và điều kiện trước
-- `python3 "$(cat .team/plugin_root)/scripts/team.py" status <ID>`: không `WAITING_FOR_APPROVAL` cho cổng trước build.
+- `python3 "<kit>/scripts/team.py" status <ID>`: không `WAITING_FOR_APPROVAL` cho cổng trước build.
 - `tasks.md` với dòng `- [ ] T<N> — … — files: … — test: … — depends: …`; cỡ S chưa có → Write một task từ `spec.md` (files = touchpoints trong spec/intake, test = file test theo `naming.test_file`).
 - `design.md` (cỡ M/L) để reviewer đối chiếu.
 - Nhánh `team/<ID>` tồn tại (tạo từ `base_branch` nếu thiếu).

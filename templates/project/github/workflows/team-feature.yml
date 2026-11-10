@@ -29,15 +29,19 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - id: tools
+        # K-06: runner không "tin" thư mục nên bỏ qua permissions.allow; truyền lại bằng --allowedTools.
+        run: echo "list=$(jq -r '["Read","Grep","Glob","Edit","Write","Agent","Skill"] + (.permissions.allow // []) | join(",")' .claude/settings.json)" >> "$GITHUB_OUTPUT"
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           plugin_marketplaces: "https://github.com/<owner>/automation-ai.git"
           plugins: "team@automation-ai"
-          claude_args: "--agent team:team-leader --max-turns 120 --max-budget-usd 15"
+          claude_args: "--agent team:team-leader --max-turns 120 --max-budget-usd 15 --allowedTools '${{ steps.tools.outputs.list }}'"
           prompt: |
             Issue #${{ github.event.issue.number }}. Sự kiện: ${{ github.event_name }}; nhãn: ${{ github.event.label.name }}.
             Chế độ: ${{ contains(github.event.issue.labels.*.name, 'team:ask') && 'ask' || 'decide' }}.
+            Nhãn của issue: ${{ join(github.event.issue.labels.*.name, ', ') }}. Nhãn `team:size:S|M|L` → truyền `--size S|M|L` cho /team:intake; `team:decide` → `--decide` (K-28).
             - Nhãn team:intake → chạy `/team:intake #${{ github.event.issue.number }}` rồi `/team:run`.
             - Nhãn team:run hoặc bình luận `@claude approve Gn` → ghi `Approved-by: <người bình luận> <ngày>` vào artifact của cổng Gn (không bao giờ G5), rồi `/team:run`.
             - Bình luận trả lời câu hỏi (`A1: ...`) → ghi câu trả lời vào questions.md của feature, rồi `/team:run`.

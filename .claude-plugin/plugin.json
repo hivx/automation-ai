@@ -1,6 +1,6 @@
 {
   "name": "team",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Đội IT ảo cho Claude Code: agent, skill, quy tắc và quy trình từ tiếp nhận dự án đến phát hành, có cổng duyệt và tự cải tiến.",
   "author": {
     "name": "automation-ai contributors"

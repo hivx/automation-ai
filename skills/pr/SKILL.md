@@ -43,7 +43,7 @@ Không dùng khi:
 1. **Ghi vị trí.** Write `.team/current.json` {feature, stage: "pr", agent: "tech-lead", started_at}.
 2. **Cập nhật với nhánh đích.** `git fetch`; rebase `team/<ID>` lên `config.base_branch`. Xung đột → giải mà không làm mất thay đổi của người khác; không giải được chắc chắn → dừng, báo.
 3. **Test trên đầu nhánh SAU rebase.** Chạy `cmd.test` trên commit sẽ đi vào PR; dán đầu ra. Đỏ → dừng (không mở PR với code đỏ). Kết quả trước rebase không còn giá trị.
-4. **Kiểm nội dung.** `pr-body.md` có bốn mục bắt buộc (grep tiêu đề); thiếu → trả về writer qua team-leader. Thay đổi > ~1.000 dòng → thêm ghi chú cỡ và gợi ý tách vào thân PR.
+4. **Kiểm nội dung.** `pr-body.md` có bốn mục bắt buộc: `grep -cE '^## (Feature|Vì sao|Đổi gì|Cách kiểm)$'` = 4 (mẫu PR của dự án có mục khác thì thêm mục đó); thiếu → trả về writer qua team-leader. Thay đổi > ~1.000 dòng → thêm ghi chú cỡ và gợi ý tách vào thân PR.
 5. **Đẩy nhánh.** `git push -u origin team/<ID>` — chỉ `team/*`, không `--force`, không `+refspec`. Bị từ chối (remote đã đi tiếp) → `git fetch`, xem khác biệt, đẩy nhánh mới `team/<ID>-r<n>` và dùng nó làm head; không force.
 6. **`create`.** `gh pr create --base <config.base_branch> --head team/<ID> --title "<dòng commit chính>" --body-file docs/team/features/<ID>/pr-body.md`. Tiêu đề theo định dạng commit, không "Fix bug", "Phase 1".
 7. **`update`.** `gh pr edit <số> --body-file …` khi nội dung đổi; commit mới đã đẩy ở bước 5.

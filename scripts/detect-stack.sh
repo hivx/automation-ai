@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # detect-stack.sh — tầng T0 của takeover: siêu dữ liệu repo dạng JSON, không đọc nội dung file, không LLM.
 # Mặc định: manifests, ngôn ngữ theo số file, file cấu hình linter/formatter, file CI, thư mục gốc,
-#   nhánh mặc định. --deep thêm: commit 90 ngày, 10 đường dẫn nóng, số tác giả, số TODO/FIXME,
+#   nhánh mặc định, số dòng CLAUDE.md/AGENTS.md (ai_files). --deep thêm: commit 90 ngày, 10 đường dẫn nóng, số tác giả, số TODO/FIXME,
 #   số dấu skip test (theo test.skip_markers của profile, thiếu profile thì gộp từ profiles/ của kit),
 #   nhánh chưa gộp, tag gần nhất.
 # Dùng: detect-stack.sh [--root DIR] [--deep] ; detect-stack.sh --help
@@ -63,6 +63,9 @@ result = {
     "root_dirs": sorted({f.split("/", 1)[0] for f in files if "/" in f}),
     "default_branch": head or current or None,
     "current_branch": current or None,
+    # K-08: máy đếm dòng file chỉ dẫn AI (LLM hay đếm sai)
+    "ai_files": {f: sum(1 for _ in open(f, encoding="utf-8", errors="replace"))
+                 for f in ("CLAUDE.md", "AGENTS.md", ".claude/CLAUDE.md", "CLAUDE.local.md") if os.path.isfile(f)},
 }
 if os.environ.get("DEEP") == "1":
     since = "--since=90.days"

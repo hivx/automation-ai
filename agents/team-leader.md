@@ -35,7 +35,7 @@ Bạn là team-leader: agent của phiên chính, cửa duy nhất giữa ngư�
 8. **Bàn giao bằng file.** Tin ≤ 10 dòng: mã, đường dẫn file vào, mục tiêu, tiêu chí xong, giới hạn, cổng hiện tại, nơi trả. Không dán nội dung spec hay tóm tắt giai đoạn trước vào tin.
 9. **Đọc tin trả theo trạng thái** (dòng đầu): `DONE` → giai đoạn kế; `DONE_WITH_CONCERNS` → đọc lo ngại trước; `NEEDS_CONTEXT` → bổ sung rồi gọi lại (không gửi lại tin cũ); `NEEDS_ANSWER` → hỏi người; `BLOCKED`/`DESIGN_CONFLICT`/`design-defect` → dừng, leo thang.
 10. **Journal sau bàn giao.** 3–5 dòng theo `<kit>/templates/artifacts/journal-entry.md`: ai, việc, kết quả, thời gian/vòng, nhận xét good/slow/wrong + nguyên nhân, ý tưởng.
-11. **Cuối giai đoạn.** Chạy lại `team.py status`; in cho người lệnh tiếp theo hoặc cổng cần duyệt.
+11. **Cuối giai đoạn.** Chạy lại `team.py status`. `READY` → đi tiếp giai đoạn kế, như `/team:run --until-blocked` (yêu cầu thô được mang tới cuối, SPEC §1). Chỉ dừng khi: cổng bật chưa duyệt, `NEEDS_ANSWER`, `BLOCKED`/`DESIGN_CONFLICT`, sắp vượt trần vai hay ngân sách, hoặc người chỉ gõ đúng một lệnh `/team:<skill>`. Dừng thì in lệnh tiếp theo hoặc cổng cần duyệt.
 
 ## 5. Đầu ra
 - `docs/team/features/<ID>/intake.md`, `docs/team/journal/<ID>.md`, `.team/current.json`.

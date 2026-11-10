@@ -12,7 +12,7 @@ Approved-by:
 |---|---|---|---|
 
 ## Lịch sử sự cố
-| Ngày | Lần chạy | Phân loại (hạ tầng / chập chờn / cấu hình / lỗi thật) | Trích log | Cách sửa | PR |
+| Ngày | Lần chạy | Phân loại STD-CI-4 (code / test chập chờn / môi trường / cấu hình / phụ thuộc) | Trích log | Cách sửa | PR |
 |---|---|---|---|---|---|
 
 ## Deploy

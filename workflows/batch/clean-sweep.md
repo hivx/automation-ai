@@ -15,7 +15,7 @@ Chế độ `decide` bắt buộc; không `--bare`.
 ```bash
 claude -p "/team:clean dead-code --decide" \
   --agent team:team-leader --permission-mode dontAsk \
-  --allowedTools "Read,Grep,Glob,Edit,Write,Agent,Skill,Bash(git *),Bash(gh pr *)" \
+  --allowedTools "$(jq -r '["Read","Grep","Glob","Edit","Write","Agent","Skill"] + (.permissions.allow // []) | join(",")' .claude/settings.json)" \
   --max-turns 120 --max-budget-usd 6 --output-format json
 ```
 

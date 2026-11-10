@@ -9,7 +9,7 @@ S.
 
 ## Chuỗi
 0. `/team:intake` → team-leader → `intake.md`.
-1. `/team:ci fix` → devops: chẩn đoán, PHÂN LOẠI trước (hạ tầng / chập chờn / cấu hình / lỗi thật).
+1. `/team:ci fix` → devops: chẩn đoán, PHÂN LOẠI trước theo STD-CI-4 (code / test chập chờn / môi trường / cấu hình / phụ thuộc).
 2. Lỗi thật trong code → chuyển `bug-fix`. Còn lại → devops sửa CI.
 3. `/team:pr` → tech-lead → PR RIÊNG cho thay đổi CI; `docs/team/ci.md` cập nhật.
 

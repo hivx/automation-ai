@@ -58,6 +58,18 @@ F CHG-003 intake.md "# Intake CHG-003 — Dọn\n- Playbook: refactor\n- Cỡ: M
 F CHG-003 spec.md "$OK$SPEC"; F CHG-003 design.md "# Design\n"
 expect CHG-003 '.status + " " + .gate' "WAITING_FOR_APPROVAL G2b_design" "refactor luôn bật G2b"
 
+F REF-005 intake.md "# Intake REF-005 — Dọn code chết\n- Playbook: refactor\n- Cỡ: M\n"
+expect REF-005 .next "/team:design REF-005 --short" "refactor không có spec → design --short"
+F REF-005 design.md "$OK# Design\n"
+expect REF-005 '.stage + " " + .status' "designed READY" "refactor không cần spec.md (K-47)"
+expect REF-005 .next "/team:clean <kind> (playbook refactor)" "refactor đã design → clean"
+F REF-005 tasks.md "- [x] T1 — clean dead-code\n"
+expect REF-005 .stage built "refactor: clean ghi tasks.md, không cần plan.md (K-47)"
+expect REF-005 .next "/team:verify REF-005" "refactor built → verify"
+F BUG-006 intake.md "# Intake BUG-006 — Lỗi\n- Playbook: bug-fix\n- Cỡ: M\n"
+F BUG-006 tasks.md "- [x] T1 — test tái hiện + sửa\n"
+expect BUG-006 .stage built "bug-fix cỡ M không cần spec/plan (K-47)"
+
 jq '.gates.G1_spec=false' "$T/.team/config.json" > "$T/c" && mv "$T/c" "$T/.team/config.json"
 F FEAT-004 intake.md "$INTAKE_M"; F FEAT-004 spec.md "$SPEC"
 expect FEAT-004 '.stage + " " + .status' "specified READY" "cổng tắt trong config không chặn"

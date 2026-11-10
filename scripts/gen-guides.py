@@ -54,7 +54,8 @@ def skills():
         agent = fm.get("agent", "")
         role = agent.split(":", 1)[1] if agent.startswith("team:") else MAIN_ROLE.get(name, "team-leader")
         outs = []
-        for p in re.findall(r"`([^`]+)`", section(body, "Đầu ra")):
+        outsec = re.sub(r"```.*?```", "", section(body, "Đầu ra"), flags=re.S)  # bỏ khối ví dụ tin trả
+        for p in re.findall(r"`([^`\n]+)`", outsec):
             if ("/" in p or p.endswith((".md", ".json", ".jsonl"))) and p not in outs:
                 outs.append(p)
         desc = fm.get("description", "")

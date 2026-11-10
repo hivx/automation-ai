@@ -20,7 +20,8 @@ Hàng = người gọi, cột = người được gọi. ✓ = được gọi; �
 | devops | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
 
 - Chỉ team-leader và tech-lead gọi vai khác. Vai khác chỉ được gọi `Explore` khi có tool `Agent`.
-- team-leader gọi thẳng `dev` chỉ cho việc cỡ S một task; còn lại qua tech-lead.
+- team-leader không gọi thẳng `dev` để làm task: mọi cỡ, kể cả S, đi qua `/team:build` (tech-lead → dev + reviewer, K-34).
+- Agent tạm (`/team:make-agent`) chỉ team-leader gọi; hook áp vai `_temp` (Bash chỉ-đọc + git cơ bản + `cmd.*`, chỉ gọi Explore).
 - Không ai gọi team-leader: nó là phiên chính và là cửa duy nhất với người.
 - Ma trận do hook role-policy thực thi (STD mức 3), không chỉ là văn bản.
 - Độ sâu tối đa: phiên chính (team-leader) → tech-lead → dev/reviewer → Explore.

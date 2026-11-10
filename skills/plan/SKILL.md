@@ -37,7 +37,7 @@ Không dùng khi:
 ## Đầu vào và điều kiện trước
 - `docs/team/features/<ID>/spec.md` có `## Definition of Done`.
 - `design.md` (cỡ M/L), `arch-impact.md` hoặc `docs/team/architecture.md` (cỡ L).
-- `python3 "$(cat .team/plugin_root)/scripts/team.py" status <ID>`: cổng trước đã qua (không `WAITING_FOR_APPROVAL`). Đang chờ cổng → trả lại, dừng.
+- `python3 "<kit>/scripts/team.py" status <ID>`: cổng trước đã qua (không `WAITING_FOR_APPROVAL`). Đang chờ cổng → trả lại, dừng.
 - `--insert`: spec có `## Amendment <n>` mới nhất chưa được kế hoạch hóa.
 
 ## Quy trình

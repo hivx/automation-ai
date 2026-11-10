@@ -11,5 +11,6 @@ team_init "$@"
 policy="$KIT_DIR/hooks/role-policy.json"
 for ((i = 1; i <= $#; i++)); do [[ ${!i} == --policy ]] && { j=$((i + 1)); policy="${!j}"; }; done
 read_input
+jq -e . >/dev/null 2>&1 <<<"$HOOK_INPUT" || block "BLOCKED (role-policy): JSON hook hỏng — hook an toàn không cho qua khi không đọc được đầu vào."
 [[ -n "$(input_get '.agent_type')" ]] || allow
 python3 -I "$TEAMLIB" role-policy --root "$TEAM_ROOT" --policy "$policy" <<<"$HOOK_INPUT"

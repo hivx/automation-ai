@@ -9,6 +9,12 @@ Approved-by:
 
 Chỉ lỗi của kit (agent, skill, hook, template), không phải của dự án. Báo lên repo automation-ai.
 
-| mức | loại | file | bằng chứng | đề xuất |
-|---|---|---|---|---|
-| cao / tb / thấp | skill không dùng / agent chạm trần / mâu thuẫn / lệch tên / an toàn | | | |
+Cột giống `docs/kit-issues.md` của repo kit để chép thẳng sang. Mức: blocker (làm sai/kẹt quy trình) / major (lách được luật máy, kết quả sai) / minor (lệch tên, tài liệu).
+
+| ID | Mức | Trạng thái | Nơi | Hiện tượng (bằng chứng: lệnh + đầu ra hoặc file:line) | Đề xuất |
+|---|---|---|---|---|---|
+| A-01 | blocker / major / minor | mới / đã có (K-xx) | <file kit> | <...> | <...> |
+
+## Phạm vi đã kiểm
+| Kiểm | Đã kiểm | Bỏ qua (vì sao) |
+|---|---|---|

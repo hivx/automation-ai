@@ -42,7 +42,7 @@ Quét theo 4 tầng, tầng sau chỉ chạy khi tầng trước chưa trả l�
 | Tự cải tiến | `docs/07-improvement.md` |
 | Kênh (CLI, GitHub, headless) | `docs/08-channels.md` |
 | Vấn đề đã biết của kit, backlog | [`docs/kit-issues.md`](kit-issues.md) |
-| Kiểm định chất lượng skill/agent | [`docs/research/kit-audit-round1.md`](research/kit-audit-round1.md) |
+| Kiểm định chất lượng skill/agent | [`docs/research/kit-audit-round1.md`](research/kit-audit-round1.md), [`kit-audit-round2.md`](research/kit-audit-round2.md) |
 | Bộ kit tham khảo, so sánh | [`docs/research/reference-kits.md`](research/reference-kits.md) |
 | Ghi công | [`docs/credits.md`](credits.md) |
 | Bắt đầu trong 5 phút | [`docs/guides/5-minute-start.md`](guides/5-minute-start.md) |
@@ -82,3 +82,10 @@ SPEC giữ nguyên văn. Các điểm dưới đây đã được người duy�
 | ADJ-20 | `stop-check.sh` chạy cả ở SubagentStop của `team:dev`, `team:maintainer`, `team:researcher`. | Vòng build chạy trong subagent; chỉ Stop của phiên chính thì quá muộn. |
 | ADJ-21 | STD-GIT-3 ở mức máy: chỉ push `team/*` hoặc tag; `--force-with-lease` cũng bị chặn; Edit/Write vào `.claude/settings*.json` bị chặn. | Đơn giản nhất và an toàn nhất. |
 | ADJ-22 | Cài cục bộ: `install-local.sh` bỏ tiền tố `team:` của tên agent, đổi skill thành `team-<tên>` (tránh đụng `/status`, `/run`, `/verify`…), gộp hook vào `.claude/settings.json`; role-policy nhận cả tên không tiền tố. | Không có namespace plugin khi cài cục bộ. |
+| ADJ-23 | coach ghi: `docs/team/retro/**`, `docs/team/proposals/**`, `docs/team/kit-issues.md` (audit-kit), `docs/team/metrics/scorecard.json` (chỉ qua `team.py scorecard`), `.team/current.json`, memory của mình — một danh sách trong `agents/coach.md` = `hooks/role-policy.json`. | SPEC §3 chỉ nêu retro/proposals, nhưng audit-kit phải ghi kit-issues và mọi giai đoạn ghi `current.json` (K-43). |
+| ADJ-24 | Không có khe deploy cho prod hay rollback (SPEC §8 chỉ có `deploy.staging`, `deploy.smoke`, `deploy.prod_requires_reviewer`): lệnh prod và rollback đã kiểm nằm ở `docs/team/ci.md` mục `## Deploy`, do `/team:ci deploy-script` viết qua PR. devops chỉ kích hoạt đúng lệnh/pipeline đó sau `Approved-by-prod:`; ưu tiên job CI có environment bắt người duyệt (STD-OPS-7). | SPEC §13 cấm bịa khe; đề xuất khe mới trong báo cáo. |
+| ADJ-25 | researcher được ghi mọi file trong worktree riêng `.claude/worktrees/<n>/` (POC), không ghi cây chính (`worktree_write` trong role-policy). | SPEC §3 "POC in worktree" không làm được khi role-policy chỉ cho `docs/team/**`. |
+| ADJ-26 | `team.py`: playbook không có analyze (bug-fix, hotfix, refactor, dependency-upgrade, spike, ci-fix, docs-only) không cần `spec.md`; bug-fix, hotfix, refactor không cần `plan.md`; refactor được tính `built` khi `/team:clean` ghi `tasks.md` (T1 tick). | Chuỗi SPEC §5 của các playbook này không có bước đó; trước đây trạng thái kẹt (K-47). |
+| ADJ-27 | analyst, architect, designer, writer có tool `Bash`, chỉ để chạy lệnh chỉ-đọc (`team.py status`, `explore-cache.sh`, `git log`); role-policy giữ `bash: read-only`. | Skill của các vai này cần kiểm trạng thái; eval analyze s1 (2026-11-09) cho thấy analyst bỏ bước vì không có Bash (K-52). |
+| ADJ-28 | `intake` để Claude gọi được (bỏ `disable-model-invocation`): khi người gõ yêu cầu thô, team-leader tự chạy `/team:intake`. | SPEC §3: team-leader làm intake; trước đây `using-team` trỏ tới một skill chỉ người gọi được (K-70). |
+| ADJ-29 | Cỡ S vẫn nghiệm thu bằng `/team:verify` (qa, bước kiểm thu gọn), không phải "verify tự động không có qa riêng"; qa tính trong trần 3 vai của cỡ S (analyst, tech-lead, qa). | SPEC §4 nói "verify (automated, no separate qa)"; kit giữ người nghiệm thu độc lập vì cỡ S cũng có thể sai (K-15, K-78). |

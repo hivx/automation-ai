@@ -16,6 +16,10 @@ Approved-by:
 ## Quyết định
 <chúng ta sẽ ...>
 
+## Ràng buộc
+<!-- luật reviewer kiểm được trên diff, ví dụ "chỉ module billing ghi bảng invoices" -->
+- <...>
+
 ## Phương án đã xét
 - <A> — <vì sao không chọn>
 

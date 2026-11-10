@@ -46,9 +46,9 @@ Chế độ quyền theo giai đoạn: `plan` khi phân tích/kiến trúc; `acc
 | Sự kiện | Script | Làm gì |
 |---|---|---|
 | PreToolUse `Edit\|Write\|NotebookEdit` | `protect.sh`, `role-policy.sh` | Chặn `protected_paths`, `.git/`, `.claude/settings*.json`, file mới ngoài `allowed_new_file_roots`; giới hạn ghi theo vai |
-| PreToolUse `Bash` | `check-git.sh`, `role-policy.sh` | Chỉ push `team/*` (và tag); chặn force-push, `--delete`, `--no-verify`, `reset --hard`/`rebase -i` trên nhánh bảo vệ; cảnh báo message sai; lệnh theo vai |
+| PreToolUse `Bash` | `check-git.sh`, `protect.sh`, `role-policy.sh` | Chỉ push `team/*` (và tag); chặn force-push, `--delete`, `--no-verify`, `reset --hard`/`rebase -i` trên nhánh bảo vệ; cảnh báo message sai; lệnh shell ghi/xóa vùng cấm (chuyển hướng, `tee`, `rm`, `mv`, `cp`, `sed -i`, … — không thấy được ghi bên trong script khác); lệnh theo vai |
 | PreToolUse `Agent` | `role-policy.sh` | Ai được gọi ai (`handbook/who-calls-whom.md`) |
-| PostToolUse `Edit\|Write` | `format.sh` | Formatter theo `formatters_by_ext` |
+| PostToolUse `Edit\|Write\|NotebookEdit` | `format.sh` | Formatter theo `formatters_by_ext` |
 | Stop; SubagentStop `team:dev\|maintainer\|researcher` | `stop-check.sh` | Khi có `.team/active-build`: lint, typecheck, test file đã đổi, cấu trúc; khi research: bắt buộc `## Sources` có URL |
 | SubagentStop (mọi agent) | `scorecard.sh` | Ghi một dòng vào `docs/team/metrics/runs.jsonl` |
 | SessionStart | `session-start.sh` | Ghi `.team/plugin_root`, nạp tóm tắt trạng thái |

@@ -1,23 +1,2 @@
 # Mục chưa đạt chuẩn chất lượng P7 — làm ở vòng sau theo thứ tự score tăng dần.
 # kit-metrics.py --check báo FAIL nếu một mục ở đây đã đạt chuẩn (xóa khỏi danh sách) hoặc mục ngoài danh sách chưa đạt.
-skill:asbuilt
-skill:make-agent
-skill:session
-skill:architect
-skill:audit-kit
-skill:ci
-skill:clean
-skill:design
-skill:make-skill
-skill:retro
-skill:research
-skill:release
-skill:onboard
-agent:researcher
-agent:writer
-agent:analyst
-agent:architect
-agent:coach
-agent:designer
-agent:devops
-agent:maintainer

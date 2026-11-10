@@ -37,3 +37,19 @@ Ghi chú trung thực:
 - Hai check mới của using-team s1 được thêm SAU khi chạy và chấm lại trên thư mục làm việc đã lưu của cả hai lần chạy; các check gốc không phân biệt được hai bản (K-33). Từ vòng sau, kịch bản dùng 5 check.
 - Không eval nào xấu đi theo check; chi phí using-team tăng có giải thích (quy trình đúng hơn), không phải hồi quy.
 - `num_turns` của phiên chính là 0–2 vì việc chạy trong subagent fork; không dùng để so.
+
+## Round 2 — P7 vòng 2 (2026-11-10, Claude Code 2.1.319)
+
+BEFORE = `pre-p7-round2` (= v0.2.1) qua `EVAL_KIT=<worktree của tag>`; AFTER = cây hiện tại (v0.3.0). Cùng dự án mẫu (`eval-project`: FEAT-001 đã accepted, chờ G4), cùng `run-eval.sh`, chế độ with-skill. Kịch bản đã sửa TRƯỚC khi chạy: make-skill s1 (check phân biệt), asbuilt s1 (mới).
+
+| Kịch bản | BEFORE | AFTER | Chi phí B → A | Ghi chú |
+|---|---|---|---|---|
+| using-team s1 (5 check) | 5/5 | lần 1: 2/5 → sửa K-70 → lần 2: 3/5 → sửa K-73 → lần 3: **5/5** | $1.71 → $0.14 / $0.17 / $1.76 | Hai file liên quan (intake, team-leader) GIỐNG nhau ở hai bản lúc chạy lần 1: khác biệt là dao động giữa các lần chạy, lộ ra hai lỗi thật của kit. Lần 1: intake chỉ người gọi được (`disable-model-invocation`) mà using-team trỏ tới nó → team-leader dừng, bắt người gõ lệnh (K-70). Lần 2: intake chạy, rồi dừng in `/team:analyze` vì "in lệnh tiếp theo" mơ hồ (K-73). Lần 3: intake → analyze → build (dev + reviewer), như BEFORE. |
+| verify s1 (4 check) | 4/4 | **4/4** | $0.90 → $1.05 | Tương đương. |
+| make-skill s1 (6 check) | 0/6 | 0/6 | $0.33 → $0.16 | Không kết luận được. BEFORE: mọi lần ghi `.claude/skills/**` bị Claude Code từ chối ở `-p` (K-72, thử 4 dạng `--allowedTools`, đều từ chối). AFTER: từ chối ĐÚNG theo hợp đồng mới — nhu cầu không có bằng chứng (chỉ một export CSV, không task lặp); không ghi file nào. Nhánh "tạo skill" chỉ thử được ở phiên tương tác. |
+| asbuilt s1 (7 check, chấm lại) | 6/7 | **7/7** | $0.23 → $0.30 | Check CHANGELOG ban đầu trỏ nhầm `CHANGELOG.md` ở gốc (dự án dùng `docs/CHANGELOG.md`) và check `^## Đổi gì` thêm SAU khi chạy; cả hai thư mục làm việc được chấm lại. BEFORE: `pr-body.md` có 3/4 tiêu đề mà `/team:pr` grep (thiếu "Đổi gì"), không có mục nợ sau G4. AFTER: 4/4 tiêu đề, `## Nợ sau G4` 3/3 đóng, bảng 17 dòng so từng tiêu chí/touchpoint. |
+
+Ghi chú trung thực:
+- Không eval nào xấu đi sau khi sửa; lần chạy xấu (using-team lần 1, 2) có nguyên nhân, có sửa (K-70, K-73) và chạy lại.
+- Chi phí using-team AFTER lần 3 ≈ BEFORE: cùng chuỗi vai.
+- make-skill cần một kịch bản có bằng chứng thật (task lặp) và phiên tương tác; ghi ở backlog vòng sau.

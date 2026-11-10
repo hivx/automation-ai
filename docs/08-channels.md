@@ -20,9 +20,11 @@ Nguồn chuẩn: `SPEC.md` §11. Điều chỉnh: ADJ-01, ADJ-03.
 Lệnh cho việc có sửa file (cần hook):
 ```
 claude -p "<lệnh /team:...>" \
-  --permission-mode dontAsk --allowedTools "<allowlist tối thiểu>" \
+  --permission-mode dontAsk \
+  --allowedTools "$(jq -r '["Read","Grep","Glob","Edit","Write","Agent","Skill"] + (.permissions.allow // []) | join(",")' .claude/settings.json)" \
   --max-turns <n> --max-budget-usd <usd> --output-format json
 ```
+- `--allowedTools` là bắt buộc: thư mục chưa được tin (runner CI, máy mới) thì `-p` bỏ qua `permissions.allow` của dự án (K-06). Danh sách lấy từ `permissions.allow` mà onboard ghi, nên không phải chép tay lệnh stack.
 - KHÔNG dùng `--bare` cho việc có sửa file: `--bare` tắt mọi hook, kể cả hook của plugin, nên luật máy không chạy (ADJ-03).
 - `--bare` chỉ cho báo cáo chỉ đọc như `/team:status`; khi đó nạp plugin bằng `--plugin-dir` và đặt `ANTHROPIC_API_KEY`.
 - Chế độ `decide` bắt buộc. Kết quả đọc từ JSON đầu ra, đối chiếu `templates/schemas/stage-result.json`.

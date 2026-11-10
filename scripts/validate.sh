@@ -16,7 +16,7 @@ AGENT_DESC_MAX_CHARS=300
 # scripts/skill-sections.txt, scripts/agent-sections.txt — kiểm bằng scripts/kit-metrics.py --check (mục 6c).
 ALLOWED_TOOLS_FILE="scripts/allowed-tools.txt"
 SKILL_HEADING_EXEMPT="handbook using-team"         # skill nạp sẵn không cần argument-hint
-HUMAN_ONLY_SKILLS="takeover onboard intake run session retro audit-kit release ci"
+HUMAN_ONLY_SKILLS="takeover onboard run session retro audit-kit release ci"  # intake: team-leader nhận yêu cầu thô (ADJ-28, K-70)
 FORK_SKILLS="analyze=analyst research=researcher architect=architect design=designer plan=tech-lead build=tech-lead verify=qa asbuilt=writer clean=maintainer ci=devops retro=coach pr=tech-lead audit-kit=coach"
 WORKFLOW_HEADINGS="## Khi nào áp dụng|## Cỡ mặc định|## Chuỗi|## Cổng|## Điểm dừng|## Tiêu chí xong|## Lỗi thường gặp|## Playbook liên quan"
 PLAYBOOKS="takeover new-project new-feature change-request bug-fix hotfix refactor dependency-upgrade data-migration integration ci-fix docs-only client-docs release spike retro"

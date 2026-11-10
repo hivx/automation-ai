@@ -86,6 +86,10 @@ GATES = [("specified", "G1_spec", "spec.md"), ("architected", "G2_arch", "arch-i
          ("verified", "G4_uat", "acceptance.md")]
 
 
+NO_SPEC_PLAYBOOKS = {"bug-fix", "hotfix", "refactor", "dependency-upgrade", "spike", "ci-fix", "docs-only"}
+NO_PLAN_PLAYBOOKS = {"bug-fix", "hotfix", "refactor"}
+
+
 def feature_state(root, fid, cfg):
     d = os.path.join(root, "docs", "team", "features", fid)
     art = {n: read(os.path.join(d, n)) for n in ("intake.md", "spec.md", "research.md", "arch-impact.md",
@@ -124,6 +128,10 @@ def feature_state(root, fid, cfg):
         "released": art["asbuilt.md"] is not None and re.search(r"(?m)^\s*(?:[-*]\s*)?\**Released\**\s*:\s*\S", art["asbuilt.md"]) is not None,
     }
     optional = {"researched", "architected", "designed"} | ({"planned"} if size == "S" else set())
+    if playbook in NO_SPEC_PLAYBOOKS:  # chuỗi SPEC §5 không có analyze (K-47)
+        optional.add("specified")
+    if playbook in NO_PLAN_PLAYBOOKS:  # chuỗi không có plan: build một task / clean ghi tasks.md (K-47)
+        optional.add("planned")
     order = ["intaken", "specified", "researched", "architected", "designed", "planned", "built", "verified", "released"]
     gate_of = {s: (g, f) for s, g, f in GATES}
     stage, status, gate, wfile = "", "READY", "", ""

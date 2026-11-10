@@ -1,5 +1,5 @@
 {
-  "_note": "Giới hạn theo vai (ADJ-02). Thực thi bởi scripts/role-policy.sh. 'write': glob đường dẫn được ghi ('*' = mọi nơi, protect.sh vẫn chặn vùng cấm). 'bash': 'any' | 'read-only' | {'allow': [glob lệnh, 'cmd.*' = các khe cmd.* của profile]}; lệnh chỉ-đọc luôn được phép. 'agents': subagent_type được gọi. 'stage_exceptions': nới thêm khi .team/current.json có stage tương ứng.",
+  "_note": "Giới hạn theo vai (ADJ-02). Thực thi bởi scripts/role-policy.sh. 'write': glob đường dẫn được ghi ('*' = mọi nơi, protect.sh vẫn chặn vùng cấm). 'bash': 'any' | 'read-only' | {'allow': [glob lệnh, 'cmd.*' = các khe cmd.* của profile]}; lệnh chỉ-đọc luôn được phép. 'agents': subagent_type được gọi. 'stage_exceptions': nới thêm khi .team/current.json có stage tương ứng. 'readonly_scripts': script của kit (so đường dẫn thật dưới <kit>/scripts/, K-40) → glob đích ghi ('' = không ghi gì ngoài file tạm); script có ghi chỉ chạy được khi vai được ghi đích đó. 'worktree_write': true = vai được ghi mọi file trong worktree riêng .claude/worktrees/<n>/ (POC của researcher), không ghi cây chính. '_temp': giới hạn mặc định cho agent tạm (.claude/agents/<tên>.md có dấu `team: temp`) — ghi được (protect.sh vẫn chặn vùng cấm), Bash chỉ-đọc + git cơ bản + cmd.*, chỉ gọi Explore. 'cp-from-kit-templates': cp chỉ được khi mọi nguồn nằm dưới <kit>/templates/ (K-26).",
   "readonly_commands": [
     "cat",
     "ls",
@@ -31,21 +31,24 @@
     "sha256sum",
     "sed",
     "paste",
-    "mkdir",
     "cd"
   ],
-  "readonly_scripts": [
-    "team.py",
-    "measure.py",
-    "teamlib.py",
-    "check-profile.py",
-    "gen-guides.py",
-    "detect-stack.sh",
-    "explore-cache.sh",
-    "log-run.sh",
-    "check-structure.sh",
-    "validate.sh"
-  ],
+  "readonly_scripts": {
+    "team.py": {
+      "write": "docs/team/metrics/scorecard.json",
+      "when": [
+        "scorecard"
+      ]
+    },
+    "measure.py": "",
+    "teamlib.py": "",
+    "check-profile.py": "",
+    "detect-stack.sh": "",
+    "explore-cache.sh": "",
+    "check-structure.sh": "",
+    "validate.sh": "",
+    "log-run.sh": "docs/team/metrics/**"
+  },
   "roles": {
     "team:team-leader": {
       "write": [
@@ -70,7 +73,7 @@
           ],
           "bash": {
             "allow": [
-              "cp *",
+              "cp-from-kit-templates",
               "jq *",
               "mkdir *",
               "git status*",
@@ -140,7 +143,8 @@
       },
       "agents": [
         "Explore"
-      ]
+      ],
+      "worktree_write": true
     },
     "team:architect": {
       "write": [
@@ -210,6 +214,24 @@
       ],
       "bash": "any",
       "agents": []
+    },
+    "_temp": {
+      "write": [
+        "*"
+      ],
+      "bash": {
+        "allow": [
+          "git status*",
+          "git diff*",
+          "git log*",
+          "git add *",
+          "git commit *",
+          "cmd.*"
+        ]
+      },
+      "agents": [
+        "Explore"
+      ]
     }
   }
 }

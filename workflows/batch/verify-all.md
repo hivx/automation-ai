@@ -15,7 +15,7 @@ Chế độ `decide` bắt buộc; không `--bare`.
 ```bash
 claude -p "/team:verify FEAT-012 --decide" \
   --agent team:team-leader --permission-mode dontAsk \
-  --allowedTools "Read,Grep,Glob,Write,Agent,Skill,Bash(git *),Bash(python3 *)" \
+  --allowedTools "$(jq -r '["Read","Grep","Glob","Write","Agent","Skill"] + (.permissions.allow // []) | join(",")' .claude/settings.json)" \
   --max-turns 80 --max-budget-usd 8 --output-format json
 ```
 

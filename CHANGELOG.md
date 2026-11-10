@@ -5,6 +5,47 @@ Mọi thay đổi đáng kể của bộ kit được ghi ở đây.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-10
+
+Vòng 2 nâng chất lượng (P7): 21 mục còn lại trong backlog được viết lại tới chuẩn; mọi skill và agent (39/39) đạt chuẩn. Sửa 4 major và 2 blocker tìm thấy khi đọc tham khảo và viết lại.
+
+### Viết lại tới chuẩn (chữ trước → sau)
+- Skill đầy đủ (10 mục, kèm `references/`): asbuilt 266 → 1.527, release 320 → 1.364, research 294 → 1.551, architect 277 → 1.431, design 277 → 1.507, ci 296 → 1.348, clean 298 → 1.363, audit-kit 272 → 1.211, make-skill 316 → 1.383, make-agent 278 → 1.327, session 260 → 1.273, onboard 393 → 1.250, retro 303 → 1.447.
+- Agent (10 mục, ví dụ tin trả, tin dừng 4 dòng): analyst 345 → 957, researcher 334 → 844, architect 348 → 866, designer 342 → 833, writer 335 → 857, devops 342 → 838, maintainer 346 → 830, coach 350 → 958.
+- Trung vị chữ: skill đầy đủ 309,5 → 1.436,5; agent 348 → 924; skill kỷ luật 1.502 (≥ 1.500). Mục đạt chuẩn: 18/39 → 39/39; `scripts/quality-backlog.txt` rỗng.
+- Tham khảo vòng 2: agent-skills (documentation-and-adrs, shipping-and-launch, source-driven-development, api-and-interface-design, ci-cd-and-automation, code-simplification, deprecation-and-migration, observability-and-instrumentation, security-and-hardening, context-engineering), superpowers writing-skills, anthropics skill-creator, BMAD (architecture, analyst, retrospective), everything-claude-code (hooks, rules, cài đặt), wshobson/VoltAgent agents (`docs/research/kit-audit-round2.md`, `docs/credits.md`).
+
+### Security
+- K-24: `protect.sh` gắn vào PreToolUse Bash: lệnh shell ghi/xóa `.git/`, settings, profile/config, `protected_paths` bị chặn (chuyển hướng, `tee`, `rm`, `mv`, `cp`, `sed -i`, `chmod`, `dd`…) cho mọi vai.
+- K-39: chỉ-đọc không còn lọt qua `sed e/w`, `sort -o`, `uniq IN OUT`, `tree -o`, `rg --pre`, `date -s`, `file -C`, `>&file`, `<>`; bỏ `mkdir`.
+- K-40: script chỉ-đọc so theo đường dẫn thật dưới `<kit>/scripts/`; script có ghi (`log-run.sh`, `team.py scorecard`) cần quyền ghi đích.
+- K-49: agent tạm có dấu `team: temp` chịu vai `_temp` (Bash chỉ-đọc + git cơ bản + `cmd.*`, chỉ Explore).
+- K-26: ngoại lệ onboard chỉ cho `cp` từ `<kit>/templates/`.
+- K-75 (từ audit-kit trong end-to-end): chặn tiền tố env nguy hiểm (`GIT_EXTERNAL_DIFF=`, `GIT_CONFIG_*`, `BASH_ENV=`, `sudo`), tên dài viết tắt của GNU (`sed --in=`, `sort --o…/--com…`), `git grep --open-files-in-pager`, `sort -uo`; đích chuyển hướng tính theo `cd`; JSON hook hỏng hay thiếu `role-policy.json` → chặn thay vì cho qua; `protect-bash` nhận `sort -o`.
+
+### Fixed
+- K-46 (blocker): architect chế độ `system` viết thêm `arch-impact.md` của feature để mang cổng G2.
+- K-47 (blocker): `team.py` không còn kẹt với playbook không có analyze/plan (bug-fix, hotfix, refactor, dependency-upgrade, spike, ci-fix, docs-only); `/team:clean` ghi `tasks.md` để refactor tới `built`.
+- K-06: batch workflow, `team-feature.yml`, `weekly-retro` sinh `--allowedTools` từ `permissions.allow`.
+- K-70: `intake` để Claude gọi được (ADJ-28) — `using-team` trỏ tới một skill chỉ người gọi được. K-73: team-leader đi tiếp tới khi gặp cổng/câu hỏi/chặn, thay vì dừng sau mỗi giai đoạn. K-71: skill gõ đường dẫn kit thật thay cho `$(cat .team/plugin_root)` (headless đòi duyệt). K-74: audit-kit ghi dần, chạy lại làm tiếp.
+- K-48 POC của researcher trong worktree riêng; K-50 `session save` không còn bị hook ghi đè; K-52 analyst/architect/designer/writer có Bash chỉ-đọc; K-56 khe CI rỗng hiện cảnh báo thay vì `true`.
+- K-08, K-09, K-27/K-43, K-28, K-30, K-38, K-44, K-45, K-51, K-54, K-55, K-57..K-61, K-63, K-64, K-66..K-69 (`docs/kit-issues.md`).
+
+### Changed
+- Mẫu PR: `## Vì sao`, `## Đổi gì`, `## Cách kiểm` tách riêng (pr grep đúng bốn tiêu đề); mẫu ADR thêm `## Ràng buộc`; mẫu asbuilt thêm `## Nợ sau G4`, `## Rollback`; mẫu kit-issues dùng cột và mức của repo kit; mẫu design bỏ cột `task`; registry có loại, bằng chứng, ca thử.
+- `/team:clean` thêm loại `deprecate`, `observe`; nhánh `team/<ID>`.
+- Skill tạm theo 8 nội dung SPEC §9 (300–1.000 chữ); chuẩn đầy đủ khi đưa lên kit.
+- ADJ-23..ADJ-29 trong `docs/00-overview.md`.
+
+### Eval và end-to-end
+- `evals/RESULTS.md` Round 2: using-team s1 5/5 → 5/5 (sau hai lần chạy lộ K-70, K-73 và sửa); verify s1 4/4 → 4/4; asbuilt s1 (mới) 6/7 → 7/7; make-skill s1 không kết luận được (K-72).
+- End-to-end trên dự án mẫu mới: onboard dừng đúng ở `clean-first`; BUG-001 (bug-fix, không spec/plan) build 1 vòng sửa → verify accepted 7/7 → dừng ở G4; retro 0 đề xuất, 4 theo dõi; audit-kit hết lượt (K-74), 7 phát hiện mới (`docs/kit-issues.md`).
+
+### Còn mở
+- K-53 (major): chưa có khe `deploy.prod`/`deploy.rollback` — đề xuất cho người quyết; tạm dùng `docs/team/ci.md` (ADJ-24).
+- K-72 (major, giới hạn Claude Code): `-p` không ghi được `.claude/skills/**`, `.claude/agents/**` — make-skill/make-agent chỉ tạo ở phiên tương tác.
+- K-18, K-25, K-62, K-65, K-76, K-77, K-79, K-80 (minor).
+
 ## [0.2.1] - 2026-11-09
 
 ### Security

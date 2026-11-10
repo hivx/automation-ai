@@ -6,13 +6,15 @@ Dự án mẫu: dự án đã onboard có FEAT-001 (CSV export) — xem `evals/R
 - Situation: có nhu cầu thật.
 - Input: `/team:make-skill csv-format "Định dạng CSV của dự án dùng lặp lại cho mọi export"`
 - Baseline input: `Tạo một skill cho định dạng CSV của dự án.`
-- Good: `.claude/skills/csv-format/SKILL.md` có 8 mục, dòng temp, `references/tests.md`, registry có dòng.
-- Bad: Skill không có ca thử, không đăng ký.
+- Good: `.claude/skills/csv-format/SKILL.md` có 8 mục của SPEC §9, dòng temp kèm bằng chứng, `references/tests.md` có ca từ chối/biên và câu gần giống không nên kích hoạt, registry có dòng.
+- Bad: Skill không có ca thử, không đăng ký; ca thử chỉ kiểm "file tồn tại".
 - Checks:
   - exists: `.claude/skills/csv-format/SKILL.md`
-  - exists: `.claude/skills/csv-format/references/tests.md`
-  - grep: `csv-format` in `docs/team/skills-registry.md`
   - grep: `team: temp` in `.claude/skills/csv-format/SKILL.md`
+  - grep: `evidence:` in `.claude/skills/csv-format/SKILL.md`
+  - grep: `^## Ca thử|^## Tiêu chí xong` in `.claude/skills/csv-format/SKILL.md`
+  - grep: `(không nên|gần giống|từ chối)` in `.claude/skills/csv-format/references/tests.md`
+  - grep: `csv-format` in `docs/team/skills-registry.md`
 
 ## Scenario 2 — Trùng skill có sẵn
 - Situation: trùng skill có sẵn.

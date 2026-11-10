@@ -22,3 +22,9 @@ Approved-by:
 
 ## Rủi ro
 - <...>
+
+## Để designer quyết
+<!-- quyết định chưa đạt phép thử ngưỡng kiến trúc; lý do -->
+
+## Chế độ system
+<!-- khi viết docs/team/architecture.md: file này mang cổng G2 của feature; liệt kê ADR mới và trỏ docs/team/architecture.md -->

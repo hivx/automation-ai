@@ -35,7 +35,7 @@ Không dùng khi:
 
 ## Đầu vào và điều kiện trước
 - `docs/team/features/<ID>/spec.md` (tiêu chí + DoD), `design.md` (test plan, cỡ M/L), `tasks.md` tick đủ.
-- `python3 "$(cat .team/plugin_root)/scripts/team.py" status <ID>` báo `built`; không → trả lại, dừng.
+- `python3 "<kit>/scripts/team.py" status <ID>` báo `built`; không → trả lại, dừng.
 - Nhánh `team/<ID>` checkout được, cây sạch.
 
 ## Quy trình

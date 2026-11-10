@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# format.sh — hook PostToolUse (Edit|Write): chạy formatter theo đuôi file từ formatters_by_ext.
+# format.sh — hook PostToolUse (Edit|Write|NotebookEdit): chạy formatter theo đuôi file từ formatters_by_ext.
 # Thay {file} bằng đường dẫn tương đối; thiếu formatter hay formatter lỗi → bỏ qua. Luôn thoát 0.
 # Dùng: format.sh [--root DIR] < hook.json ; format.sh --help
 set -uo pipefail
@@ -7,7 +7,7 @@ set -uo pipefail
 [[ ${1:-} == --help || ${1:-} == -h ]] && { show_help "$0"; exit 0; }
 team_init "$@"
 read_input
-path="$(input_get '.tool_input.file_path')"
+path="$(input_get '.tool_input.file_path // .tool_input.notebook_path')"
 [[ -z $path ]] && exit 0
 rel="$(rel_path "${path//\\//}")"
 [[ -z $rel || ! -f $TEAM_ROOT/$rel ]] && exit 0

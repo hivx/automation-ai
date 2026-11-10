@@ -15,11 +15,11 @@ Chế độ `decide` bắt buộc. Không dùng `--bare` (hook phải chạy, AD
 ```bash
 claude -p "/team:build FEAT-012 --decide" \
   --agent team:team-leader --permission-mode dontAsk \
-  --allowedTools "Read,Grep,Glob,Edit,Write,Agent,Skill,Bash(git *),Bash(python3 *)" \
+  --allowedTools "$(jq -r '["Read","Grep","Glob","Edit","Write","Agent","Skill"] + (.permissions.allow // []) | join(",")' .claude/settings.json)" \
   --max-turns 200 --max-budget-usd 20 --output-format json \
   > docs/team/metrics/batch-build-FEAT-012.json
 ```
-Lệnh `cmd.*` được phép qua `permissions.allow` mà onboard ghi. Mẫu GitHub Actions đầy đủ: `templates/project/github/workflows/team-feature.yml`.
+`--allowedTools` lấy từ `permissions.allow` mà onboard ghi (có các khe `cmd.*`): thư mục chưa được tin (CI, máy mới) thì `-p` bỏ qua `permissions.allow`, nên phải truyền lại bằng cờ (K-06). Mẫu GitHub Actions đầy đủ: `templates/project/github/workflows/team-feature.yml`.
 
 ## Cổng
 Không vượt cổng nào. G4 trở đi chờ người.

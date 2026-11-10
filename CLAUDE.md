@@ -13,7 +13,7 @@
 3. Tên phải khớp mọi nơi: docs ↔ agents ↔ skills ↔ templates ↔ scripts. Đổi tên thì grep và sửa hết.
 4. Văn xuôi bằng tiếng Việt. Định danh luôn bằng tiếng Anh: tên file/thư mục, key JSON, tên skill/agent, mã STD, nhánh, script, cờ CLI, key frontmatter.
 5. Chỉ dùng bash, python3 (stdlib), jq, git, gh (tùy chọn). Không thêm phụ thuộc.
-6. Chuẩn chất lượng (P7): skill nạp thường xuyên ≤ 400 chữ, 4 mục; skill khác 1.200–2.500 chữ, 10 mục; agent 600–1.200 chữ, 10 mục. Cấu hình: `scripts/skill-budgets.txt`, `skill-sections.txt`, `agent-sections.txt`; đo: `scripts/kit-metrics.py`; mục chưa đạt nằm trong `scripts/quality-backlog.txt` (chỉ được rút ngắn). Phần dài chuyển vào `references/`.
+6. Chuẩn chất lượng (P7): skill nạp thường xuyên ≤ 400 chữ, 4 mục; skill khác 1.200–2.500 chữ, 10 mục; agent 600–1.200 chữ, 10 mục. Cấu hình: `scripts/skill-budgets.txt`, `skill-sections.txt`, `agent-sections.txt`; đo: `scripts/kit-metrics.py`; mục chưa đạt nằm trong `scripts/quality-backlog.txt` (chỉ được rút ngắn; rỗng từ v0.3.0 — mục mới phải đạt chuẩn ngay). Phần dài chuyển vào `references/`.
 7. Không dùng `@file` trong skill/agent. Trong plugin, trỏ file bằng `${CLAUDE_PLUGIN_ROOT}`.
 8. Mô tả skill bắt đầu bằng "Dùng khi", < 500 ký tự, không tóm tắt quy trình.
 9. Không viết MCP server, không tạo plugin khác ngoài `team`.

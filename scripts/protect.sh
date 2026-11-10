@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# protect.sh — hook PreToolUse (Edit|Write|NotebookEdit): chặn ghi vào vùng cấm.
+# protect.sh — hook PreToolUse (Edit|Write|NotebookEdit|Bash): chặn ghi vào vùng cấm.
+# Bash (K-24): đích ghi nhận ra được (chuyển hướng, tee, rm, mv, cp, sed -i, …) — xem teamlib.protect_bash.
 # Chặn (thoát 2): .git/**, .claude/settings*.json, protected_paths (STD-SEC-1);
 #   file MỚI ngoài structure.allowed_new_file_roots (STD-STRUCT-1).
 # Luôn cho phép: docs/team/**, .team/** (trừ profile/config ngoài onboard), .claude/{agent-memory,skills,agents,rules}/**, CHANGELOG.md ở gốc.
@@ -10,6 +11,11 @@ set -uo pipefail
 [[ ${1:-} == --help || ${1:-} == -h ]] && { show_help "$0"; exit 0; }
 team_init "$@"
 read_input
+if [[ "$(input_get '.tool_name')" == Bash ]]; then
+  # K-24: đích ghi của lệnh shell (chuyển hướng, tee, rm, mv, cp, sed -i, …) qua cùng luật vùng cấm.
+  printf '%s' "$HOOK_INPUT" | python3 -I "$TEAMLIB" protect-bash --root "$TEAM_ROOT" || exit 2
+  allow
+fi
 path="$(input_get '.tool_input.file_path // .tool_input.notebook_path')"
 [[ -z $path ]] && allow
 path="${path//\\//}"

@@ -5,7 +5,7 @@ Nguồn chuẩn: `SPEC.md` §9 (Memory). Trang này giải thích lý do.
 ## Năm tầng
 | Tầng | Là gì | Nằm ở đâu | Ai ghi |
 |---|---|---|---|
-| 0 Ngân sách ngữ cảnh | Nạp lười: rule theo đường dẫn, skill khi cần, handbook nạp sẵn; khám phá bằng `Explore`; một feature mỗi phiên; cảnh báo khi vượt `context_warn_pct` | — | hook SessionStart |
+| 0 Ngân sách ngữ cảnh | Nạp lười: rule theo đường dẫn, skill khi cần, handbook nạp sẵn; khám phá bằng `Explore`; một feature mỗi phiên; cảnh báo khi vượt `context_warn_pct` | — | `/team:session plan` đặt điểm nén theo giai đoạn (mức 1: không hook nào đọc được % ngữ cảnh); hook SessionStart nhắc luật sau khi nén |
 | 1 Trạng thái phiên | Bàn giao ≤ 40 dòng, chỉ phần khác so với artifact | `.team/session/<id>.md` (gitignore) | hook PreCompact, SessionEnd; nạp ở SessionStart |
 | 2 Artifact feature | spec, design, plan, review, acceptance... | `docs/team/features/<ID>/` | các vai |
 | 3 Kiến thức dự án | Chia hai: auto memory của Claude Code (máy cục bộ: thói quen, đặc điểm máy) và `docs/team/` (dùng chung, CI đọc được: ADR, cache research theo phiên bản, As-Built, glossary, cache explore có hash) | `~/.claude/projects/...` và `docs/team/` | các vai, theo rule |

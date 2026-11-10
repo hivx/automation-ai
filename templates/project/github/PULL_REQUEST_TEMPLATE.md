@@ -4,8 +4,14 @@
 - As-Built: `docs/team/features/<ID>/asbuilt.md`
 - Nghiệm thu: `docs/team/features/<ID>/acceptance.md` — Verdict: <!-- accepted / rework / design-defect -->
 
-## Vì sao, đổi gì, cách kiểm
-<!-- ngắn; dán lệnh và đầu ra kiểm -->
+## Vì sao
+<!-- vấn đề hoặc nhu cầu, một hai câu; dẫn spec.md -->
+
+## Đổi gì
+<!-- hành vi và file chính; khác thiết kế thì dẫn asbuilt.md -->
+
+## Cách kiểm
+<!-- lệnh đã chạy và đầu ra (mã thoát), lấy từ acceptance.md -->
 
 ## Review checklist (handbook/STD.md)
 - [ ] 1. Làm đúng và đủ spec, không thừa (STD-DESIGN-5, STD-TEST-2)

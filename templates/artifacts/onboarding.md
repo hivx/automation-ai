@@ -8,9 +8,11 @@ Approved-by:
 # Onboarding
 
 ## Đã tạo / bỏ qua / việc tay
-| Trạng thái | File | Ghi chú |
-|---|---|---|
-| đã tạo | `.team/profile.json` | nguồn: profile-proposal.md / profiles/<stack>.json |
+Kit: `team` <phiên bản từ plugin.json>. Lần chạy lại onboard chỉ được ra "bỏ qua (đã có)" cho mọi dòng dưới đây.
+
+| Trạng thái | File | Cách ghi (tạo / gộp JSON / chèn khối / bỏ qua) | Nguồn mẫu | Ghi chú |
+|---|---|---|---|---|
+| đã tạo | `.team/profile.json` | tạo | profile-proposal.md / profiles/<stack>.json | |
 
 ## Chạy thử một lần
 | Khe | Lệnh | Mã thoát | Đầu ra (trích) |

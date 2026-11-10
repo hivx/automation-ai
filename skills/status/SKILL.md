@@ -12,7 +12,7 @@ In trạng thái tính từ artifact (không con trỏ lưu sẵn) và ai đang 
 
 ## Quy trình
 1. Kiểm `docs/team/` có. Không có → in: dự án có code → `/team:takeover`; repo rỗng → `/team:onboard --new`; dừng.
-2. Chạy (Bash): `python3 "$(cat .team/plugin_root)/scripts/team.py" status $ARGUMENTS`.
+2. Chạy (Bash): `python3 "<kit>/scripts/team.py" status $ARGUMENTS` (`<kit>` = đường dẫn đọc từ `.team/plugin_root`, gõ thẳng).
 3. In NGUYÊN đầu ra trong khối mã, kể cả cột "Cổng áp dụng".
 4. Với mỗi dòng `WAITING_FOR_APPROVAL`, `WAITING_FOR_ANSWER`, `BLOCKED`, `REWORK`, `DESIGN_DEFECT`: một dòng "Chờ người: <việc> — <file>".
 5. In lệnh tiếp theo đúng như cột "Tiếp theo" của script.

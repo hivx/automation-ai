@@ -26,8 +26,10 @@ else
   lines+=("team: dự án chưa onboard — chạy /team:takeover (có code) hoặc /team:onboard --new.")
 fi
 if [[ $source == resume || $source == compact ]]; then
-  latest="$(ls -t .team/session/*.md 2>/dev/null | grep -v '/plan.md$' | head -n 1)"
+  latest="$(ls -t .team/session/*.md 2>/dev/null | grep -vE '/(plan|notes-[^/]*)\.md$' | head -n 1)"
   [[ -n $latest ]] && lines+=("Bàn giao mới nhất: $latest — đọc trước khi làm tiếp.")
+  notes="$(ls -t .team/session/notes-*.md 2>/dev/null | head -n 1)"  # /team:session save (hook không ghi đè)
+  [[ -n $notes ]] && lines+=("Ghi chú phiên (session save): $notes.")
 fi
 if [[ $source == compact ]]; then
   lines+=("Sáu luật cốt lõi: (1) file mới chỉ trong allowed_new_file_roots; (2) test hỏng trước;"

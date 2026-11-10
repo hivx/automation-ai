@@ -7,7 +7,7 @@ user-invocable: false
 # Sổ tay kỹ thuật (bản rút gọn)
 
 ## Tổng quan
-`handbook/STD-short.md` của kit là LUẬT cho mọi code đội viết. Skill này nạp sẵn vào mọi agent; nó không thay bản đầy đủ `<kit>/handbook/STD.md` (`<kit>` = nội dung `.team/plugin_root`).
+`handbook/STD-short.md` của kit là LUẬT cho mọi code đội viết. Skill này nạp sẵn vào mọi agent; nó không thay bản đầy đủ `<kit>/handbook/STD.md` (`<kit>` = nội dung `.team/plugin_root`; gõ thẳng đường dẫn, không `$(cat …)` — headless đòi duyệt lệnh thay thế).
 
 ## Quy trình
 1. **Trước mọi việc khác:** Read `${CLAUDE_PLUGIN_ROOT}/handbook/STD-short.md`. Không đọc được → Read `<kit>/handbook/STD-short.md`. Không đọc được cả hai → dừng và báo người gọi.

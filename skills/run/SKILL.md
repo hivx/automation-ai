@@ -13,7 +13,7 @@ Chạy giai đoạn kế tiếp của feature theo playbook và cổng. `$ARGUME
 
 ## Quy trình
 1. Kiểm `docs/team/features/<ID>/intake.md` có; không có → in `/team:intake`, dừng.
-2. Bash: `python3 "$(cat .team/plugin_root)/scripts/team.py" next <ID>` và `status <ID>`.
+2. Bash: `python3 "<kit>/scripts/team.py" next <ID>` và `status <ID>` (`<kit>` = đường dẫn đọc từ `.team/plugin_root`, gõ thẳng).
 3. Cổng: CHỈ theo đầu ra `team.py` (đã tính theo cỡ: S bỏ G1, G3; refactor/data-migration bật G2b). Không tự đọc `gates` trong config. `WAITING_FOR_*` → dừng, in việc người cần làm.
 4. Lệnh kế là skill chỉ người gọi được (`/team:release`, `/team:ci`) → in lệnh, dừng.
 5. Ghi journal một câu lý do (Write), rồi gọi skill kế (Skill). Cỡ S vẫn đi qua `/team:build` để có reviewer.

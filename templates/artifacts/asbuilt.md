@@ -21,4 +21,12 @@ Approved-by:
 ## CHANGELOG
 <mục đã thêm dưới [Unreleased]>
 
+## Nợ sau G4
+| Mục DoD qa ghi chủ | Đã làm | Kiểm lại (lệnh → kết quả) |
+|---|---|---|
+| <CHANGELOG / README / tài liệu> | <file> | <grep … → khớp> hoặc "để /team:release kiểm" |
+
+## Rollback
+<!-- /team:release viết trước lần deploy đầu: điều kiện kích hoạt, lệnh (từ docs/team/ci.md), phần dữ liệu, thời gian dự kiến -->
+
 <!-- devops thêm dòng sau khi lên prod thành công: Released: <tag> <YYYY-MM-DD> -->

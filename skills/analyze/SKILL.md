@@ -38,7 +38,7 @@ Analyst không chọn công nghệ, nhưng phải biết dự án đang có gì 
 Không chạy lệnh `cmd.*` nào trong giai đoạn này.
 
 ## Đầu vào và điều kiện trước
-- `docs/team/features/<ID>/intake.md` có (kiểm bằng `python3 "$(cat .team/plugin_root)/scripts/team.py" status <ID>` → `intaken`).
+- `docs/team/features/<ID>/intake.md` có (kiểm bằng `python3 "<kit>/scripts/team.py" status <ID>` → `intaken`).
 - Chế độ: `--decide` thắng; không có thì lấy dòng `Chế độ:` trong `intake.md`.
 - `--amend`: `spec.md` đã có `Approved-by:` và yêu cầu thay đổi được nêu rõ trong `$ARGUMENTS` hoặc trong `intake.md` của change-request.
 - Thiếu một điều trên → trả về ≤ 5 dòng nêu điều thiếu, trạng thái `NEEDS_CONTEXT`, rồi dừng.
