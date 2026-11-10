@@ -3,19 +3,19 @@ Stage: intake
 Author-agent: team-leader
 Date: <YYYY-MM-DD>
 Approved-by:
-<!-- Cổng: người duyệt điền dòng trên `Approved-by: <tên> <YYYY-MM-DD>`. Không có cổng thì để trống. -->
+<!-- Gate: the approver fills in the line above as `Approved-by: <name> <YYYY-MM-DD>`. Leave it empty when there is no gate. -->
 
-# Intake <ID> — <tiêu đề ngắn>
+# Intake <ID> — <short title>
 
-- Yêu cầu gốc: "<nguyên văn>"
-- Nguồn: <hội thoại | issue #N>
-- Loại việc: <feature | bug | hotfix | change | refactor | ...>
-- Playbook: <tên playbook>
-- Cỡ: <S | M | L>
-- Chế độ: <ask | decide>
-- Lý do chọn playbook/cỡ: <một câu>
-- Skill tạm: <không cần | tên + bước cần>
-- Ngân sách: max_agents_per_feature = <n>; feature_budget_usd = <n | không giới hạn>
+- Original request: "<verbatim>"
+- Source: <conversation | issue #N>
+- Work type: <feature | bug | hotfix | change | refactor | ...>
+- Playbook: <playbook name>
+- Size: <S | M | L>
+- Mode: <ask | decide>
+- Reason for playbook/size: <one sentence>
+- Temp skill: <not needed | name + step that needs it>
+- Budget: max_agents_per_feature = <n>; feature_budget_usd = <n | unlimited>
 
-## Đổi cỡ (nếu có)
-- <YYYY-MM-DD>: <cỡ cũ> → <cỡ mới> — <lý do>
+## Size changes (if any)
+- <YYYY-MM-DD>: <old size> → <new size> — <reason>

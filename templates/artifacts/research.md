@@ -3,29 +3,29 @@ Stage: research
 Author-agent: researcher
 Date: <YYYY-MM-DD>
 Approved-by:
-<!-- Cổng: người duyệt điền dòng trên `Approved-by: <tên> <YYYY-MM-DD>`. Không có cổng thì để trống. -->
+<!-- Gate: the approver fills in the line above as `Approved-by: <name> <YYYY-MM-DD>`. Leave it empty when there is no gate. -->
 
-# Research <ID> — <câu hỏi>
+# Research <ID> — <question>
 
-## Câu trả lời ngắn
-<1–3 câu; độ tin cậy: cao | trung bình | thấp>
+## Short answer
+<1–3 sentences; confidence: high | medium | low>
 
-## Phiên bản đang dùng
-<thư viện/nền tảng @ phiên bản, lấy từ manifest>
+## Versions in use
+<library/platform @ version, taken from the manifest>
 
-## Phương án
-| Phương án | Ưu | Nhược | Rủi ro | Chi phí |
+## Options
+| Option | Pros | Cons | Risk | Cost |
 |---|---|---|---|---|
 | A | | | | |
 
-## Khuyến nghị
-<chọn gì, vì sao; chờ architect quyết nếu là quyết định kiến trúc>
+## Recommendation
+<what to pick and why; wait for the architect if it is an architecture decision>
 
-## POC (nếu có)
-<lệnh + đầu ra thật; worktree đã gỡ>
+## POC (if any)
+<command + real output; worktree removed>
 
-## Nháp ADR (nếu có)
-<bối cảnh / phương án / khuyến nghị / hệ quả>
+## ADR draft (if any)
+<context / options / recommendation / consequences>
 
 ## Sources
-- <URL> — <tiêu đề> (truy cập <YYYY-MM-DD>)
+- <URL> — <title> (accessed <YYYY-MM-DD>)

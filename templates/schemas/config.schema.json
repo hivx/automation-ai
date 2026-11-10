@@ -38,7 +38,7 @@
           "enum": [
             true
           ],
-          "description": "Prod luôn cần người"
+          "description": "Prod always needs a human"
         }
       },
       "additionalProperties": false,
@@ -142,7 +142,7 @@
         "max_temp_skills": {
           "type": "integer",
           "minimum": 0,
-          "description": "Trần số skill/agent tạm đang hoạt động"
+          "description": "Cap on active temp skills/agents"
         }
       },
       "additionalProperties": false,
@@ -162,55 +162,55 @@
       "properties": {
         "team-leader": {
           "type": "string",
-          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+          "description": "sonnet|opus|haiku|fable|inherit or a model ID"
         },
         "tech-lead": {
           "type": "string",
-          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+          "description": "sonnet|opus|haiku|fable|inherit or a model ID"
         },
         "coach": {
           "type": "string",
-          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+          "description": "sonnet|opus|haiku|fable|inherit or a model ID"
         },
         "analyst": {
           "type": "string",
-          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+          "description": "sonnet|opus|haiku|fable|inherit or a model ID"
         },
         "researcher": {
           "type": "string",
-          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+          "description": "sonnet|opus|haiku|fable|inherit or a model ID"
         },
         "architect": {
           "type": "string",
-          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+          "description": "sonnet|opus|haiku|fable|inherit or a model ID"
         },
         "designer": {
           "type": "string",
-          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+          "description": "sonnet|opus|haiku|fable|inherit or a model ID"
         },
         "dev": {
           "type": "string",
-          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+          "description": "sonnet|opus|haiku|fable|inherit or a model ID"
         },
         "reviewer": {
           "type": "string",
-          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+          "description": "sonnet|opus|haiku|fable|inherit or a model ID"
         },
         "qa": {
           "type": "string",
-          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+          "description": "sonnet|opus|haiku|fable|inherit or a model ID"
         },
         "writer": {
           "type": "string",
-          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+          "description": "sonnet|opus|haiku|fable|inherit or a model ID"
         },
         "maintainer": {
           "type": "string",
-          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+          "description": "sonnet|opus|haiku|fable|inherit or a model ID"
         },
         "devops": {
           "type": "string",
-          "description": "sonnet|opus|haiku|fable|inherit hoặc model ID"
+          "description": "sonnet|opus|haiku|fable|inherit or a model ID"
         }
       },
       "additionalProperties": false
@@ -223,49 +223,49 @@
           "items": {
             "type": "string"
           },
-          "description": "Người được duyệt cổng này"
+          "description": "Who may approve this gate"
         },
         "G1_spec": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "Người được duyệt cổng này"
+          "description": "Who may approve this gate"
         },
         "G2_arch": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "Người được duyệt cổng này"
+          "description": "Who may approve this gate"
         },
         "G2b_design": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "Người được duyệt cổng này"
+          "description": "Who may approve this gate"
         },
         "G3_plan": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "Người được duyệt cổng này"
+          "description": "Who may approve this gate"
         },
         "G4_uat": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "Người được duyệt cổng này"
+          "description": "Who may approve this gate"
         },
         "G5_prod": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "Người được duyệt cổng này"
+          "description": "Who may approve this gate"
         }
       },
       "additionalProperties": false
@@ -302,7 +302,7 @@
       "properties": {
         "questions": {
           "type": "string",
-          "description": "Nơi gửi câu hỏi khi không có hộp thoại (mặc định issue-comment)"
+          "description": "Where questions go when there is no dialog (default issue-comment)"
         },
         "notify": {
           "type": "string"

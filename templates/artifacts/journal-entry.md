@@ -3,9 +3,9 @@ Stage: any
 Author-agent: team-leader
 Date: <YYYY-MM-DD>
 Approved-by:
-<!-- Cổng: người duyệt điền dòng trên `Approved-by: <tên> <YYYY-MM-DD>`. Không có cổng thì để trống. -->
+<!-- Gate: the approver fills in the line above as `Approved-by: <name> <YYYY-MM-DD>`. Leave it empty when there is no gate. -->
 
 # Journal <ID>
 
-<!-- Mỗi lần bàn giao: 3–5 dòng, đúng định dạng dưới; trần journal.max_lines_per_entry. -->
+<!-- Each handoff: 3–5 lines, exactly in the format below; cap journal.max_lines_per_entry. -->
 - <date> <stage> → <agent/skill> | <what> | <result> | <time/rounds> | <verdict: good/slow/wrong + cause> | <idea>

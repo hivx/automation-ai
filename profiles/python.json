@@ -89,11 +89,11 @@
     ]
   },
   "notes": {
-    "deploy.staging": "Để trống: mỗi dự án tự khai lúc onboard.",
-    "deploy.smoke": "Để trống: mỗi dự án tự khai lúc onboard.",
-    "cmd.install": "Giả định pyproject có extra [dev]; dự án dùng requirements.txt/poetry/uv thì sửa.",
-    "cmd.typecheck": "Chưa chắc: mypy hoặc pyright tùy dự án.",
-    "cmd.run": "Chưa chắc: tên module 'app' là giả định.",
-    "cmd.migrate": "Chưa chắc: chỉ đúng khi dự án dùng Alembic; Django dùng manage.py migrate."
+    "deploy.staging": "Left empty: each project declares it at onboard.",
+    "deploy.smoke": "Left empty: each project declares it at onboard.",
+    "cmd.install": "Assumes pyproject has a [dev] extra; adjust if the project uses requirements.txt/poetry/uv.",
+    "cmd.typecheck": "Uncertain: mypy or pyright depending on the project.",
+    "cmd.run": "Uncertain: the module name 'app' is an assumption.",
+    "cmd.migrate": "Uncertain: only correct when the project uses Alembic; Django uses manage.py migrate."
   }
 }

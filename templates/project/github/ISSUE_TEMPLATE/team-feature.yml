@@ -1,34 +1,34 @@
-name: Yêu cầu cho đội team
-description: Giao một yêu cầu thô cho đội. Gắn nhãn team:intake để đội nhận.
+name: Request for the team crew
+description: Hand a raw request to the team. Add the team:intake label so the team picks it up.
 labels: ["team:intake"]
 body:
   - type: textarea
     id: request
     attributes:
-      label: Yêu cầu thô
-      description: Viết như nói với đồng nghiệp. Đội sẽ hỏi lại điều lớn chưa rõ.
+      label: Raw request
+      description: Write it as you would to a colleague. The team will ask back about big open points.
     validations:
       required: true
   - type: dropdown
     id: size
     attributes:
-      label: Cỡ việc
+      label: Work size
       options: ["auto", "S", "M", "L"]
       default: 0
   - type: dropdown
     id: mode
     attributes:
-      label: Chế độ
-      description: ask = hỏi điều lớn chưa rõ; decide = tự quyết và ghi lý do (thêm nhãn team:ask để hỏi).
+      label: Mode
+      description: ask = ask about big open points; decide = decide and record the reason (add the team:ask label to be asked).
       options: ["decide", "ask"]
       default: 0
   - type: textarea
     id: constraints
     attributes:
-      label: Ràng buộc
-      description: Hạn, công nghệ bắt buộc, phần không được đụng.
+      label: Constraints
+      description: Deadline, mandatory technology, parts that must not be touched.
   - type: textarea
     id: done
     attributes:
-      label: Thế nào là xong
-      description: Điều bạn sẽ kiểm để chấp nhận.
+      label: What done looks like
+      description: What you will check before accepting.

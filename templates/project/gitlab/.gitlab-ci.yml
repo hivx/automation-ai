@@ -1,4 +1,4 @@
-# TODO(v2): bản GitLab tương đương team-ci.yml. Hiện chỉ là khung; onboard chép khi ci.provider = gitlab.
+# TODO(v2): GitLab equivalent of team-ci.yml. For now only a skeleton; onboard copies it when ci.provider = gitlab.
 stages: [check]
 
 team-check:

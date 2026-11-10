@@ -3,30 +3,30 @@ Stage: asbuilt
 Author-agent: writer
 Date: <YYYY-MM-DD>
 Approved-by:
-<!-- Cổng: người duyệt điền dòng trên `Approved-by: <tên> <YYYY-MM-DD>`. Không có cổng thì để trống. -->
+<!-- Gate: the approver fills in the line above as `Approved-by: <name> <YYYY-MM-DD>`. Leave it empty when there is no gate. -->
 
-<!-- G5: người điền `Approved-by-prod: <tên> <YYYY-MM-DD>` lên đầu file trước khi lên prod. -->
+<!-- G5: the human adds `Approved-by-prod: <name> <YYYY-MM-DD>` at the top of this file before going to prod. -->
 # As-Built <ID>
 
 ## Differences from design
-| Mục thiết kế | Thực tế | file:line | Lý do |
+| Design item | Actual | file:line | Reason |
 |---|---|---|---|
-| <...> | đúng thiết kế / khác: <...> | | |
+| <...> | as designed / differs: <...> | | |
 
-## Release notes (cho người dùng)
-- Đổi gì: <...>
-- Ai bị ảnh hưởng: <...>
-- Cần làm gì: <...>
+## Release notes (for users)
+- What changed: <...>
+- Who is affected: <...>
+- What to do: <...>
 
 ## CHANGELOG
-<mục đã thêm dưới [Unreleased]>
+<entry added under [Unreleased]>
 
-## Nợ sau G4
-| Mục DoD qa ghi chủ | Đã làm | Kiểm lại (lệnh → kết quả) |
+## Post-G4 debt
+| DoD item qa flagged | Done | Recheck (command → result) |
 |---|---|---|
-| <CHANGELOG / README / tài liệu> | <file> | <grep … → khớp> hoặc "để /team:release kiểm" |
+| <CHANGELOG / README / docs> | <file> | <grep … → match> or "left for /team:release to check" |
 
 ## Rollback
-<!-- /team:release viết trước lần deploy đầu: điều kiện kích hoạt, lệnh (từ docs/team/ci.md), phần dữ liệu, thời gian dự kiến -->
+<!-- /team:release writes this before the first deploy: trigger condition, command (from docs/team/ci.md), data part, expected duration -->
 
-<!-- devops thêm dòng sau khi lên prod thành công: Released: <tag> <YYYY-MM-DD> -->
+<!-- devops adds this line after a successful prod release: Released: <tag> <YYYY-MM-DD> -->

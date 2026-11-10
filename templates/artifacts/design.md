@@ -3,36 +3,36 @@ Stage: design
 Author-agent: designer
 Date: <YYYY-MM-DD>
 Approved-by:
-<!-- Cổng: người duyệt điền dòng trên `Approved-by: <tên> <YYYY-MM-DD>`. Không có cổng thì để trống. -->
+<!-- Gate: the approver fills in the line above as `Approved-by: <name> <YYYY-MM-DD>`. Leave it empty when there is no gate. -->
 
-# Design <ID> — <tiêu đề>
+# Design <ID> — <title>
 
-## 1. Bối cảnh
-<trích spec; kiến trúc liên quan>
+## 1. Context
+<excerpt from the spec; related architecture>
 
-## 2. Mô hình dữ liệu
-<thực thể, trường, ràng buộc>
+## 2. Data model
+<entities, fields, constraints>
 
-## 3. API / hợp đồng
-<endpoint/hàm, đầu vào, đầu ra, lỗi; phiên bản>
+## 3. API / contract
+<endpoint/function, inputs, outputs, errors; version>
 
-## 4. Luồng
+## 4. Flow
 1. <...>
 
-## 5. Quyền
-<ai được làm gì; kiểm ở đâu>
+## 5. Permissions
+<who may do what; where it is checked>
 
-## 6. Migration và rollback
-- Lên: <...>
-- Xuống: <...>
-- Đối soát: <...>
+## 6. Migration and rollback
+- Up: <...>
+- Down: <...>
+- Reconciliation: <...>
 
 ## 7. Touchpoints
-| file | change | ghi chú |
+| file | change | notes |
 |---|---|---|
-| <đường/dẫn> | mới / sửa | <vì sao chạm; chia task là việc của tech-lead> |
+| <path/to/file> | new / edit | <why it is touched; splitting into tasks is the tech-lead's job> |
 
 ## 8. Test plan
-| Tiêu chí | Test | Loại |
+| Criterion | Test | Type |
 |---|---|---|
-| AC-1 | <file test::tên> | unit / integration / e2e |
+| AC-1 | <test file::name> | unit / integration / e2e |

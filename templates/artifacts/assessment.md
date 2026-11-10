@@ -3,36 +3,36 @@ Stage: takeover
 Author-agent: team-leader
 Date: <YYYY-MM-DD>
 Approved-by:
-<!-- Cổng: người duyệt điền dòng trên `Approved-by: <tên> <YYYY-MM-DD>`. Không có cổng thì để trống. -->
+<!-- Gate: the approver fills in the line above as `Approved-by: <name> <YYYY-MM-DD>`. Leave it empty when there is no gate. -->
 
-# Đánh giá dự án
+# Project assessment
 
-## 1. Dự án làm gì?
-<theo tài liệu (T1) và theo code (T2); chỗ lệch>
+## 1. What does the project do?
+<according to the docs (T1) and according to the code (T2); where they disagree>
 
-## 2. Đã tới đâu?
-<tính năng có code+test; dở dang; nhịp commit; vùng nóng>
+## 2. How far has it got?
+<features with code+tests; unfinished work; commit rhythm; hot spots>
 
-## 3. Việc tiếp theo là gì?
+## 3. What comes next?
 1. <...>
 
-## Đã quét / Chưa quét / Độ tin cậy
-| Tầng | Đã quét | Chưa quét | Độ tin cậy |
+## Scanned / Not scanned / Confidence
+| Tier | Scanned | Not scanned | Confidence |
 |---|---|---|---|
 | T0 | | | |
 | T1 | | | |
 | T2 | | | |
 | T3 | | | |
 
-## Phụ lục A — Stack và sức khỏe
-| Mục | Kết quả | Bằng chứng |
+## Appendix A — Stack and health
+| Item | Result | Evidence |
 |---|---|---|
-| Build/test chạy được? | | lệnh đề xuất |
+| Do build/test run? | | proposed command |
 | Lint | | |
 | Coverage | | |
-| Phụ thuộc lỗi thời / CVE | | |
-| Secret lộ | | |
-| Test chập chờn / bị skip | | |
+| Outdated dependencies / CVEs | | |
+| Leaked secrets | | |
+| Flaky / skipped tests | | |
 
-## Phụ lục B — Quy ước đo từ code
-<đặt tên, cấu trúc, test, commit>
+## Appendix B — Conventions measured from the code
+<naming, structure, tests, commits>

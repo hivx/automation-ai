@@ -12,21 +12,21 @@
   "properties": {
     "stack": {
       "type": "string",
-      "description": "Tên stack chính"
+      "description": "Main stack name"
     },
     "language": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "Ngôn ngữ dùng trong repo"
+      "description": "Languages used in the repo"
     },
     "cmd": {
       "type": "object",
       "properties": {
         "install": {
           "type": "string",
-          "description": "Cài phụ thuộc"
+          "description": "Install dependencies"
         },
         "build": {
           "type": "string",
@@ -34,11 +34,11 @@
         },
         "test": {
           "type": "string",
-          "description": "Toàn bộ test"
+          "description": "Full test suite"
         },
         "test_one": {
           "type": "string",
-          "description": "Test của một file; dùng chỗ thay {file}; phải chứa {file} (chỗ thay duy nhất) hoặc để rỗng",
+          "description": "Tests of one file; uses the {file} placeholder; must contain {file} (the only placeholder) or be empty",
           "pattern": "^$|\\{file\\}"
         },
         "lint": {
@@ -47,27 +47,27 @@
         },
         "typecheck": {
           "type": "string",
-          "description": "Kiểm kiểu"
+          "description": "Type check"
         },
         "format": {
           "type": "string",
-          "description": "Format một file; dùng chỗ thay {file}; phải chứa {file} (chỗ thay duy nhất) hoặc để rỗng",
+          "description": "Format one file; uses the {file} placeholder; must contain {file} (the only placeholder) or be empty",
           "pattern": "^$|\\{file\\}"
         },
         "run": {
           "type": "string",
-          "description": "Chạy ứng dụng"
+          "description": "Run the application"
         },
         "migrate": {
           "type": "string",
-          "description": "Chạy migration"
+          "description": "Run migrations"
         }
       },
       "additionalProperties": false,
       "required": [
         "test_one"
       ],
-      "description": "Lệnh chạy từ gốc repo; {file} là chỗ thay duy nhất"
+      "description": "Commands run from the repo root; {file} is the only placeholder"
     },
     "formatters_by_ext": {
       "type": "object",
@@ -75,40 +75,40 @@
         "type": "string",
         "pattern": "\\{file\\}"
       },
-      "description": "Đuôi file → lệnh format có {file}"
+      "description": "File extension → format command containing {file}"
     },
     "structure": {
       "type": "object",
       "properties": {
         "src": {
           "type": "string",
-          "description": "Thư mục mã nguồn"
+          "description": "Source folder"
         },
         "tests": {
           "type": "string",
-          "description": "Thư mục test hoặc 'colocated'"
+          "description": "Test folder or 'colocated'"
         },
         "docs": {
           "type": "string",
-          "description": "Thư mục tài liệu"
+          "description": "Docs folder"
         },
         "scripts": {
           "type": "string",
-          "description": "Thư mục script"
+          "description": "Scripts folder"
         },
         "config": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "File/thư mục cấu hình"
+          "description": "Config files/folders"
         },
         "allowed_new_file_roots": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "Danh sách ĐÓNG nơi được tạo file mới"
+          "description": "CLOSED list of places where new files may be created"
         }
       },
       "additionalProperties": false,
@@ -148,7 +148,7 @@
           "items": {
             "type": "string"
           },
-          "description": "Dấu bỏ qua test bị cấm dùng để cho xanh"
+          "description": "Test-skip markers that must not be used to get green"
         }
       },
       "additionalProperties": false
@@ -158,7 +158,7 @@
       "items": {
         "type": "string"
       },
-      "description": "Glob không agent nào được sửa: secret, lockfile, vendored, cấu hình prod"
+      "description": "Globs no agent may edit: secrets, lockfiles, vendored code, prod config"
     },
     "ci": {
       "type": "object",
@@ -179,7 +179,7 @@
           "items": {
             "type": "string"
           },
-          "description": "Lệnh chuẩn bị môi trường CI"
+          "description": "Command that prepares the CI environment"
         }
       },
       "additionalProperties": false
@@ -189,25 +189,25 @@
       "properties": {
         "staging": {
           "type": "string",
-          "description": "Lệnh deploy staging"
+          "description": "Staging deploy command"
         },
         "smoke": {
           "type": "string",
-          "description": "Lệnh smoke test"
+          "description": "Smoke test command"
         },
         "prod_requires_reviewer": {
           "type": "boolean",
           "enum": [
             true
           ],
-          "description": "Prod luôn cần người duyệt"
+          "description": "Prod always needs a human approver"
         }
       },
       "additionalProperties": false
     },
     "ui": {
       "type": "boolean",
-      "description": "Dự án có giao diện người dùng"
+      "description": "The project has a user interface"
     },
     "tracker": {
       "type": "string",
@@ -242,14 +242,14 @@
       "additionalProperties": {
         "type": "string"
       },
-      "description": "Khe → ghi chú một dòng (giá trị chưa chắc, lý do)"
+      "description": "Slot → one-line note (uncertain value, reason)"
     },
     "packages": {
       "type": "object",
       "additionalProperties": {
         "type": "object"
       },
-      "description": "Monorepo: thư mục → profile ghi đè một phần"
+      "description": "Monorepo: folder → partial profile override"
     }
   },
   "additionalProperties": false

@@ -98,10 +98,10 @@
     ]
   },
   "notes": {
-    "deploy.staging": "Để trống: mỗi dự án tự khai lúc onboard.",
-    "deploy.smoke": "Để trống: mỗi dự án tự khai lúc onboard.",
-    "cmd.test_one": "Chưa chắc: giả định Vitest; dự án dùng Jest thì đổi thành npx jest {file}.",
-    "cmd.install": "Đổi theo trình quản lý gói: yarn install --frozen-lockfile hoặc pnpm install --frozen-lockfile.",
-    "cmd.migrate": "Để trống: tùy ORM (Prisma, Knex, TypeORM...)."
+    "deploy.staging": "Left empty: each project declares it at onboard.",
+    "deploy.smoke": "Left empty: each project declares it at onboard.",
+    "cmd.test_one": "Uncertain: assumes Vitest; if the project uses Jest, change it to npx jest {file}.",
+    "cmd.install": "Change it to match the package manager: yarn install --frozen-lockfile or pnpm install --frozen-lockfile.",
+    "cmd.migrate": "Left empty: depends on the ORM (Prisma, Knex, TypeORM...)."
   }
 }

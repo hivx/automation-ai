@@ -36,7 +36,7 @@
   "naming": {
     "file": "snake_case",
     "class": "MixedCaps (PascalCase khi export)",
-    "function": "MixedCaps (camelCase khi không export)",
+    "function": "MixedCaps (camelCase when not exported)",
     "constant": "MixedCaps",
     "test_file": "{name}_test.go",
     "branch": "team/{id}-{slug}"
@@ -82,11 +82,11 @@
     ]
   },
   "notes": {
-    "deploy.staging": "Để trống: mỗi dự án tự khai lúc onboard.",
-    "deploy.smoke": "Để trống: mỗi dự án tự khai lúc onboard.",
-    "cmd.test_one": "Go chạy test theo package: lệnh lấy thư mục của {file}.",
-    "cmd.lint": "Cần cài golangci-lint; nếu không có thì dùng go vet ./....",
-    "cmd.run": "Chưa chắc: ứng dụng nhiều binary thì là go run ./cmd/<tên>.",
-    "cmd.migrate": "Để trống: tùy công cụ (golang-migrate, goose...)."
+    "deploy.staging": "Left empty: each project declares it at onboard.",
+    "deploy.smoke": "Left empty: each project declares it at onboard.",
+    "cmd.test_one": "Go runs tests per package: the command takes the folder of {file}.",
+    "cmd.lint": "Requires golangci-lint; if it is missing, use go vet ./....",
+    "cmd.run": "Uncertain: for a multi-binary app it is go run ./cmd/<name>.",
+    "cmd.migrate": "Left empty: depends on the tool (golang-migrate, goose...)."
   }
 }

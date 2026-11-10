@@ -3,18 +3,18 @@ Stage: audit
 Author-agent: coach
 Date: <YYYY-MM-DD>
 Approved-by:
-<!-- Cổng: người duyệt điền dòng trên `Approved-by: <tên> <YYYY-MM-DD>`. Không có cổng thì để trống. -->
+<!-- Gate: the approver fills in the line above as `Approved-by: <name> <YYYY-MM-DD>`. Leave it empty when there is no gate. -->
 
-# Vấn đề của bộ kit `team`
+# Issues of the `team` kit
 
-Chỉ lỗi của kit (agent, skill, hook, template), không phải của dự án. Báo lên repo automation-ai.
+Kit defects only (agent, skill, hook, template), not the project's. Report them to the automation-ai repo.
 
-Cột giống `docs/kit-issues.md` của repo kit để chép thẳng sang. Mức: blocker (làm sai/kẹt quy trình) / major (lách được luật máy, kết quả sai) / minor (lệch tên, tài liệu).
+Columns match the kit repo's `docs/kit-issues.md` so rows can be copied straight across. Level: blocker (wrong result or stuck process) / major (a machine rule can be bypassed, wrong result) / minor (name mismatch, docs).
 
-| ID | Mức | Trạng thái | Nơi | Hiện tượng (bằng chứng: lệnh + đầu ra hoặc file:line) | Đề xuất |
+| ID | Level | Status | Location | Symptom (evidence: command + output or file:line) | Proposal |
 |---|---|---|---|---|---|
-| A-01 | blocker / major / minor | mới / đã có (K-xx) | <file kit> | <...> | <...> |
+| A-01 | blocker / major / minor | new / known (K-xx) | <kit file> | <...> | <...> |
 
-## Phạm vi đã kiểm
-| Kiểm | Đã kiểm | Bỏ qua (vì sao) |
+## Scope checked
+| Check | Checked | Skipped (why) |
 |---|---|---|

@@ -3,28 +3,28 @@ Stage: architect
 Author-agent: architect
 Date: <YYYY-MM-DD>
 Approved-by:
-<!-- Cổng: người duyệt điền dòng trên `Approved-by: <tên> <YYYY-MM-DD>`. Không có cổng thì để trống. -->
+<!-- Gate: the approver fills in the line above as `Approved-by: <name> <YYYY-MM-DD>`. Leave it empty when there is no gate. -->
 
-# Đánh giá tác động kiến trúc <ID>
+# Architecture impact assessment <ID>
 
-## Module bị chạm
-| Module | Thay đổi | Mức |
+## Modules touched
+| Module | Change | Level |
 |---|---|---|
 
-## Hợp đồng thay đổi
-<API, schema, sự kiện; tương thích ngược hay cần di trú>
+## Contract changes
+<API, schema, events; backward compatible or migration needed>
 
-## NFR bị ảnh hưởng
-<hiệu năng, bảo mật, khả dụng...>
+## NFRs affected
+<performance, security, availability...>
 
-## Quyết định
-<ADR mới: ADR-NNN, hoặc "không cần ADR" + lý do>
+## Decision
+<new ADR: ADR-NNN, or "no ADR needed" + reason>
 
-## Rủi ro
+## Risks
 - <...>
 
-## Để designer quyết
-<!-- quyết định chưa đạt phép thử ngưỡng kiến trúc; lý do -->
+## Left to the designer
+<!-- decisions that did not pass the architecture-threshold test; reason -->
 
-## Chế độ system
-<!-- khi viết docs/team/architecture.md: file này mang cổng G2 của feature; liệt kê ADR mới và trỏ docs/team/architecture.md -->
+## System mode
+<!-- when writing docs/team/architecture.md: this file carries the feature's G2 gate; list the new ADRs and point to docs/team/architecture.md -->

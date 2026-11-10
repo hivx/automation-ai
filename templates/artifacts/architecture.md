@@ -3,32 +3,32 @@ Stage: architect
 Author-agent: architect
 Date: <YYYY-MM-DD>
 Approved-by:
-<!-- Cổng: người duyệt điền dòng trên `Approved-by: <tên> <YYYY-MM-DD>`. Không có cổng thì để trống. -->
+<!-- Gate: the approver fills in the line above as `Approved-by: <name> <YYYY-MM-DD>`. Leave it empty when there is no gate. -->
 
-# Kiến trúc hệ thống
+# System architecture
 
-## Bối cảnh
-<hệ thống làm gì; người dùng; hệ thống ngoài>
+## Context
+<what the system does; users; external systems>
 
 ```mermaid
 flowchart LR
-  user[Người dùng] --> app[Ứng dụng]
-  app --> db[(Dữ liệu)]
+  user[User] --> app[Application]
+  app --> db[(Data)]
 ```
 
-## Thành phần
-| Thành phần | Trách nhiệm | Công nghệ | Chủ sở hữu |
+## Components
+| Component | Responsibility | Technology | Owner |
 |---|---|---|---|
 
-## Luồng dữ liệu chính
+## Main data flows
 1. <...>
 
-## NFR → giải pháp
-| NFR | Giải pháp | ADR |
+## NFR → solution
+| NFR | Solution | ADR |
 |---|---|---|
 
-## Ranh giới và phụ thuộc
-<module nào gọi module nào; một chiều>
+## Boundaries and dependencies
+<which module calls which; one direction only>
 
-## Rủi ro
+## Risks
 - <...>

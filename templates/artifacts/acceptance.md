@@ -3,26 +3,26 @@ Stage: verify
 Author-agent: qa
 Date: <YYYY-MM-DD>
 Approved-by:
-<!-- Cổng: người duyệt điền dòng trên `Approved-by: <tên> <YYYY-MM-DD>`. Không có cổng thì để trống. -->
+<!-- Gate: the approver fills in the line above as `Approved-by: <name> <YYYY-MM-DD>`. Leave it empty when there is no gate. -->
 
 # Acceptance <ID>
 
 Verdict: <accepted | rework | design-defect>
 
-## Tiêu chí
+## Criteria
 | criterion | command | output excerpt | verdict |
 |---|---|---|---|
-| AC-1 | `<lệnh>` | `<đầu ra thật>` | đạt / không |
+| AC-1 | `<command>` | `<real output>` | pass / fail |
 
-## Kiểm chung
-- `cmd.test`: <đầu ra>
-- `cmd.lint`: <đầu ra>
-- `cmd.typecheck`: <đầu ra>
-- Dấu skip mới trong diff: <không có | danh sách>
-- Migration lên/xuống: <đầu ra | không áp dụng>
+## Common checks
+- `cmd.test`: <output>
+- `cmd.lint`: <output>
+- `cmd.typecheck`: <output>
+- New skip markers in the diff: <none | list>
+- Migration up/down: <output | not applicable>
 
 ## Acceptance checklist (6)
-<1–6: đạt / trượt (mã STD)>
+<1–6: pass / fail (STD code)>
 
 ## DoD
-- [ ] As-Built  - [ ] README/tài liệu  - [ ] CHANGELOG
+- [ ] As-Built  - [ ] README/docs  - [ ] CHANGELOG

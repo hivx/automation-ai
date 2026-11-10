@@ -3,33 +3,33 @@ Stage: retro
 Author-agent: coach
 Date: <YYYY-MM-DD>
 Approved-by:
-<!-- Cổng: người duyệt điền dòng trên `Approved-by: <tên> <YYYY-MM-DD>`. Không có cổng thì để trống. -->
+<!-- Gate: the approver fills in the line above as `Approved-by: <name> <YYYY-MM-DD>`. Leave it empty when there is no gate. -->
 
-# Đề xuất: <agent-or-skill> (từ retro <date>)
+# Proposal: <agent-or-skill> (from retro <date>)
 
-## Bằng chứng
-| Chỉ số | Giá trị | Trung vị cùng cỡ | Nguồn |
+## Evidence
+| Metric | Value | Median for the same size | Source |
 |---|---|---|---|
 
-Dòng journal liên quan: <trích>
+Related journal lines: <excerpt>
 
-## Chẩn đoán 5 nguyên nhân
-| prompt | model/effort | đầu vào | profile/config | cỡ task | Kết luận |
+## Five-cause diagnosis
+| prompt | model/effort | input | profile/config | task size | Conclusion |
 |---|---|---|---|---|---|
 
-## Thay đổi đề xuất (overlay, nội dung đầy đủ)
+## Proposed change (overlay, full content)
 ```markdown
 # Overlay from retro <date>: <reason>
 # version: <n>
-<toàn bộ nội dung file mới>
+<entire content of the new file>
 ```
 
-## Eval (baseline vs có thay đổi, ≥ 3 kịch bản)
-| # | Kịch bản | Kỳ vọng | Kiểm bằng |
+## Eval (baseline vs changed, ≥ 3 scenarios)
+| # | Scenario | Expected | Checked by |
 |---|---|---|---|
 
 ## Canary
-- Chạy trên <N> việc cỡ S; giữ khi <...>; rollback khi <...>; thay/bỏ khi <...>
+- Run on <N> size-S jobs; keep when <...>; roll back when <...>; replace/drop when <...>
 
 ## Rollback
-<khôi phục bản trước: xóa overlay / trả file cũ>
+<restore the previous version: delete the overlay / restore the old file>

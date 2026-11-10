@@ -3,26 +3,26 @@ Stage: onboard
 Author-agent: team-leader
 Date: <YYYY-MM-DD>
 Approved-by:
-<!-- Cổng: người duyệt điền dòng trên `Approved-by: <tên> <YYYY-MM-DD>`. Không có cổng thì để trống. -->
+<!-- Gate: the approver fills in the line above as `Approved-by: <name> <YYYY-MM-DD>`. Leave it empty when there is no gate. -->
 
 # Onboarding
 
-## Đã tạo / bỏ qua / việc tay
-Kit: `team` <phiên bản từ plugin.json>. Lần chạy lại onboard chỉ được ra "bỏ qua (đã có)" cho mọi dòng dưới đây.
+## Created / skipped / manual work
+Kit: `team` <version from plugin.json>. A rerun of onboard may only produce "skipped (already present)" for every row below.
 
-| Trạng thái | File | Cách ghi (tạo / gộp JSON / chèn khối / bỏ qua) | Nguồn mẫu | Ghi chú |
+| Status | File | Write method (create / merge JSON / insert block / skip) | Template source | Notes |
 |---|---|---|---|---|
-| đã tạo | `.team/profile.json` | tạo | profile-proposal.md / profiles/<stack>.json | |
+| created | `.team/profile.json` | create | profile-proposal.md / profiles/<stack>.json | |
 
-## Chạy thử một lần
-| Khe | Lệnh | Mã thoát | Đầu ra (trích) |
+## Trial run
+| Slot | Command | Exit code | Output (excerpt) |
 |---|---|---|---|
 | cmd.install | | | |
 | cmd.lint | | | |
 | cmd.test | | | |
 
-## Plugin khuyên dùng (chưa cài)
+## Recommended plugins (not installed)
 - `claude plugin install <name@marketplace>`
 
-## Việc người phải làm tay
+## Manual work for the human
 - <...>

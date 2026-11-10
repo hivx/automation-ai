@@ -3,27 +3,27 @@ Stage: architect
 Author-agent: architect
 Date: <YYYY-MM-DD>
 Approved-by:
-<!-- Cổng: người duyệt điền dòng trên `Approved-by: <tên> <YYYY-MM-DD>`. Không có cổng thì để trống. -->
+<!-- Gate: the approver fills in the line above as `Approved-by: <name> <YYYY-MM-DD>`. Leave it empty when there is no gate. -->
 
-# ADR-NNN: <quyết định>
+# ADR-NNN: <decision>
 
-- Trạng thái: <proposed | accepted | superseded by ADR-MMM>
-- Ngày: <YYYY-MM-DD>
+- Status: <proposed | accepted | superseded by ADR-MMM>
+- Date: <YYYY-MM-DD>
 
-## Bối cảnh
-<lực tác động: yêu cầu, NFR, ràng buộc>
+## Context
+<forces at play: requirements, NFRs, constraints>
 
-## Quyết định
-<chúng ta sẽ ...>
+## Decision
+<we will ...>
 
-## Ràng buộc
-<!-- luật reviewer kiểm được trên diff, ví dụ "chỉ module billing ghi bảng invoices" -->
+## Constraints
+<!-- rules the reviewer can check on a diff, e.g. "only the billing module writes the invoices table" -->
 - <...>
 
-## Phương án đã xét
-- <A> — <vì sao không chọn>
+## Options considered
+- <A> — <why it was not chosen>
 
-## Hệ quả
-- Tốt: <...>
-- Xấu: <...>
-- Phải làm thêm: <...>
+## Consequences
+- Good: <...>
+- Bad: <...>
+- Follow-up work: <...>

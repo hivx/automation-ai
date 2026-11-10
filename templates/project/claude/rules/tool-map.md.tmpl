@@ -1,14 +1,14 @@
-# Dùng công cụ nào
+# Which tool to use
 
-| Việc | Ưu tiên | Dự phòng |
+| Job | Preferred | Fallback |
 |---|---|---|
-| Tìm chỗ sửa, đọc nhiều file | agent `Explore` | Grep/Glob rồi Read từng đoạn |
-| Một file đã biết | Read đúng đoạn | — |
-| Tài liệu thư viện | WebFetch docs chính thức, đúng phiên bản | Mã nguồn thư viện đã cài |
-| Kiểm giao diện (`ui: {{ui}}`) | Playwright MCP nếu đã cài | Mô tả tay + xin người ảnh chụp |
-| Chạy test | `{{cmd.test_one}}` qua Bash | `{{cmd.test}}` |
-| PR, issue | `gh` qua Bash | In nội dung để người tự làm |
-| Sơ đồ | Mermaid trong Markdown | Bảng |
-| Trạng thái đội | `/team:status` | Đọc `docs/team/features/<ID>/` |
+| Find where to edit, read many files | agent `Explore` | Grep/Glob, then Read each part |
+| One known file | Read just the relevant part | — |
+| Library docs | WebFetch the official docs, exact version | The installed library's source |
+| Check the UI (`ui: {{ui}}`) | Playwright MCP if installed | Manual description + ask the human for screenshots |
+| Run tests | `{{cmd.test_one}}` via Bash | `{{cmd.test}}` |
+| PRs, issues | `gh` via Bash | Print the content for the human to do it |
+| Diagrams | Mermaid in Markdown | Table |
+| Team status | `/team:status` | Read `docs/team/features/<ID>/` |
 
-Công cụ ưu tiên không có → dùng dự phòng và ghi một dòng vào journal.
+Preferred tool unavailable → use the fallback and write one line in the journal.

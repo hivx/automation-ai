@@ -3,26 +3,26 @@ Stage: retro
 Author-agent: coach
 Date: <YYYY-MM-DD>
 Approved-by:
-<!-- Cổng: người duyệt điền dòng trên `Approved-by: <tên> <YYYY-MM-DD>`. Không có cổng thì để trống. -->
+<!-- Gate: the approver fills in the line above as `Approved-by: <name> <YYYY-MM-DD>`. Leave it empty when there is no gate. -->
 
 # Retro <YYYY-MM-DD>
 
-- Kỳ: <từ> → <đến>; feature: <danh sách>
-- Lệnh: `measure.py --since <date>` (đầu ra bên dưới)
+- Period: <from> → <to>; features: <list>
+- Command: `measure.py --since <date>` (output below)
 
-## Xếp hạng cần chú ý
-<bảng từ measure.py>
+## Attention ranking
+<table from measure.py>
 
-## Điểm nghẽn (≤ 3)
-| # | Đối tượng | Bằng chứng (số liệu + dòng journal) |
+## Bottlenecks (≤ 3)
+| # | Subject | Evidence (metrics + journal lines) |
 |---|---|---|
 
-## Chẩn đoán 5 nguyên nhân
-| Điểm nghẽn | prompt | model/effort | đầu vào | profile/config | cỡ task | Kết luận |
+## Five-cause diagnosis
+| Bottleneck | prompt | model/effort | input | profile/config | task size | Conclusion |
 |---|---|---|---|---|---|---|
 
-## Đề xuất
-- `docs/team/proposals/<date>/<agent-or-skill>.md` — <tóm tắt>; chờ người duyệt
+## Proposals
+- `docs/team/proposals/<date>/<agent-or-skill>.md` — <summary>; awaiting the human's approval
 
-## Gọi thừa agent
-<số agent mỗi feature so với max_agents_per_feature>
+## Excess agent calls
+<agents per feature compared with max_agents_per_feature>

@@ -3,22 +3,22 @@ Stage: plan
 Author-agent: tech-lead
 Date: <YYYY-MM-DD>
 Approved-by:
-<!-- Cổng: người duyệt điền dòng trên `Approved-by: <tên> <YYYY-MM-DD>`. Không có cổng thì để trống. -->
+<!-- Gate: the approver fills in the line above as `Approved-by: <name> <YYYY-MM-DD>`. Leave it empty when there is no gate. -->
 
 # Plan <ID>
 
-- Nhánh feature: `team/<ID>` từ `<base_branch>`
-- Số task: <n>; song song tối đa: <limits.max_parallel_dev>
+- Feature branch: `team/<ID>` from `<base_branch>`
+- Tasks: <n>; max parallel: <limits.max_parallel_dev>
 
-## Thứ tự
-1. <nhóm task, lý do thứ tự>
+## Order
+1. <task group, reason for the order>
 
-## Nhóm song song
-- <T2, T3> (không chung file)
+## Parallel groups
+- <T2, T3> (no shared files)
 
-## Rủi ro
-| Rủi ro | Dấu hiệu | Cách xử lý |
+## Risks
+| Risk | Signal | Response |
 |---|---|---|
 
-## Walking skeleton (cỡ L)
-<T1 chạy đầu-cuối gồm những gì>
+## Walking skeleton (size L)
+<what T1 runs end to end>

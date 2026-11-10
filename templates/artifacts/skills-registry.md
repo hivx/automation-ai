@@ -3,13 +3,13 @@ Stage: any
 Author-agent: team-leader
 Date: <YYYY-MM-DD>
 Approved-by:
-<!-- Cổng: người duyệt điền dòng trên `Approved-by: <tên> <YYYY-MM-DD>`. Không có cổng thì để trống. -->
+<!-- Gate: the approver fills in the line above as `Approved-by: <name> <YYYY-MM-DD>`. Leave it empty when there is no gate. -->
 
-# Skill và agent tạm của dự án
+# Project temp skills and agents
 
-Trần đang hoạt động (skill + agent `temp`): `limits.max_temp_skills`. `temp` không dùng 30 ngày → `retired`; ổn định và người duyệt → `project`; `project` dùng ở ≥ 2 dự án → đề xuất đưa lên kit.
-team-leader cập nhật `last used` và `runs` trong cùng lần ghi journal khi giao việc dùng skill/agent; retro rà và đề xuất đổi trạng thái.
+Active cap (`temp` skills + agents): `limits.max_temp_skills`. `temp` unused for 30 days → `retired`; stable and approved by the human → `project`; `project` used in ≥ 2 projects → propose moving it into the kit.
+team-leader updates `last used` and `runs` in the same journal write when handing off work that uses the skill/agent; retro reviews them and proposes status changes.
 
-| name | loại skill/agent | trạng thái temp/project/retired | nhu cầu (bằng chứng) | created | last used | runs | model (agent) | ca thử |
+| name | kind skill/agent | status temp/project/retired | need (evidence) | created | last used | runs | model (agent) | test cases |
 |---|---|---|---|---|---|---|---|---|
-| <tên> | skill | temp | <một câu> (<journal/review dẫn tới>) | <YYYY-MM-DD> | <YYYY-MM-DD> | 0 | — | .claude/skills/<tên>/references/tests.md |
+| <name> | skill | temp | <one sentence> (<journal/review that led to it>) | <YYYY-MM-DD> | <YYYY-MM-DD> | 0 | — | .claude/skills/<name>/references/tests.md |

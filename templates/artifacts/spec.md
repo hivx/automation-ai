@@ -3,45 +3,45 @@ Stage: analyze
 Author-agent: analyst
 Date: <YYYY-MM-DD>
 Approved-by:
-<!-- Cổng: người duyệt điền dòng trên `Approved-by: <tên> <YYYY-MM-DD>`. Không có cổng thì để trống. -->
+<!-- Gate: the approver fills in the line above as `Approved-by: <name> <YYYY-MM-DD>`. Leave it empty when there is no gate. -->
 
-# Spec <ID> — <tiêu đề>
+# Spec <ID> — <title>
 
-## Mục tiêu
-<vì sao làm; giá trị cho ai>
+## Goal
+<why we do it; value for whom>
 
-## Người dùng
-<ai dùng, trong tình huống nào>
+## Users
+<who uses it, in which situation>
 
-## Phạm vi
-- Trong: <...>
-- Ngoài: <...>
+## Scope
+- In: <...>
+- Out: <...>
 
-## Dữ liệu
-<thực thể, trường, khối lượng; dữ liệu nhạy cảm>
+## Data
+<entities, fields, volume; sensitive data>
 
-## Giao diện / tích hợp
-<API, màn hình, hệ thống ngoài>
+## Interface / integration
+<API, screens, external systems>
 
 ## NFR
-| Mã | Yêu cầu | Đo bằng |
+| ID | Requirement | Measured by |
 |---|---|---|
 | NFR-1 | <...> | <...> |
 
-## Tiêu chí nghiệm thu
-| Mã | Tiêu chí (đo được) | Cách kiểm |
+## Acceptance criteria
+| ID | Criterion (measurable) | How to check |
 |---|---|---|
-| AC-1 | <...> | <lệnh hoặc bước có đầu ra> |
+| AC-1 | <...> | <command or step with output> |
 
 ## Assumptions decided by the team
-- <giả định> — vì <lý do>; sai thì <cách sửa>
+- <assumption> — because <reason>; if wrong, <how to fix>
 
 ## Definition of Done
-- [ ] Mọi AC đạt, đầu ra được dán trong acceptance.md
-- [ ] As-Built viết xong (asbuilt.md) — sau G4, `/team:asbuilt`
-- [ ] README/tài liệu người dùng cập nhật nếu hành vi đổi — sau G4, `/team:asbuilt`
-- [ ] Mục CHANGELOG — sau G4, `/team:asbuilt`
-- [ ] CI xanh
+- [ ] Every AC passes, output pasted into acceptance.md
+- [ ] As-Built written (asbuilt.md) — after G4, `/team:asbuilt`
+- [ ] README/user docs updated if behavior changed — after G4, `/team:asbuilt`
+- [ ] CHANGELOG entry — after G4, `/team:asbuilt`
+- [ ] CI green
 
 ## Amendment <n> (<YYYY-MM-DD>)
-<chỉ khi --amend: thay đổi gì; tiêu chí đánh dấu [changed]>
+<only with --amend: what changed; criteria marked [changed]>

@@ -3,18 +3,18 @@ Stage: ci
 Author-agent: devops
 Date: <YYYY-MM-DD>
 Approved-by:
-<!-- Cổng: người duyệt điền dòng trên `Approved-by: <tên> <YYYY-MM-DD>`. Không có cổng thì để trống. -->
+<!-- Gate: the approver fills in the line above as `Approved-by: <name> <YYYY-MM-DD>`. Leave it empty when there is no gate. -->
 
 # CI/CD
 
 ## Pipeline
-| Workflow | Kích hoạt | Bước | Runner |
+| Workflow | Trigger | Steps | Runner |
 |---|---|---|---|
 
-## Lịch sử sự cố
-| Ngày | Lần chạy | Phân loại STD-CI-4 (code / test chập chờn / môi trường / cấu hình / phụ thuộc) | Trích log | Cách sửa | PR |
+## Incident history
+| Date | Run | STD-CI-4 class (code / flaky test / environment / config / dependency) | Log excerpt | Fix | PR |
 |---|---|---|---|---|---|
 
 ## Deploy
 - Staging: `deploy.staging` → `deploy.smoke`
-- Prod: chỉ khi có `Approved-by-prod:`; rollback: <lệnh đã kiểm>
+- Prod: only with `Approved-by-prod:`; rollback: <verified command>

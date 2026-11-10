@@ -33,7 +33,7 @@
     ]
   },
   "naming": {
-    "file": "PascalCase (trùng tên lớp)",
+    "file": "PascalCase (same as the class name)",
     "class": "PascalCase",
     "function": "camelCase",
     "constant": "UPPER_SNAKE_CASE",
@@ -83,13 +83,13 @@
     ]
   },
   "notes": {
-    "deploy.staging": "Để trống: mỗi dự án tự khai lúc onboard.",
-    "deploy.smoke": "Để trống: mỗi dự án tự khai lúc onboard.",
-    "cmd.typecheck": "Biên dịch là bước kiểm kiểu của Java.",
-    "cmd.lint": "Chưa chắc: cần maven-checkstyle-plugin trong pom.xml.",
-    "cmd.format": "Để trống: Maven không có formatter một file mặc định; dự án có Spotless thì khai.",
-    "cmd.run": "Chưa chắc: chỉ đúng với Spring Boot.",
-    "cmd.migrate": "Chưa chắc: chỉ đúng khi dùng Flyway; Liquibase dùng liquibase:update.",
-    "protected_paths": "Maven không có lockfile; giữ pom.xml sửa được nhưng reviewer kiểm (STD-DEP-1)."
+    "deploy.staging": "Left empty: each project declares it at onboard.",
+    "deploy.smoke": "Left empty: each project declares it at onboard.",
+    "cmd.typecheck": "Compilation is the type-check step for Java.",
+    "cmd.lint": "Uncertain: needs maven-checkstyle-plugin in pom.xml.",
+    "cmd.format": "Left empty: Maven has no default single-file formatter; declare it if the project uses Spotless.",
+    "cmd.run": "Uncertain: only correct for Spring Boot.",
+    "cmd.migrate": "Uncertain: only correct with Flyway; Liquibase uses liquibase:update.",
+    "protected_paths": "Maven has no lockfile; pom.xml stays editable but the reviewer checks it (STD-DEP-1)."
   }
 }

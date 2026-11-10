@@ -3,22 +3,22 @@ Stage: takeover
 Author-agent: team-leader
 Date: <YYYY-MM-DD>
 Approved-by:
-<!-- Cổng: người duyệt điền dòng trên `Approved-by: <tên> <YYYY-MM-DD>`. Không có cổng thì để trống. -->
+<!-- Gate: the approver fills in the line above as `Approved-by: <name> <YYYY-MM-DD>`. Leave it empty when there is no gate. -->
 
-# Nợ kỹ thuật
+# Technical debt
 
-## Chặn (phải xử lý trước khi đội làm việc an toàn)
-| Mục | STD | Bằng chứng | Đề xuất |
+## Blocking (must be handled before the team can work safely)
+| Item | STD | Evidence | Proposal |
 |---|---|---|---|
 
-## Nên làm
-| Mục | STD | Bằng chứng | Đề xuất |
+## Should do
+| Item | STD | Evidence | Proposal |
 |---|---|---|---|
 
-## Để sau
-| Mục | STD | Bằng chứng | Đề xuất |
+## Later
+| Item | STD | Evidence | Proposal |
 |---|---|---|---|
 
-## Test chập chờn
-| Test | Lần gặp | Ghi chú |
+## Flaky tests
+| Test | Times seen | Notes |
 |---|---|---|

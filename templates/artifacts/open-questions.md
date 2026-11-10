@@ -3,13 +3,13 @@ Stage: takeover
 Author-agent: team-leader
 Date: <YYYY-MM-DD>
 Approved-by:
-<!-- Cổng: người duyệt điền dòng trên `Approved-by: <tên> <YYYY-MM-DD>`. Không có cổng thì để trống. -->
+<!-- Gate: the approver fills in the line above as `Approved-by: <name> <YYYY-MM-DD>`. Leave it empty when there is no gate. -->
 
-# Câu hỏi mở (≤ 10)
+# Open questions (≤ 10)
 
-Trả lời ngay dưới từng câu.
+Answer directly under each question.
 
-1. <câu hỏi> — vì sao cần: <...>
-   - Trả lời:
-2. <câu hỏi>
-   - Trả lời:
+1. <question> — why it matters: <...>
+   - Answer:
+2. <question>
+   - Answer:

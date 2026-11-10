@@ -3,26 +3,26 @@ Stage: takeover
 Author-agent: team-leader
 Date: <YYYY-MM-DD>
 Approved-by:
-<!-- Cổng: người duyệt điền dòng trên `Approved-by: <tên> <YYYY-MM-DD>`. Không có cổng thì để trống. -->
+<!-- Gate: the approver fills in the line above as `Approved-by: <name> <YYYY-MM-DD>`. Leave it empty when there is no gate. -->
 
 # AI-readiness
 
 Verdict: <ready | adjust-profile | clean-first>
 
-## Hiện trạng
-| Mục | Có | Giữ / Cắt / Viết lại | Lý do |
+## Current state
+| Item | Present | Keep / Cut / Rewrite | Reason |
 |---|---|---|---|
-| CLAUDE.md (<n> dòng, cập nhật <ngày>) | | | |
+| CLAUDE.md (<n> lines, updated <date>) | | | |
 | .claude/ (settings, agents, skills, rules) | | | |
-| Plugin đã cài | | | |
+| Installed plugins | | | |
 | MCP | | | |
 | AGENTS.md | | | |
 
-## Mâu thuẫn với code
+## Conflicts with the code
 - <...>
 
-## Việc trước khi onboard
+## Work before onboarding
 - <...>
 
-## Đã quét / Chưa quét / Độ tin cậy
+## Scanned / Not scanned / Confidence
 <...>

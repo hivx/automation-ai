@@ -3,11 +3,11 @@ Stage: plan
 Author-agent: tech-lead
 Date: <YYYY-MM-DD>
 Approved-by:
-<!-- Cổng: người duyệt điền dòng trên `Approved-by: <tên> <YYYY-MM-DD>`. Không có cổng thì để trống. -->
+<!-- Gate: the approver fills in the line above as `Approved-by: <name> <YYYY-MM-DD>`. Leave it empty when there is no gate. -->
 
 # Tasks <ID>
 
-Mỗi task 2–5 phút. Hai task chung file thì phụ thuộc nhau. Đánh dấu `BLOCKED: <lý do>` cuối dòng khi bị chặn.
+Each task takes 2–5 minutes. Two tasks that share a file depend on each other. Append `BLOCKED: <reason>` to the end of the line when a task is blocked.
 
-- [ ] T1 — <tiêu đề> — files: <đường/dẫn, ...> — test: <file test> — depends: —
-- [ ] T2 — <tiêu đề> — files: <...> — test: <...> — depends: T1
+- [ ] T1 — <title> — files: <path/to/file, ...> — test: <test file> — depends: —
+- [ ] T2 — <title> — files: <...> — test: <...> — depends: T1

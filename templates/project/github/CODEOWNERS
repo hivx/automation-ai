@@ -1,4 +1,4 @@
-# Mẫu CODEOWNERS — thay @<owner> bằng người/nhóm thật. Người duyệt cấu hình đội và tài liệu đội.
+# CODEOWNERS template — replace @<owner> with a real person/team. Approvers of the team config and team docs.
 /.team/             @<owner>
 /.claude/           @<owner>
 /docs/team/adr/     @<owner>
