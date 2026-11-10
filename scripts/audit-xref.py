@@ -91,8 +91,11 @@ def main(argv):
     files = list(walk(root, TEXT_DIRS, EXTS)) + [os.path.join(root, f) for f in TOP_FILES]
     md_files = [f for f in files if f.endswith((".md", ".tmpl"))]
 
-    # 1. names that do not exist
+    # 1. names that do not exist (historical records are never rewritten, as in check-lang.py and validate.sh)
+    historical = tuple(os.path.join(root, "docs", d) + os.sep for d in ("requirements", "acceptance"))
     for f in md_files:
+        if f.startswith(historical):
+            continue
         t = read(f)
         for m in re.finditer(r"(?<![\w/-])team:([a-z][a-z-]*)\b", t):
             name = m.group(1)
