@@ -60,6 +60,7 @@ Các bảng giữa dấu `<!-- gen:… -->` do `scripts/gen-vi-guide.py` sinh t�
 - Ngôn ngữ artifact: `output_language: "vi"` (mặc định) hoặc `"en"`. Chỉ đổi văn xuôi; mốc máy đọc giữ tiếng Anh.
 - Cỡ việc: `default_size: "auto"` (team-leader chấm) hoặc ép bằng `--size` / nhãn `team:size:*`.
 - Giới hạn: `limits.max_rework`, `max_attempts`, `max_questions_round`, `max_parallel_dev`, `max_agents_per_feature` (S/M/L), `feature_budget_usd`, `max_temp_skills`.
+- Số người mỗi vai: `limits.headcount`, ví dụ `{"analyst": 2, "designer": 2, "tech-lead": 2}` và `max_parallel_dev: 5` (5 dev tính chung cả đội, chia đều cho các feature đang build). Chạy nhiều feature cùng lúc: `/team:run --all`. Các bước trong một feature vẫn tuần tự.
 - Model theo vai: `models.<vai>`; mặc định ghi trong frontmatter của `agents/<vai>.md` (bảng "Đội ngũ").
 - Lệnh của dự án (test, lint, build…), thư mục được tạo file, vùng cấm: `.team/profile.json` (`cmd.*`, `structure.*`, `protected_paths`). Chỉ người sửa, hoặc chạy lại `/team:onboard`.
 - Toàn bộ khóa và ý nghĩa: bảng "Cấu hình" bên dưới.
@@ -138,6 +139,7 @@ Anh viết tiếng Việt; Claude dịch sang đúng skill/khái niệm theo b�
 ## 9. QUYẾT ĐỊNH & YÊU CẦU CỦA CHỦ REPO
 Nhật ký chỉ thêm, mới nhất ở trên. Anh viết yêu cầu ở đây bằng tiếng Việt; mọi phiên sau của Claude đọc mục này trước khi làm. Mẫu: `- YYYY-MM-DD | <quyết định hoặc yêu cầu> | <ai ghi> | <trạng thái: mới / đang làm / xong / bỏ>`
 
+- 2026-11-11 | Đội có số người theo vai (v0.5.0): `limits.headcount` cho từng vai; `/team:run --all` chạy song song nhiều feature theo đợt (`team.py wave` chọn feature, giới hạn theo số người, tách các build đụng chung file, chia dev cho các build); cờ build riêng cho từng feature; hook biết agent làm feature nào qua transcript | Claude (theo yêu cầu của chủ repo) | xong
 - 2026-11-11 | Build chạy song song theo đợt (v0.4.1): các task sẵn sàng, không chung file được tech-lead giao cùng lúc cho nhiều dev (tối đa `limits.max_parallel_dev`, mặc định 2), review cũng song song, merge vẫn lần lượt. Các bước của một feature (analyze → design → plan → build → verify) vẫn tuần tự vì bước sau cần kết quả bước trước | Claude (theo yêu cầu của chủ repo) | xong
 - 2026-11-11 | Đổi model theo tính chất việc (v0.4.1, `SPEC-OVERRIDES.md` mục 2): lead (team-leader, tech-lead) dùng fable; vai thực thi một việc (dev, maintainer, devops, architect, designer, reviewer, qa) dùng opus; vai phân tích và viết tài liệu (analyst, researcher, coach, writer) dùng sonnet | Claude (theo yêu cầu của chủ repo) | xong
 - 2026-11-10 | Việc của anh: thay bản gốc `automation-ai_ban-hieu-yeu-cau.md` bằng `docs/requirements/ban-hieu-yeu-cau.md` (đã thêm sửa đổi A5), rồi chạy lại P8 | Claude (P9) | mới
@@ -261,7 +263,20 @@ Nhật ký chỉ thêm, mới nhất ở trên. Anh viết yêu cầu ở đây 
 | `limits.max_rework` | integer | — | Số vòng sửa tối đa cho một task trước khi leo thang. |
 | `limits.max_attempts` | integer | — | Số lần thử tối đa khi task BLOCKED. |
 | `limits.max_questions_round` | integer | — | Số đợt hỏi tối đa khi làm rõ yêu cầu. |
-| `limits.max_parallel_dev` | integer | — | Số dev chạy song song tối đa. |
+| `limits.max_parallel_dev` | integer | — | Số dev chạy song song tối đa, tính chung cả đội (khi không có headcount.dev). |
+| `limits.headcount` | object | — | Số người mỗi vai được chạy cùng lúc, tính chung cả đội (mặc định 1; dev lấy max_parallel_dev, reviewer lấy theo dev). |
+| `limits.headcount.tech-lead` | integer | — | Số tech-lead chạy cùng lúc. |
+| `limits.headcount.analyst` | integer | — | Số analyst chạy cùng lúc. |
+| `limits.headcount.researcher` | integer | — | Số researcher chạy cùng lúc. |
+| `limits.headcount.architect` | integer | — | Số architect chạy cùng lúc. |
+| `limits.headcount.designer` | integer | — | Số designer chạy cùng lúc. |
+| `limits.headcount.dev` | integer | — | Số dev chạy cùng lúc. |
+| `limits.headcount.reviewer` | integer | — | Số reviewer chạy cùng lúc. |
+| `limits.headcount.qa` | integer | — | Số qa chạy cùng lúc. |
+| `limits.headcount.writer` | integer | — | Số writer chạy cùng lúc. |
+| `limits.headcount.maintainer` | integer | — | Số maintainer chạy cùng lúc. |
+| `limits.headcount.devops` | integer | — | Số devops chạy cùng lúc. |
+| `limits.headcount.coach` | integer | — | Số coach chạy cùng lúc. |
 | `limits.max_agents_per_feature` | object | — | Trần số vai team-leader tự gọi cho một feature, theo cỡ. |
 | `limits.max_agents_per_feature.S` | integer | — | Trần vai cho cỡ S. |
 | `limits.max_agents_per_feature.M` | integer | — | Trần vai cho cỡ M. |
@@ -488,9 +503,9 @@ Các mốc sau do script và cổng đọc bằng máy: **không bao giờ dịc
 
 ## Số liệu
 <!-- gen:stats -->
-- Phiên bản kit: 0.4.1
+- Phiên bản kit: 0.5.0
 - Skill: 26 · agent: 13 · playbook: 16 (+ 4 lô) · script: 30
-- Số từ trung vị (tiếng Anh): skill nạp thường xuyên 347.5, skill khác 1509.5, agent 918
-- Commit: 9036a09
+- Số từ trung vị (tiếng Anh): skill nạp thường xuyên 370.5, skill khác 1509.5, agent 918
+- Commit: 15e1ef2
 - Ngày sinh file: 2026-11-11
 <!-- /gen:stats -->

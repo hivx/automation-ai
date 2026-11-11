@@ -4,6 +4,10 @@
 Subcommands:
   status [<ID>] [--brief] [--waiting]   stage table per feature + "Waiting on the human" lines
   next <ID>                             the next skill command
+  wave                                  the features the team-leader can dispatch together now, one agent per
+                                        feature, capped by limits.headcount[role] (max_parallel_dev for dev);
+                                        builds whose tasks.md `files:` overlap go one at a time; each build
+                                        gets its share of the team-wide dev and reviewer headcount
   metrics                               aggregate docs/team/metrics/runs.jsonl by agent/skill/size
   scorecard                             write docs/team/metrics/scorecard.json
 Common flags: --root DIR (default $CLAUDE_PROJECT_DIR or the current directory), --json.
@@ -240,6 +244,67 @@ def next_cmd(st, cond):
     return f"/team:run {fid}"
 
 
+HOLD = {"WAITING_FOR_APPROVAL", "WAITING_FOR_ANSWER", "BLOCKED", "DESIGN_DEFECT", "RELEASED"}
+NEXT_CMD = re.compile(r"^/team:([a-z][a-z-]*)\s+(\S+)([^,]*)")
+FILES = re.compile(r"files:\s*([^—\n]+)")
+
+
+def headcount(cfg):
+    """limits.headcount per role (default 1); dev falls back to limits.max_parallel_dev."""
+    lim = cfg.get("limits") or {}
+    hc = dict(lim.get("headcount") or {})
+    hc.setdefault("dev", lim.get("max_parallel_dev", 1))
+    hc.setdefault("reviewer", hc["dev"])
+    return {k: v for k, v in hc.items() if isinstance(v, int) and v >= 1}
+
+
+def skill_meta(name):
+    """(role, human_only) of a kit skill, read from its frontmatter."""
+    paths = [os.path.join(kit_dir(), "skills", name, "SKILL.md"),  # plugin
+             os.path.join(os.path.dirname(kit_dir()), "skills", name, "SKILL.md")]  # local install: .claude/skills
+    text = header(next((t for t in map(read, paths) if t), ""), 15)
+    m = re.search(r"(?m)^agent:\s*(?:team:)?([a-z-]+)", text)
+    return (m.group(1) if m else "team-leader"), bool(re.search(r"(?m)^disable-model-invocation:\s*true", text))
+
+
+def task_files(root, fid):
+    out = set()
+    for m in FILES.finditer(read(os.path.join(root, "docs", "team", "features", fid, "tasks.md")) or ""):
+        out |= {f.strip().strip("`") for f in m.group(1).split(",") if f.strip() and "<" not in f}
+    return out
+
+
+def wave(root, cfg, rows):
+    """Pick what can run at the same time: per role up to headcount, builds with disjoint files."""
+    hc, used, picked, held, busy = headcount(cfg), {}, [], [], set()
+    for r in rows:
+        m = NEXT_CMD.match(r["next"])
+        if r["status"] in HOLD or not m or m.group(2) != r["id"] or "<" in r["next"]:
+            held.append(dict(id=r["id"], reason=r["status"] if r["status"] in HOLD else "needs the human", next=r["next"]))
+            continue
+        skill = m.group(1)
+        role, human_only = skill_meta(skill)
+        if human_only:
+            held.append(dict(id=r["id"], reason="human-only skill", next=r["next"]))
+            continue
+        if used.get(role, 0) >= hc.get(role, 1):
+            held.append(dict(id=r["id"], reason=f"headcount {role}={hc.get(role, 1)} in use", next=r["next"]))
+            continue
+        files = task_files(root, r["id"]) if skill == "build" else set()
+        if files & busy:
+            held.append(dict(id=r["id"], reason="shares files with a build in this wave: " + ", ".join(sorted(files & busy)[:3]),
+                             next=r["next"]))
+            continue
+        busy |= files
+        used[role] = used.get(role, 0) + 1
+        picked.append(dict(id=r["id"], skill=skill, role=role, args=(r["id"] + m.group(3)).strip(), command=m.group(0).strip()))
+    builds = [d for d in picked if d["role"] == "tech-lead" and d["skill"] == "build"]
+    for d in builds:  # dev and reviewer headcount is team-wide: split it between the builds of this wave
+        d["devs"] = max(1, hc.get("dev", 1) // len(builds))
+        d["reviewers"] = max(1, hc.get("reviewer", 1) // len(builds))
+    return dict(dispatch=picked, held=held, headcount=hc)
+
+
 def features(root):
     base = os.path.join(root, "docs", "team", "features")
     if not os.path.isdir(base):
@@ -324,6 +389,19 @@ def main(argv):
     root = os.path.abspath(root)
     as_json = "--json" in flags
     cfg = config(root)
+    if sub == "wave":
+        w = wave(root, cfg, [feature_state(root, f, cfg) for f in (pos or features(root))])
+        if as_json:
+            print(json.dumps(w, ensure_ascii=False, indent=2))
+            return 0
+        for d in w["dispatch"]:
+            share = f"  devs={d['devs']} reviewers={d['reviewers']}" if "devs" in d else ""
+            print(f"dispatch  {d['id']}  {d['role']}  {d['command']}{share}")
+        for h in w["held"]:
+            print(f"hold      {h['id']}  {h['reason']}  ({h['next']})")
+        if not w["dispatch"]:
+            print("wave: nothing to dispatch")
+        return 0
     if sub in ("status", "next"):
         ids = pos or features(root)
         if sub == "next" and not pos:

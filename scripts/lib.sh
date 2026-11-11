@@ -12,6 +12,7 @@
 #   under_allowed_roots <rel> 0 if it is under structure.allowed_new_file_roots
 #   log_event <json>         appends one line to docs/team/metrics/runs.jsonl
 #   current_stage / current_feature   read .team/current.json
+#   hook_feature / hook_stage / build_active   per-feature state for parallel waves
 #   block <msg>              prints to stderr, exits 2 (the hook blocks)
 #   allow                    exits 0
 
@@ -66,6 +67,16 @@ log_event() {
 
 current_stage() { jq -r '.stage // empty' "$TEAM_ROOT/.team/current.json" 2>/dev/null; }
 current_feature() { jq -r '.feature // empty' "$TEAM_ROOT/.team/current.json" 2>/dev/null; }
+# hook_feature: the feature of the subagent that fired the hook (from its transcript), else current.json.
+hook_feature() {
+  local tp f=""; tp="$(input_get '.agent_transcript_path')"
+  [[ -n $tp ]] && f="$(python3 -I "$TEAMLIB" agent-feature "$tp")"
+  [[ -n $f ]] && echo "$f" || current_feature
+}
+# hook_stage: current.json's stage only when it describes the hook's feature (parallel waves), else empty.
+hook_stage() { [[ "$(hook_feature)" == "$(current_feature)" ]] && current_stage; }
+# build_active: a build is running (.team/active-build-<ID> per feature; the old single .team/active-build still counts).
+build_active() { compgen -G "$TEAM_ROOT/.team/active-build*" >/dev/null; }
 
 block() { printf '%s\n' "$*" >&2; exit 2; }
 allow() { exit 0; }

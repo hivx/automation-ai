@@ -22,10 +22,10 @@ result=done
 for v in design-defect request-changes approve accepted rework BLOCKED NEEDS_ANSWER DESIGN_CONFLICT SPECIFIED; do
   [[ $msg == *"$v"* ]] && { result="$v"; break; }
 done
-feat="$(current_feature)"
+feat="$(hook_feature)"
 legacy_size=$'c\xe1\xbb\xa1'   # Vietnamese label of old intake files (UTF-8 bytes), still read
 size="$(grep -oiE "(${legacy_size}|size)[^A-Za-z]*[SML]\\b" "$TEAM_ROOT/docs/team/features/$feat/intake.md" 2>/dev/null | head -n 1 | grep -oE '[SML]$' || true)"
-log_event "$(jq -nc --arg ts "$(date -Iseconds)" --arg f "$feat" --arg s "$(current_stage)" --arg z "$size" \
+log_event "$(jq -nc --arg ts "$(date -Iseconds)" --arg f "$feat" --arg s "$(hook_stage)" --arg z "$size" \
   --arg a "$agent" --arg id "$(input_get '.agent_id')" --argjson t "${turns:-null}" --argjson d "${dur:-null}" \
   --arg r "$result" --arg tp "$tp" \
   '{ts:$ts, feature:$f, stage:$s, size:(if $z == "" then null else $z end), agent:$a, agent_id:$id, skill:null,

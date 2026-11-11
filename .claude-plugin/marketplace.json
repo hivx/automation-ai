@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Self-hosted marketplace for the team plugin.",
-    "version": "0.4.1"
+    "version": "0.5.0"
   },
   "plugins": [
     {

@@ -3,5 +3,5 @@
   "max_turns": 40,
   "max_budget_usd": 2.0,
   "project": "",
-  "allowed_tools": "Bash(make *),Bash(python3 *),Bash(git *),Bash(jq *),Bash(cat *),Bash(ls *),Bash(mkdir *),Bash(touch .team/active-build),Bash(rm .team/active-build),Bash(rm -f .team/active-build),Agent,Skill"
+  "allowed_tools": "Bash(make *),Bash(python3 *),Bash(git *),Bash(jq *),Bash(cat *),Bash(ls *),Bash(mkdir *),Bash(touch .team/active-build*),Bash(rm .team/active-build*),Bash(rm -f .team/active-build*),Agent,Skill"
 }

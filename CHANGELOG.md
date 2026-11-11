@@ -5,6 +5,22 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follo
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-11
+
+A team has fixed roles but a variable number of people per role (owner request, ADJ-31).
+
+### Added
+- `limits.headcount.<role>` in `config.json` and `config.schema.json` (optional; default 1; dev falls back to `max_parallel_dev`, reviewer to dev).
+- `team.py wave [--json]`: the features that can move now, one agent each, capped per role; builds whose `tasks.md` `files:` overlap wait; the team-wide dev/reviewer headcount is split between the builds of a wave (`devs=`, `reviewers=`). Tests in `test_team_status.sh`.
+- `/team:run --all`: parallel waves; the team-leader sends every wave item as an Agent call in ONE message (`skills/run/references/parallel-wave.md`).
+- `teamlib.py agent-feature`, `lib.sh` `hook_feature` / `hook_stage` / `build_active`.
+
+### Changed
+- Build flag is per feature: `.team/active-build-<ID>` (the old `.team/active-build` still counts) in `build`, tech-lead, role-policy, gitignore, evals.
+- `stop-check.sh` checks the research Sources of the researcher's own feature (read from its transcript) instead of `current.json`; `scorecard.sh` records the subagent's own feature. Tests in `test_hooks.sh`.
+- `settings.json.tmpl` allows the commands forked skills used to grant (`cat`, `ls`, `git branch/rev-parse/merge/show/ls-tree/fetch/rebase/push`, `.team/active-build-*`), because wave agents do not get a skill's `allowed-tools`. Projects onboarded earlier add them by hand.
+- `log-run.sh` is called with `--feature` from `run`.
+
 ## [0.4.1] - 2026-11-11
 
 ### Changed

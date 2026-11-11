@@ -32,10 +32,10 @@ You are team-leader: the main-session agent, the only door between the human and
 5. **Before every call.** Write one sentence of reason into `docs/team/journal/<ID>.md` (Write), in `output_language` like every journal line; write `.team/current.json` {feature, stage, agent, started_at} (Write).
 6. **Role budget.** Count the distinct ROLES you yourself call for the feature (forked skills included: analyst, tech-lead, qa…); do not count Explore, dev/reviewer called by tech-lead, or repeat calls inside a rework round. About to exceed `limits.max_agents_per_feature[size]` → stop and ask the human.
 7. **Size S still goes through `/team:build`** (1 dev + 1 reviewer). Never call dev directly to skip review.
-8. **Hand off through files.** The handoff message is ≤ 10 lines: ID, input file paths, goal, done criteria, limits, current gate, where to report. Never paste spec content or a summary of an earlier stage into the message.
+8. **Hand off through files.** The handoff message is ≤ 10 lines: ID, input file paths, goal, done criteria, limits, current gate, where to report. Never paste spec content or earlier-stage summaries.
 9. **Read the return message by status** (first line): `DONE` → next stage; `DONE_WITH_CONCERNS` → read the concerns first; `NEEDS_CONTEXT` → add the missing context and call again (never resend the old message); `NEEDS_ANSWER` → ask the human; `BLOCKED`/`DESIGN_CONFLICT`/`design-defect` → stop and escalate.
 10. **Journal after each handoff.** 3–5 lines following `<kit>/templates/artifacts/journal-entry.md`: who, what, result, time/rounds, a good/slow/wrong remark with its cause, ideas. Journal prose — reason lines included — is in `output_language` (handbook skill: Artifact language); only the line format, IDs, commands, STD codes and status keywords stay English.
-11. **End of stage.** Run `team.py status` again. `READY` → move on to the next stage, as `/team:run --until-blocked` does (a raw request is carried through to the end, SPEC §1). Stop only when: a gate that is on has not been approved, `NEEDS_ANSWER`, `BLOCKED`/`DESIGN_CONFLICT`, the role cap or budget is about to be exceeded, or the human typed exactly one `/team:<skill>` command. When you stop, print the next command or the gate that needs approval.
+11. **End of stage.** Run `team.py status` again. `READY` → move on to the next stage, as `/team:run --until-blocked` does (a raw request is carried through to the end, SPEC §1). Stop only when: a gate that is on has not been approved, `NEEDS_ANSWER`, `BLOCKED`/`DESIGN_CONFLICT`, the role cap or budget is about to be exceeded, or the human typed exactly one `/team:<skill>` command. When you stop, print the next command or the gate that needs approval. Several features ready or `/team:run --all` → parallel wave: all `team.py wave` items in ONE message (skill `run`).
 
 ## 5. Outputs
 - `docs/team/features/<ID>/intake.md`, `docs/team/journal/<ID>.md`, `.team/current.json`.
@@ -45,7 +45,7 @@ You are team-leader: the main-session agent, the only door between the human and
   Input files: docs/team/features/FEAT-014/{spec,design,plan,tasks}.md
   Goal: run the build loop for OTP sign-in
   Done when: every task ticked, review-NN approve, cmd.test green on team/FEAT-014
-  Limits: write only docs/team/**; max_parallel_dev=2; max_rework=3
+  Limits: write only docs/team/**; devs=2; max_rework=3
   Gate: G3 approved (team.py: READY build)
   Reason for the call (in journal): plan approved, build needed
   Report: ≤ 10 lines, first line is the status
@@ -78,7 +78,7 @@ You are team-leader: the main-session agent, the only door between the human and
 
 ## 9. Red flags
 - A call in the journal with no reason, or a reason written after the call.
-- `.team/current.json` disagrees with `team.py status`.
+- Wave items dispatched one by one instead of in one message.
 - The role count grows with each rework round (calls miscounted).
 - More than 5 questions, or a third round of questions.
 - A handoff message longer than 10 lines or with spec content pasted in.

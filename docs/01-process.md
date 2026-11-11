@@ -50,6 +50,9 @@ team-leader sets the size at intake. Force a size with `--size S|M|L` or the lab
 
 A task takes 2–5 minutes and names concrete file paths. Two tasks that touch the same file never run in parallel; ready tasks that share no file run as a wave of up to `limits.max_parallel_dev` devs at once (skill `build`). Nobody says "done" before pasting the output.
 
+## Several features at once
+One role can have several people: `limits.headcount.<role>` in `.team/config.json` (default 1; dev from `max_parallel_dev`). `/team:run --all` runs parallel waves: `team.py wave` picks every feature that can move now, caps each role at its headcount, keeps builds with overlapping `files:` apart and splits the team-wide dev/reviewer headcount between builds; the team-leader dispatches the whole wave in one message (skill `run`). The stages of ONE feature stay sequential.
+
 ## Stopping and escalation
 The team stops when: a task is BLOCKED after `max_attempts`; `max_rework` is exceeded; it hits `DESIGN_CONFLICT` or a design-defect verdict; an enabled gate is not approved; `feature_budget_usd` is exceeded; it touches `protected_paths`; two rework rounds hit the same error.
 Every stop states: the reason, which piece of work, who must do what, and the command to resume. Handling: `docs/guides/incidents.md`.

@@ -1,7 +1,7 @@
 ---
 name: run
 description: Use when the human wants the team to move a feature on to the next stage or gate, or to keep running until it is blocked.
-argument-hint: "[<ID>] [--until-blocked]"
+argument-hint: "[<ID>] [--until-blocked] | --all"
 disable-model-invocation: true
 allowed-tools: Bash(python3 *) Bash(cat *)
 ---
@@ -9,7 +9,7 @@ allowed-tools: Bash(python3 *) Bash(cat *)
 # Move a feature forward
 
 ## Overview
-Run the feature's next stage according to its playbook and gates. `$ARGUMENTS`: a feature ID (default from `.team/current.json`), `--until-blocked` to loop until blocked. Never pass a gate.
+Run the feature's next stage according to its playbook and gates. `$ARGUMENTS`: a feature ID (default from `.team/current.json`), `--until-blocked` to loop until blocked; `--all` to move every ready feature at once, in parallel waves capped by `limits.headcount` (follow `${CLAUDE_SKILL_DIR}/references/parallel-wave.md` instead of the steps below). Never pass a gate.
 
 ## Process
 1. Check that `docs/team/features/<ID>/intake.md` exists; if not → print `/team:intake`, stop.
@@ -18,7 +18,7 @@ Run the feature's next stage according to its playbook and gates. `$ARGUMENTS`: 
 4. The next command is a human-only skill (`/team:release`, `/team:ci`) → print the command, stop.
 5. Write a one-sentence reason in the journal (Write; prose in `output_language`), then call the next skill (Skill). Size S still goes through `/team:build` so a reviewer runs.
 6. After the skill: rerun `team.py status <ID>`; if the stage did not change → stop and report (do not rerun the same skill).
-7. Log metrics: `bash "<kit>/scripts/log-run.sh" --skill <skill> --result <result>`.
+7. Log metrics: `bash "<kit>/scripts/log-run.sh" --feature <ID> --skill <skill> --result <result>`.
 8. `--until-blocked` → back to step 2; otherwise → stop.
 
 ## Common rationalizations
@@ -30,8 +30,9 @@ Run the feature's next stage according to its playbook and gates. `$ARGUMENTS`: 
 | "Status didn't change, rerun build" | Stop and report; an artifact may be malformed. |
 | "Another feature waits on a gate, so stop everything" | A gate blocks only its own feature. |
 | "Skip log-run to go faster" | Metrics are the input to retro. |
+| "`--all`: call the skills one by one" | One message, one Agent call per wave item. |
 
 ## Verification
-- The `team.py status <ID>` output is pasted after each stage.
+- The `team.py status <ID>` output (`--all`: `team.py wave`) is pasted after each stage or wave.
 - Every skill called has a journal line.
 - Every stop uses the 4-line stop message: `STOP: <reason>` / `Work: <item>` / `Who does what: <who>` / `Resume: <command>`.

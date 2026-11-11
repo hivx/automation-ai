@@ -9,6 +9,9 @@ Subcommands:
   check-git --root R                   read hook JSON (stdin), check git commands in tool_input.command
   role-policy --root R --policy F      read hook JSON (stdin), check per-role limits (agent_type)
   protect-bash --root R                read hook JSON (stdin), block Bash commands that write/delete forbidden areas (K-24)
+  agent-feature <transcript>           print the feature ID a subagent worked on (most cited docs/team/features/<ID>/
+                                       path in its transcript); empty when none. Parallel waves make current.json
+                                       name only the last dispatched feature, so hooks ask the transcript instead.
 Exit codes of check-git/role-policy/protect-bash: 0 allow, 2 block (reason on stderr).
 """
 import fnmatch
@@ -667,6 +670,21 @@ def role_policy(root, data, policy_path):
 
 
 # ---------- CLI ----------
+FEATURE_PATH = re.compile(r"docs/team/features/([A-Za-z][A-Za-z0-9]*-[A-Za-z0-9]+)/")
+
+
+def agent_feature(transcript):
+    try:
+        with open(os.path.expanduser(transcript), encoding="utf-8", errors="replace") as fh:
+            text = fh.read()
+    except OSError:
+        return ""
+    counts = {}
+    for m in FEATURE_PATH.finditer(text):
+        counts[m.group(1)] = counts.get(m.group(1), 0) + 1
+    return max(sorted(counts), key=counts.get) if counts else ""
+
+
 def main(argv):
     if not argv or argv[0] in ("-h", "--help"):
         print(__doc__.strip())
@@ -697,6 +715,9 @@ def main(argv):
         return 0 if allowed_root(root, pos[0]) else 1
     if sub == "test-glob":
         print(test_glob(pos[0] if pos else ""))
+        return 0
+    if sub == "agent-feature":
+        print(agent_feature(pos[0]) if pos else "")
         return 0
     if sub in ("check-git", "role-policy", "protect-bash"):
         try:

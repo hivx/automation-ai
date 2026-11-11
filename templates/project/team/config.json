@@ -22,6 +22,16 @@
     "max_attempts": 3,
     "max_questions_round": 2,
     "max_parallel_dev": 2,
+    "headcount": {
+      "tech-lead": 1,
+      "analyst": 1,
+      "researcher": 1,
+      "architect": 1,
+      "designer": 1,
+      "reviewer": 2,
+      "qa": 1,
+      "writer": 1
+    },
     "max_agents_per_feature": {
       "S": 3,
       "M": 6,

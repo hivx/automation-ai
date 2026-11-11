@@ -80,5 +80,26 @@ expect FEAT-005 .status WAITING_FOR_ANSWER "questions.md without spec → waitin
 
 out="$(python3 -I "$KIT/scripts/team.py" status --root "$T")"
 if grep -q "Waiting on the human: approve G2b_design" <<<"$out"; then pass=$((pass + 1)); echo "ok   table has a 'Waiting on the human' line"; else failn=$((failn + 1)); echo "FAIL table lacks the waiting line"; fi
+# wave: parallel dispatch across features, capped by limits.headcount; overlapping builds wait
+W="$(mktemp -d)"; mkdir -p "$W/.team"
+jq '.limits.headcount={"analyst":2,"tech-lead":2,"dev":5,"reviewer":4}' "$KIT/templates/project/team/config.json" > "$W/.team/config.json"
+G() { mkdir -p "$W/docs/team/features/$1"; printf '%b' "$3" > "$W/docs/team/features/$1/$2"; }
+for i in 1 2 3; do G FEAT-01$i intake.md "$INTAKE_M"; done
+for i in 4 5 6; do G FEAT-01$i intake.md "$INTAKE_M"; G FEAT-01$i spec.md "$OK$SPEC"; G FEAT-01$i design.md "$OK# d\n"; G FEAT-01$i plan.md "$OK# p\n"; done
+G FEAT-014 tasks.md "- [ ] T1 — a — files: src/a.py, src/b.py — test: t — depends: —\n"
+G FEAT-015 tasks.md "- [ ] T1 — a — files: src/b.py — test: t — depends: —\n"
+G FEAT-016 tasks.md "- [ ] T1 — a — files: src/c.py — test: t — depends: —\n"
+G FEAT-017 intake.md "$INTAKE_M"; G FEAT-017 spec.md "$SPEC"
+wj="$(python3 -I "$KIT/scripts/team.py" wave --json --root "$W")"; rm -rf "$W"
+wexp() { local got; got="$(jq -r "$1" <<<"$wj")"
+  if [[ $got == "$2" ]]; then pass=$((pass + 1)); echo "ok   $3 ($got)"; else failn=$((failn + 1)); echo "FAIL $3: want '$2' got '$got'"; fi; }
+wexp '[.dispatch[] | select(.role=="analyst") | .id] | join(",")' "FEAT-011,FEAT-012" "wave: 2 analysts take 2 features at once"
+wexp '[.held[] | select(.id=="FEAT-013") | .reason] | join("")' "headcount analyst=2 in use" "wave: 3rd analyze waits for a free analyst"
+wexp '[.dispatch[] | select(.skill=="build") | .id] | join(",")' "FEAT-014,FEAT-016" "wave: file-disjoint builds run together"
+wexp '[.held[] | select(.id=="FEAT-015") | .reason] | join("")' "shares files with a build in this wave: src/b.py" "wave: build sharing a file waits"
+wexp '[.dispatch[] | select(.skill=="build") | .devs] | join(",")' "2,2" "wave: team-wide 5 devs split between 2 builds"
+wexp '[.held[] | select(.id=="FEAT-017") | .reason] | join("")' "WAITING_FOR_APPROVAL" "wave: a feature at a gate is not dispatched"
+wexp '.headcount.designer // "default"' "default" "wave: roles without headcount default to 1"
+
 echo "test_team_status: $pass passed, $failn failed"
 (( failn == 0 ))

@@ -97,6 +97,9 @@
           "touch .team/active-build",
           "rm .team/active-build",
           "rm -f .team/active-build",
+          "touch .team/active-build-*",
+          "rm .team/active-build-*",
+          "rm -f .team/active-build-*",
           "cmd.*"
         ]
       },

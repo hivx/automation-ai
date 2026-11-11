@@ -170,5 +170,29 @@ check "stop: research without URL blocked"       2 stop-check.sh '{"hook_event_n
 printf '# Research\n\n## Sources\n- https://docs.python.org/3/ (2026-11-09)\n' > docs/team/features/FEAT-001/research.md
 check "stop: research with Sources allows stop"  0 stop-check.sh '{"hook_event_name":"Stop","stop_hook_active":false}'
 
+# parallel waves: per-feature build flag; researcher's feature comes from its transcript, not current.json
+jq '.cmd.lint="false"' .team/profile.json > .team/p && mv .team/p .team/profile.json
+touch .team/active-build-FEAT-009
+check "stop: per-feature active-build-<ID> runs the build checks" 2 stop-check.sh "$(jq -nc --arg c "$P" '{hook_event_name:"SubagentStop",stop_hook_active:false,cwd:$c,agent_type:"team:dev"}')"
+rm .team/active-build-FEAT-009; jq '.cmd.lint="true"' .team/profile.json > .team/p && mv .team/p .team/profile.json
+echo '{"feature":"FEAT-002","stage":"analyze"}' > .team/current.json
+mkdir -p docs/team/features/FEAT-003; printf '# Research
+
+## Sources
+(none yet)
+' > docs/team/features/FEAT-003/research.md
+printf '%s\n' '{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Write","input":{"file_path":"docs/team/features/FEAT-003/research.md"}}]}}' > "$P/.team/tr.jsonl"
+rs() { jq -nc --arg t "$P/.team/tr.jsonl" '{hook_event_name:"SubagentStop",stop_hook_active:false,agent_type:"team:researcher",agent_transcript_path:$t}'; }
+check "stop: parallel researcher, its feature (transcript) lacks URL → blocked" 2 stop-check.sh "$(rs)"
+printf '# Research
+
+## Sources
+- https://docs.python.org/3/ (2026-11-11)
+' > docs/team/features/FEAT-003/research.md
+check "stop: parallel researcher, its feature has Sources → allowed" 0 stop-check.sh "$(rs)"
+check "role: tech-lead touch .team/active-build-<ID> allowed" 0 role-policy.sh "$(b 'touch .team/active-build-FEAT-003' team:tech-lead)"
+check "role: tech-lead rm -f .team/active-build-<ID> allowed" 0 role-policy.sh "$(b 'rm -f .team/active-build-FEAT-003' team:tech-lead)"
+rm -f "$P/.team/tr.jsonl"
+
 echo "test_hooks: $pass passed, $failn failed"
 (( failn == 0 ))

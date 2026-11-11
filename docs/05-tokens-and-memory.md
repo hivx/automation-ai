@@ -21,7 +21,7 @@ Keep it when: it is reused ≥ 2 times OR it is expensive to recreate. When keep
 ## Keeping the prompt cache
 - The start of the prompt stays stable; do not inject changing data at the top.
 - Do not switch models mid-session.
-- When splitting work in parallel: same model, same tool set.
+- When splitting work in parallel: same model, same tool set. Cost grows with `limits.headcount` (agents running at once).
 - Compact proactively at stage boundaries; do not wait until the context is full.
 
 ## Tips for users

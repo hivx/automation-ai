@@ -27,6 +27,7 @@ claude -p "<command /team:...>" \
 - `--allowedTools` is mandatory: in a directory that is not yet trusted (a CI runner, a new machine), `-p` ignores the project's `permissions.allow` (K-06). The list is taken from the `permissions.allow` that onboard wrote, so stack commands never have to be copied by hand.
 - Do NOT use `--bare` for work that edits files: `--bare` turns off every hook, including the plugin's hooks, so the machine rules do not run (ADJ-03).
 - `--bare` is only for read-only reports such as `/team:status`; in that case load the plugin with `--plugin-dir` and set `ANTHROPIC_API_KEY`.
+- Many features at once: `claude -p "/team:run --all"` with the same flags; raise `--max-turns`/`--max-budget-usd` with the headcount.
 - `decide` mode is mandatory. Read the result from the JSON output and check it against `templates/schemas/stage-result.json`.
 
 ## Scheduled tasks

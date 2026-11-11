@@ -5,7 +5,7 @@ argument-hint: "<ID> [--task T<N>] [--decide]"
 context: fork
 agent: team:tech-lead
 background: false
-allowed-tools: Bash(python3 *) Bash(cat *) Bash(git *) Bash(touch .team/active-build) Bash(rm .team/active-build)
+allowed-tools: Bash(python3 *) Bash(cat *) Bash(git *) Bash(touch .team/active-build-*) Bash(rm .team/active-build-*) Bash(rm -f .team/active-build-*)
 ---
 
 # The build loop: dev → reviewer → fix → merge
@@ -13,7 +13,7 @@ allowed-tools: Bash(python3 *) Bash(cat *) Bash(git *) Bash(touch .team/active-b
 ## Overview
 This skill runs a feature's build loop until every task in `tasks.md` is ticked: the dev (own worktree) writes a failing test first, then the code; the reviewer (fresh context, read-only) grades it against the Review checklist (10); the dev fixes blockers/majors; the tech-lead merges the task branch into `team/<ID>` and runs `cmd.test`. The skill runs in the `tech-lead` context (fork); the tech-lead calls only `team:dev`, `team:reviewer` and Explore.
 
-One rule never changes with size: **size S still goes through this skill with 1 dev + 1 reviewer** (K-34). Nobody says "done" without the output of a real command. `.team/active-build` is created at the start and removed on EVERY exit; the `stop-check.sh` hook reads it to run lint/test when the dev and the tech-lead stop. Example: a one-line hotfix still produces a red-then-green `cmd.test_one` output, a `review-01.md` and a merge commit on `team/<ID>`.
+One rule never changes with size: **size S still goes through this skill with 1 dev + 1 reviewer** (K-34). Nobody says "done" without the output of a real command. `.team/active-build-<ID>` (one per feature, so parallel builds do not switch each other off) is created at the start and removed on EVERY exit; the `stop-check.sh` hook reads it to run lint/test when the dev and the tech-lead stop. Example: a one-line hotfix still produces a red-then-green `cmd.test_one` output, a `review-01.md` and a merge commit on `team/<ID>`.
 
 `$ARGUMENTS`: the `<ID>`; `--task T<N>` to run a single task; `--decide`. `<kit>` = the content of `.team/plugin_root`.
 
@@ -30,8 +30,8 @@ Do not use when:
 
 ## Discover the stack first
 1. Read `.team/profile.json`: `cmd.test_one`, `cmd.test`, `cmd.lint`, `cmd.typecheck`, `naming.test_file`, `naming.branch`, `structure.allowed_new_file_roots`, `protected_paths`. `cmd.test_one` missing → stop and report (never guess the command).
-2. Read `.team/config.json`: `base_branch`, `limits.max_parallel_dev`, `limits.max_rework`, `limits.max_attempts`, `limits.max_agents_per_feature`.
-3. Resume from disk: if `.team/active-build` already exists → read `tasks.md` and `git log --oneline <base_branch>..team/<ID>` BEFORE anything else; ticked tasks are never redone.
+2. Read `.team/config.json`: `base_branch`, `limits.headcount.dev` / `limits.max_parallel_dev`, `limits.headcount.reviewer`, `limits.max_rework`, `limits.max_attempts`, `limits.max_agents_per_feature`.
+3. Resume from disk: if `.team/active-build-<ID>` already exists → read `tasks.md` and `git log --oneline <base_branch>..team/<ID>` BEFORE anything else; ticked tasks are never redone.
 
 ## Inputs and preconditions
 - `python3 "<kit>/scripts/team.py" status <ID>`: no `WAITING_FOR_APPROVAL` for a gate before build.
@@ -40,9 +40,9 @@ Do not use when:
 - Branch `team/<ID>` exists (create it from `base_branch` if missing).
 
 ## Process
-1. **Switch the build on.** `touch .team/active-build`; Write `.team/current.json` {feature, stage: "build", agent: "tech-lead", started_at}.
+1. **Switch the build on.** `touch .team/active-build-<ID>`; Write `.team/current.json` {feature, stage: "build", agent: "tech-lead", started_at}.
 2. **Check before calling anyone (preflight).** Tabulate every pair of tasks that touch a shared file or interface; tasks that contradict themselves (their test does not match their touchpoints); tasks that require something the Review checklist treats as a defect. Any problem → `DESIGN_CONFLICT` to the team-leader, and no dev is called yet.
-3. **Pick a wave.** Every unticked task whose `depends:` are all ticked, up to `limits.max_parallel_dev`, with no two sharing a file or interface (the preflight table). Migrations and shared state go alone. One ready task → a wave of one. Write the wave into `tasks.md` progress (`wave N: T2, T3`).
+3. **Pick a wave.** Every unticked task whose `depends:` are all ticked, up to your dev share, with no two sharing a file or interface (the preflight table). Migrations and shared state go alone. One ready task → a wave of one. Write the wave into `tasks.md` progress (`wave N: T2, T3`). Dev share: the `devs=` line of the team-leader's handoff when several features build at once (`team.py wave` splits the team-wide headcount), else `limits.headcount.dev`, else `limits.max_parallel_dev`; reviewers likewise (`reviewers=`, else `limits.headcount.reviewer`, else the dev share).
 4. **Record BASE.** `git rev-parse team/<ID>` → write `BASE=<sha>` into each wave task's progress line in `tasks.md` (Edit). The reviewer's diff is always `BASE..<task branch head>`, never `HEAD~1`.
 5. **Call the devs** — every task of the wave in ONE message: one Agent `team:dev` call per task, each in its own worktree, so they run at the same time; never one after another when the wave has two or more tasks. Each call gets a handoff message ≤ 10 lines: task code; criteria (quoted); touchpoints; `cmd.test_one` with `{file}` set to the test file; branch `team/<ID>-task-N` created from `team/<ID>`; the sentence "only modify inside the touchpoints"; where to write the detailed report. Message templates: `${CLAUDE_SKILL_DIR}/references/handoffs.md`.
 6. **Read each dev's status** (steps 6–11 run per task; a stop in one task does not cancel the others already running) — the first line of the return message is one of `DONE`, `DONE_WITH_CONCERNS`, `NEEDS_CONTEXT`, `BLOCKED`, `DESIGN_CONFLICT` (decision point):
@@ -61,7 +61,7 @@ Do not use when:
 12. **Merge and tick** (`approve`): merges are serial, one task at a time in task order; merge `team/<ID>-task-N` into `team/<ID>` (git), run `cmd.test` on `team/<ID>` after each merge. Red → find out whether the merge or an earlier task caused it before doing anything else; do not tick. Green → tick the task (`- [x] T<N>`), Write `review-NN.md` from `<kit>/templates/artifacts/review.md` (verdict, findings, number of rounds, diff command, `deferred` section), and write one journal line. Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language).
 13. **Loop** back to step 3 for the next wave once every task of this wave is ticked or stopped.
 14. **All tasks done.** Run `git diff <base_branch>...team/<ID>` and write its output to `docs/team/features/<ID>/diff.patch` with Write (for the writer). Record the number of roles used (distinct roles, not counting re-calls within rework rounds) against `limits.max_agents_per_feature`.
-15. **Every exit** (done, stopped, error): `rm .team/active-build`.
+15. **Every exit** (done, stopped, error): `rm -f .team/active-build-<ID>`.
 
 ## Outputs
 - Commits on `team/<ID>`; `docs/team/features/<ID>/tasks.md` ticked; a `review-NN.md` per task; `diff.patch`.
@@ -90,7 +90,7 @@ Do not use when:
 | "HEAD~1 is the task's diff" | Use the recorded `BASE..task branch head`. |
 | "I remember what task 3 did" | Reread the task line and `git log`; the tick on disk is the truth. |
 | "Call qa now while we are at it" | The tech-lead calls only dev, reviewer and Explore. |
-| "Safer to run the devs one by one" | Ready, file-disjoint tasks form one wave; call all of them in one message, up to `max_parallel_dev`. |
+| "Safer to run the devs one by one" | Ready, file-disjoint tasks form one wave; call all of them in one message, up to your dev share. |
 
 ## Red flags
 - A test is green on its first run, or there is no red output.
@@ -100,7 +100,7 @@ Do not use when:
 - A wave of two or more ready tasks was dispatched one dev at a time.
 - A `review-NN.md` says approve without a diff command or a tier-1 verdict.
 - The same finding appears in two consecutive rounds.
-- A task is ticked without a merge commit on `team/<ID>`; `.team/active-build` remains after stopping.
+- A task is ticked without a merge commit on `team/<ID>`; `.team/active-build-<ID>` remains after stopping.
 - Size S has only a dev call and no reviewer.
 
 ## Verification
@@ -110,7 +110,7 @@ Do not use when:
 - [ ] `git diff --name-only` of each task is a subset of its touchpoints.
 - [ ] Each task has a `review-NN.md` with verdict, diff command and round count; rework rounds have ADDRESSED/NOT ADDRESSED.
 - [ ] `tasks.md` progress lists each wave; a wave of two or more tasks shows its dev calls sent together.
-- [ ] `ls .team/active-build` reports no such file; `diff.patch` exists and is not empty.
+- [ ] `ls .team/active-build-<ID>` reports no such file; `diff.patch` exists and is not empty.
 
 ## See also
 - `${CLAUDE_SKILL_DIR}/references/handoffs.md` — handoff templates for the dev, the reviewer and rework rounds; the status table.

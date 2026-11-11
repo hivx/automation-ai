@@ -49,7 +49,7 @@ The plugin's `hooks/hooks.json`; in a local install, `install-local.sh` merges t
 | PreToolUse `Bash` | `check-git.sh`, `protect.sh`, `role-policy.sh` | Only `team/*` (and tags) may be pushed; blocks force-push, `--delete`, `--no-verify`, `reset --hard`/`rebase -i` on protected branches; warns on a malformed message; shell commands that write/delete in forbidden areas (redirection, `tee`, `rm`, `mv`, `cp`, `sed -i`, … — writes inside another script are not visible); per-role commands |
 | PreToolUse `Agent` | `role-policy.sh` | Who may call whom (`handbook/who-calls-whom.md`) |
 | PostToolUse `Edit\|Write\|NotebookEdit` | `format.sh` | Formatter per `formatters_by_ext` |
-| Stop; SubagentStop `team:dev\|maintainer\|researcher` | `stop-check.sh` | When `.team/active-build` exists: lint, typecheck, tests of changed files, structure; for research: `## Sources` with URLs is mandatory |
+| Stop; SubagentStop `team:dev\|maintainer\|researcher` | `stop-check.sh` | When a build is active (`.team/active-build-<ID>`, or the older `.team/active-build`): lint, typecheck, tests of changed files, structure; for a researcher (its feature read from its transcript): `## Sources` with URLs is mandatory |
 | SubagentStop (every agent) | `scorecard.sh` | Writes one line to `docs/team/metrics/runs.jsonl` |
 | SessionStart | `session-start.sh` | Writes `.team/plugin_root`, loads the status summary |
 | PreCompact, SessionEnd | `handoff.sh` | Session handoff |

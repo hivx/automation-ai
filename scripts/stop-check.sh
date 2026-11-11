@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # stop-check.sh — Stop / SubagentStop hook: no stopping until the build is green.
 # stop_hook_active = true → allow the stop (avoids a loop).
-# When .team/active-build exists: takes the code files changed against config.base_branch (skipping docs, .team, .claude,
+# When a build is active (.team/active-build-<ID>, or the old .team/active-build): takes the code files changed against config.base_branch (skipping docs, .team, .claude,
 #   .github, build/cache directories, non-code files, helper files __init__/conftest/setup/fixtures/
 #   helpers/utils); runs cmd.lint, cmd.typecheck (if set), cmd.test_one for each changed test file
 #   (matching naming.test_file), check-structure.sh. Failure → exit 2 with the first 40 lines.
-# When the current stage is research: research.md must have '## Sources' with at least one http URL.
+# When a researcher stops (or, outside a subagent, the current stage is research): the research.md of that
+#   agent's feature (hook_feature: from its transcript) must have '## Sources' with at least one http URL.
 # Commands run in the hook's `cwd` (the dev's worktree); configuration is read from the project root.
 # Usage: stop-check.sh [--root DIR] < hook.json ; stop-check.sh --help
 set -uo pipefail
@@ -16,15 +17,16 @@ read_input
 [[ "$(input_get '.stop_hook_active')" == "true" ]] && allow
 WD="$(input_get '.cwd')"; [[ -d $WD ]] || WD="$TEAM_ROOT"
 
-stage="$(current_stage)"
-if [[ $stage == research ]]; then
-  f="$TEAM_ROOT/docs/team/features/$(current_feature)/research.md"
+agent="$(input_get '.agent_type')"
+feat="$(hook_feature)"
+if [[ -n $feat && ( ${agent#team:} == researcher || ( -z $agent && "$(current_stage)" == research ) ) ]]; then
+  f="$TEAM_ROOT/docs/team/features/$feat/research.md"
   if [[ ! -f $f ]] || ! awk '/^## Sources/{s=1;next} s && /https?:\/\//{ok=1} END{exit ok?0:1}' "$f"; then
     block "BLOCKED (research): ${f#"$TEAM_ROOT"/} must have a '## Sources' section with at least one http URL and its access date."
   fi
 fi
 
-[[ -f $TEAM_ROOT/.team/active-build ]] || allow
+build_active || allow
 cd "$WD" || allow
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || allow
 base="$(config_get '.base_branch')"; base="${base:-main}"
