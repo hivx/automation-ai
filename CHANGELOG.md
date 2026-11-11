@@ -5,6 +5,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follo
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-11-11
+
+### Changed
+- Model routing by the shape of the work (owner decision, `SPEC-OVERRIDES.md` entry 2): team-leader, tech-lead → fable; dev, maintainer, devops → opus; analyst, researcher, coach → sonnet; architect, designer, reviewer, qa stay opus; writer stays sonnet. Updated in `agents/*.md`, `templates/project/team/config.json`, `docs/02-team.md`, `make-agent` and its agent template, `GUIDE-VI.md`.
+- Build runs in waves (owner request): ready tasks that share no file are dispatched together, one Agent `team:dev` call per task in ONE message (each in its own worktree), up to `limits.max_parallel_dev`; their reviewers likewise; merges stay serial. Before, the loop picked one task at a time, so `max_parallel_dev` was never used. Updated in `skills/build`, `agents/tech-lead.md`, `docs/01-process.md`.
+- `scripts/audit-xref.py` skips `docs/requirements/` and `docs/acceptance/` in its name checks, like `check-lang.py` and `validate.sh`.
+
+### Added
+- `docs/requirements/raw/`: the owner's raw inputs (understanding document v1, prompt chain P0–P6), linked from `docs/00-overview.md`.
+
 ## [0.4.0] - 2026-11-10
 
 Language switch (P9; owner decision, `SPEC-OVERRIDES.md` entry 1): AI-facing text is English, owner-facing Vietnamese lives only in `GUIDE-VI.md`, and artifacts written inside a project follow the new `output_language` slot (default `vi`). Machine-read anchors never change language. Semantics are unchanged: same roles, tools, models, gates, stages, playbooks, slots, scripts, hooks, artifact paths, 86 STD rules, section structure and word-budget bands.

@@ -7,7 +7,7 @@ A temp agent follows the same 10-section contract as the kit's agents (`<kit>/sc
 name: <name>
 description: Delegate when <situation>. (starts with "Delegate when", ≤ 300 characters, says WHEN to delegate)
 tools: <minimal, bare tool names; no AskUserQuestion; Agent only when the body restricts it to Explore>
-model: <haiku|sonnet|opus — by the cost of a mistake; the reason goes in the registry>
+model: <haiku|sonnet|opus|fable — by the shape of the work (SPEC-OVERRIDES.md entry 2); the reason goes in the registry>
 effort: <low|medium|high>
 maxTurns: <n>
 skills:

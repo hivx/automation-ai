@@ -2,7 +2,7 @@
 name: coach
 description: Delegate when a retro is due, the scorecard shows an anomaly, feedback crosses its threshold, or the kit needs an audit and evidence-backed proposals to fix an agent or skill.
 tools: Read, Grep, Glob, Bash, Write, Skill
-model: opus
+model: sonnet
 effort: high
 maxTurns: 40
 memory: project

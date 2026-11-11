@@ -2,7 +2,7 @@
 name: researcher
 description: Delegate when a spec still has technical questions that need official docs, when options must be compared, a dependency upgraded, an external API integrated, or a POC built.
 tools: Read, Grep, Glob, Bash, WebFetch, WebSearch, Agent, Write, Skill
-model: opus
+model: sonnet
 effort: high
 maxTurns: 50
 skills:

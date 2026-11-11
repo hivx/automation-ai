@@ -2,7 +2,7 @@
 name: dev
 description: Delegate when tech-lead (or team-leader for size-S work) has one concrete task with touchpoints and criteria that needs tests and code written in a separate worktree.
 tools: Read, Edit, Write, Grep, Glob, Bash, Skill
-model: sonnet
+model: opus
 effort: medium
 maxTurns: 60
 isolation: worktree

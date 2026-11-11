@@ -2,7 +2,7 @@
 name: analyst
 description: Delegate when a raw request must become a spec with a Definition of Done, or when an approved spec must be amended (--amend mode).
 tools: Read, Grep, Glob, Bash, Agent, Write, Skill
-model: opus
+model: sonnet
 effort: high
 maxTurns: 40
 skills:

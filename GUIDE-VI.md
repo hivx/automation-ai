@@ -138,6 +138,8 @@ Anh viết tiếng Việt; Claude dịch sang đúng skill/khái niệm theo b�
 ## 9. QUYẾT ĐỊNH & YÊU CẦU CỦA CHỦ REPO
 Nhật ký chỉ thêm, mới nhất ở trên. Anh viết yêu cầu ở đây bằng tiếng Việt; mọi phiên sau của Claude đọc mục này trước khi làm. Mẫu: `- YYYY-MM-DD | <quyết định hoặc yêu cầu> | <ai ghi> | <trạng thái: mới / đang làm / xong / bỏ>`
 
+- 2026-11-11 | Build chạy song song theo đợt (v0.4.1): các task sẵn sàng, không chung file được tech-lead giao cùng lúc cho nhiều dev (tối đa `limits.max_parallel_dev`, mặc định 2), review cũng song song, merge vẫn lần lượt. Các bước của một feature (analyze → design → plan → build → verify) vẫn tuần tự vì bước sau cần kết quả bước trước | Claude (theo yêu cầu của chủ repo) | xong
+- 2026-11-11 | Đổi model theo tính chất việc (v0.4.1, `SPEC-OVERRIDES.md` mục 2): lead (team-leader, tech-lead) dùng fable; vai thực thi một việc (dev, maintainer, devops, architect, designer, reviewer, qa) dùng opus; vai phân tích và viết tài liệu (analyst, researcher, coach, writer) dùng sonnet | Claude (theo yêu cầu của chủ repo) | xong
 - 2026-11-10 | Việc của anh: thay bản gốc `automation-ai_ban-hieu-yeu-cau.md` bằng `docs/requirements/ban-hieu-yeu-cau.md` (đã thêm sửa đổi A5), rồi chạy lại P8 | Claude (P9) | mới
 - 2026-11-10 | Chuyển ngôn ngữ (P9, v0.4.0): chỉ dẫn cho AI bằng tiếng Anh; chỉ file này bằng tiếng Việt; artifact theo `output_language` (mặc định `vi`); mốc máy đọc luôn tiếng Anh | Claude (theo prompt P9 của chủ repo) | xong
 - 2026-11-10 | Nghiệm thu theo tài liệu yêu cầu (P8): TỪ CHỐI, 11 yêu cầu `must` trượt — xem `docs/acceptance/acceptance-2026-11-10.md` | Claude (theo prompt P8) | xong
@@ -186,18 +188,18 @@ Nhật ký chỉ thêm, mới nhất ở trên. Anh viết yêu cầu ở đây 
 <!-- gen:agents -->
 | Vai trò | Việc chính | Không được làm | Model / effort | maxTurns |
 |---|---|---|---|---|
-| `analyst` | Spec + DoD từ yêu cầu thô; chuẩn hoá (Explore) → triage 7 mục → hỏi/tự quyết → spec; amendment | Chọn công nghệ, thiết kế | opus / high | 40 |
+| `analyst` | Spec + DoD từ yêu cầu thô; chuẩn hoá (Explore) → triage 7 mục → hỏi/tự quyết → spec; amendment | Chọn công nghệ, thiết kế | sonnet / high | 40 |
 | `architect` | Kiến trúc từ NFR, ADR, đánh giá tác động feature, review thiết kế 3 câu | Code | opus / high | 40 |
-| `coach` | Đọc scorecard + journal → nút thắt → chẩn đoán 5 nguyên nhân → đề xuất có diff + eval → canary cỡ S → đề xuất giữ/rollback/thay/gỡ; audit kit | Tự áp dụng, sửa kit gốc, sửa code dự án | opus / high | 40 |
+| `coach` | Đọc scorecard + journal → nút thắt → chẩn đoán 5 nguyên nhân → đề xuất có diff + eval → canary cỡ S → đề xuất giữ/rollback/thay/gỡ; audit kit | Tự áp dụng, sửa kit gốc, sửa code dự án | sonnet / high | 40 |
 | `designer` | Thiết kế chi tiết: dữ liệu, API, luồng, phân quyền, migration, touchpoints, test plan | Đổi kiến trúc đã chốt, quyết nghiệp vụ | opus / high | 40 |
-| `dev` | Một task, worktree riêng, test fail trước, lệnh từ profile, lint sạch, commit chuẩn; chỉ sửa trong touchpoints | Mở rộng phạm vi, sửa thiết kế, push nhánh chính, skip test | sonnet / medium | 60 |
-| `devops` | Dựng/bảo trì CI/CD, chẩn đoán pipeline đỏ (phân loại nguyên nhân trước), script deploy/rollback/smoke, `docs/team/ci.md` | Xoá bước test để qua, tự deploy prod, ghi secret vào file | sonnet / medium | 60 |
-| `maintainer` | Dọn dẹp/chuẩn hoá không đổi hành vi: code chết, tên, cấu trúc, phụ thuộc thừa, test mồ côi; một loại một PR; simplification, deprecation/migration, observability checklist | Đổi hành vi, gộp vào feature | sonnet / medium | 60 |
+| `dev` | Một task, worktree riêng, test fail trước, lệnh từ profile, lint sạch, commit chuẩn; chỉ sửa trong touchpoints | Mở rộng phạm vi, sửa thiết kế, push nhánh chính, skip test | opus / medium | 60 |
+| `devops` | Dựng/bảo trì CI/CD, chẩn đoán pipeline đỏ (phân loại nguyên nhân trước), script deploy/rollback/smoke, `docs/team/ci.md` | Xoá bước test để qua, tự deploy prod, ghi secret vào file | opus / medium | 60 |
+| `maintainer` | Dọn dẹp/chuẩn hoá không đổi hành vi: code chết, tên, cấu trúc, phụ thuộc thừa, test mồ côi; một loại một PR; simplification, deprecation/migration, observability checklist | Đổi hành vi, gộp vào feature | opus / medium | 60 |
 | `qa` | Nghiệm thu từng tiêu chí bằng lệnh + output thật; DoD; migration lên/xuống; README; verdict accepted / rework / design-defect | Sửa code, tin mô tả | opus / high | 40 |
-| `researcher` | Tài liệu chính thức có URL + ngày, so phương án, POC trong worktree, dự thảo ADR, cache theo version | Quyết định thay architect | opus / high | 50 |
+| `researcher` | Tài liệu chính thức có URL + ngày, so phương án, POC trong worktree, dự thảo ADR, cache theo version | Quyết định thay architect | sonnet / high | 50 |
 | `reviewer` | Context mới, chỉ thấy diff + design + handbook; finding có mã STD, mức độ, file:line, cách sửa; verdict approve / request-changes / design-defect | Sửa code, góp ý phong cách ngoài STD | opus / high | 25 |
-| `team-leader` | Một cửa anh nói chuyện. Tiếp nhận, chọn playbook & cỡ, quyết hỏi/tự quyết, gọi đúng vai trò có lý do, giữ cổng, leo thang, ghi sổ công tác, điều phối tạo skill tạm khi cần, nâng/hạ cỡ | Viết code, viết spec, review code | sonnet / low | 30 |
-| `tech-lead` | Lập plan, chia task 2–5 phút có touchpoints, giao dev, điều phối review 2 tầng, tích hợp nhánh, tick task, ghi note cấp task | Tự code task lớn, bỏ qua review | sonnet / medium | 60 |
+| `team-leader` | Một cửa anh nói chuyện. Tiếp nhận, chọn playbook & cỡ, quyết hỏi/tự quyết, gọi đúng vai trò có lý do, giữ cổng, leo thang, ghi sổ công tác, điều phối tạo skill tạm khi cần, nâng/hạ cỡ | Viết code, viết spec, review code | fable / low | 30 |
+| `tech-lead` | Lập plan, chia task 2–5 phút có touchpoints, giao dev, điều phối review 2 tầng, tích hợp nhánh, tick task, ghi note cấp task | Tự code task lớn, bỏ qua review | fable / medium | 60 |
 | `writer` | As-Built (khác design ở đâu), release notes, CHANGELOG, README, mô tả PR | Sửa code | sonnet / medium | 30 |
 <!-- /gen:agents -->
 
@@ -486,9 +488,9 @@ Các mốc sau do script và cổng đọc bằng máy: **không bao giờ dịc
 
 ## Số liệu
 <!-- gen:stats -->
-- Phiên bản kit: 0.4.0
+- Phiên bản kit: 0.4.1
 - Skill: 26 · agent: 13 · playbook: 16 (+ 4 lô) · script: 30
-- Số từ trung vị (tiếng Anh): skill nạp thường xuyên 347.5, skill khác 1509.0, agent 918
-- Commit: e6c00b1
-- Ngày sinh file: 2026-11-10
+- Số từ trung vị (tiếng Anh): skill nạp thường xuyên 347.5, skill khác 1509.5, agent 918
+- Commit: 9036a09
+- Ngày sinh file: 2026-11-11
 <!-- /gen:stats -->

@@ -2,7 +2,7 @@
 name: devops
 description: Delegate when the CI pipeline is red, when CI/CD must be set up or fixed, deploy, rollback or smoke scripts written, or when releasing to staging or to prod with G5 approved.
 tools: Read, Edit, Write, Grep, Glob, Bash, Skill
-model: sonnet
+model: opus
 effort: medium
 maxTurns: 60
 skills:

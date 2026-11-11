@@ -18,7 +18,7 @@ The skill runs in the main session (team-leader may write `.claude/agents/**`, `
 Use when:
 - The work needs a tool that no role has (an MCP server already installed for the project, a special measuring tool).
 - The work needs a large preloaded context (a design system, a protocol specification) that would flood the context of an existing role if loaded there.
-- The work needs a different model from the role doing it because the cost of a mistake differs (for example, checking a legal contract needs opus while dev uses sonnet).
+- The work needs a different model from the role doing it because the cost of a mistake differs (for example, checking a legal contract needs opus while writer uses sonnet).
 
 Do not use when:
 - A temp skill is enough → `/team:make-skill`.
@@ -43,7 +43,7 @@ Do not use when:
 1. **Check the reason for an agent.** Walk `tool-selection.md` from top to bottom; record the row where you stopped. Not the agent row → refuse and point the way (hook, script, rule, skill). Checkpoint: the stopping row is quoted in your notes.
 2. **Match capabilities.** For each role that might take it on: quote its description line and say why it is not enough. A role is enough (even with a temp skill) → refuse and suggest `/team:make-skill`.
 3. **Collect samples.** Agent → Explore: sample files, conventions, profile slots. External docs needed → researcher through team-leader.
-4. **Choose the model by the cost of a mistake** (SPEC §3): haiku for mechanical work, sonnet for building and coordinating, opus when mistakes are expensive. Record the reason in the registry.
+4. **Choose the model by the shape of the work** (`SPEC-OVERRIDES.md` entry 2): haiku for mechanical work, sonnet for reading, analysis and documentation, opus for carrying out one concrete job whose mistakes are expensive, fable only for coordinating many tasks. Record the reason in the registry.
 5. **Choose minimal tools.** No `AskUserQuestion`; `Agent` only when the body says explicitly that it calls Explore only; MCP tools by their full names. Never use `permissionMode`, `hooks` or `mcpServers` in the frontmatter.
 6. **Write** `.claude/agents/<name>.md` from `${CLAUDE_SKILL_DIR}/references/agent-template.md`, in English: the description starts with "Delegate when", ≤ 300 characters; `skills` preloads the handbook (`team:handbook`; local install `team-handbook`); the 10 sections of `<kit>/scripts/agent-sections.txt`, with an example return message (first line `<name> -> team-leader | <ID> | <STATUS>`) and a 4-line stop message.
 7. **Marker line** at the top of the body: `<!-- team: temp, created <YYYY-MM-DD>, need: <need>, evidence: <source>, why-agent: <…> -->`. The `team: temp` marker is what the hook uses to apply the `_temp` limits — without it the agent runs with no role limits.

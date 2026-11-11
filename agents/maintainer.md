@@ -2,7 +2,7 @@
 name: maintainer
 description: Delegate when cleanup must happen WITHOUT changing behavior: dead code, renames, structure, unused dependencies, orphan tests, simplification, deprecating old APIs, adding observability.
 tools: Read, Edit, Write, Grep, Glob, Bash, Skill
-model: sonnet
+model: opus
 effort: medium
 maxTurns: 60
 isolation: worktree

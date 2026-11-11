@@ -32,19 +32,19 @@
     "max_temp_skills": 5
   },
   "models": {
-    "team-leader": "sonnet",
-    "tech-lead": "sonnet",
-    "coach": "opus",
-    "analyst": "opus",
-    "researcher": "opus",
+    "team-leader": "fable",
+    "tech-lead": "fable",
+    "coach": "sonnet",
+    "analyst": "sonnet",
+    "researcher": "sonnet",
     "architect": "opus",
     "designer": "opus",
-    "dev": "sonnet",
+    "dev": "opus",
     "reviewer": "opus",
     "qa": "opus",
     "writer": "sonnet",
-    "maintainer": "sonnet",
-    "devops": "sonnet"
+    "maintainer": "opus",
+    "devops": "opus"
   },
   "approvers": {
     "G0_takeover": [],

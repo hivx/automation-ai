@@ -48,7 +48,7 @@ team-leader sets the size at intake. Force a size with `--size S|M|L` or the lab
 5. tech-lead ticks the task, writes `review-NN.md`, merges into `team/<ID>`, runs `cmd.test`.
 6. No tasks left → `/team:verify`.
 
-A task takes 2–5 minutes and names concrete file paths. Two tasks that touch the same file never run in parallel. Nobody says "done" before pasting the output.
+A task takes 2–5 minutes and names concrete file paths. Two tasks that touch the same file never run in parallel; ready tasks that share no file run as a wave of up to `limits.max_parallel_dev` devs at once (skill `build`). Nobody says "done" before pasting the output.
 
 ## Stopping and escalation
 The team stops when: a task is BLOCKED after `max_attempts`; `max_rework` is exceeded; it hits `DESIGN_CONFLICT` or a design-defect verdict; an enabled gate is not approved; `feature_budget_usd` is exceeded; it touches `protected_paths`; two rework rounds hit the same error.

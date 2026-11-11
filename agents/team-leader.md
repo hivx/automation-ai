@@ -2,7 +2,7 @@
 name: team-leader
 description: Delegate when the user brings a new request, asks about progress or approves a gate, or when a playbook must be chosen, the work sized and the other roles coordinated. Runs as the main-session agent.
 tools: Read, Grep, Glob, Bash, Agent, AskUserQuestion, Write, Skill
-model: sonnet
+model: fable
 effort: low
 maxTurns: 30
 skills:
