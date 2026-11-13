@@ -16,7 +16,7 @@ AGENT_DESC_MAX_CHARS=300
 # scripts/skill-sections.txt, scripts/agent-sections.txt — checked by scripts/kit-metrics.py --check (section 6c).
 ALLOWED_TOOLS_FILE="scripts/allowed-tools.txt"
 SKILL_HEADING_EXEMPT="handbook using-team"         # preloaded skills need no argument-hint
-HUMAN_ONLY_SKILLS="takeover onboard run session retro audit-kit release ci"  # intake: team-leader receives the raw request (ADJ-28, K-70)
+HUMAN_ONLY_SKILLS="release"  # merge, tag, deploy stay with the human; every other skill is callable by Claude (ADJ-28, ADJ-35)
 FORK_SKILLS="analyze=analyst research=researcher architect=architect design=designer plan=tech-lead build=tech-lead verify=qa asbuilt=writer clean=maintainer ci=devops retro=coach pr=tech-lead audit-kit=coach"
 WORKFLOW_HEADINGS="## When it applies|## Default size|## Chain|## Gates|## Stop points|## Done criteria|## Common mistakes|## Related playbooks"
 PLAYBOOKS="takeover new-project new-feature change-request bug-fix hotfix refactor dependency-upgrade data-migration integration ci-fix docs-only client-docs release spike retro"

@@ -2,7 +2,6 @@
 name: audit-kit
 description: Use when the `team` kit running in this project needs an audit of itself: a hook that can be bypassed, permissions broader than the contract, contradictory instructions, mismatched names, unused skills, or agents hitting their turn limit.
 argument-hint: "[--since <YYYY-MM-DD>]"
-disable-model-invocation: true
 context: fork
 agent: team:coach
 background: false

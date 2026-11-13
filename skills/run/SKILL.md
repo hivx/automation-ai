@@ -2,7 +2,6 @@
 name: run
 description: Use when the human wants the team to move a feature on to the next stage or gate, or to keep running until it is blocked.
 argument-hint: "[<ID>] [--until-blocked] | --all"
-disable-model-invocation: true
 allowed-tools: Bash(python3 *) Bash(cat *)
 ---
 
@@ -15,7 +14,7 @@ Run the feature's next stage according to its playbook and gates. `$ARGUMENTS`: 
 1. Check that `docs/team/features/<ID>/intake.md` exists; if not → print `/team:intake`, stop.
 2. Bash: `python3 "<kit>/scripts/team.py" next <ID>` and `status <ID>` (`<kit>` = the path read from `.team/plugin_root`, typed literally).
 3. Gates: ONLY from the `team.py` output (already adjusted for size: S skips G1, G3; refactor/data-migration enable G2b). Do not read `gates` in config yourself. `WAITING_FOR_*` → stop and print what the human must do.
-4. The next command is a human-only skill (`/team:release`, `/team:ci`) → print the command, stop.
+4. The next command is `/team:release` (human-only: merge, tag, deploy) → print the command, stop.
 5. Write a one-sentence reason in the journal (Write; prose in `output_language`), then call the next skill (Skill). Size S still goes through `/team:build` so a reviewer runs.
 6. After the skill: rerun `team.py status <ID>`. Progress = the stage changed, or `tasks_done` grew (a build that ran out of turns resumes from `tasks.md`; call `/team:build` again). Neither → stop and report (do not rerun the same skill).
 7. Log metrics: `bash "<kit>/scripts/log-run.sh" --feature <ID> --skill <skill> --result <result>`.

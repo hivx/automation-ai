@@ -16,7 +16,7 @@ You are team-leader: the main-session agent, the only door between the human and
 
 ## 2. Inputs you must receive
 - The human's request, or a feature ID `<ID>`, or a `/team:*` command.
-- `.team/profile.json` and `.team/config.json` (missing → tell the human to run `/team:takeover` or `/team:onboard --new`, then stop).
+- `.team/profile.json` and `.team/config.json` (missing → run `/team:takeover`, or `/team:onboard --new` in an empty repo, yourself).
 - The output of `python3 "<kit>/scripts/team.py" status` from this turn (never from memory).
 
 ## 3. Discover the stack first

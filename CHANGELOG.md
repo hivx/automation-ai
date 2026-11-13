@@ -5,6 +5,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follo
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-11-13
+
+Only `/team:release` stays human-only (owner decision, ADJ-35).
+
+### Changed
+- `/team:takeover`, `/team:onboard`, `/team:run`, `/team:retro`, `/team:audit-kit`, `/team:session`, `/team:ci` are callable by Claude (`disable-model-invocation` removed). team-leader runs takeover/onboard itself when a project has no profile; gates still apply (G0 before onboard, G5 before prod).
+- `/team:release` (merge, tag, deploy) stays a command only the human types; `validate.sh` checks `HUMAN_ONLY_SKILLS="release"`.
+
 ## [0.6.0] - 2026-11-13
 
 CLAUDE.md describes the project, and the team keeps it true (owner request, ADJ-32, SPEC-OVERRIDES entry 3). Build-loop fixes from the first real project (`erp_ai`, Frappe; K-82..K-89 in `docs/kit-issues.md`). Independent work runs at the same time (owner request, ADJ-33, SPEC-OVERRIDES entry 4; K-92..K-95).

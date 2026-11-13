@@ -2,7 +2,6 @@
 name: onboard
 description: Use when takeover's G0 has been approved, or an empty repo needs the team configured for the first time (--new), to install the profile, config, settings, rules, CI and the docs/team skeleton for the project.
 argument-hint: "[--new] [--accept-clean-first]"
-disable-model-invocation: true
 allowed-tools: Read Glob Bash(jq *) Bash(cat *) Bash(ls *) Bash(mkdir *) Bash(cp *) Bash(python3 *) Bash(git status *) Bash(echo *) Bash(awk *) Bash(wc *)
 ---
 

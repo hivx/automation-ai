@@ -139,6 +139,7 @@ Anh viết tiếng Việt; Claude dịch sang đúng skill/khái niệm theo b�
 ## 9. QUYẾT ĐỊNH & YÊU CẦU CỦA CHỦ REPO
 Nhật ký chỉ thêm, mới nhất ở trên. Anh viết yêu cầu ở đây bằng tiếng Việt; mọi phiên sau của Claude đọc mục này trước khi làm. Mẫu: `- YYYY-MM-DD | <quyết định hoặc yêu cầu> | <ai ghi> | <trạng thái: mới / đang làm / xong / bỏ>`
 
+- 2026-11-13 | Chỉ còn `/team:release` là lệnh người phải tự gõ (v0.6.1, ADJ-35): 7 skill takeover, onboard, run, retro, audit-kit, session, ci bỏ `disable-model-invocation`, nên team-leader tự chạy takeover/onboard khi dự án chưa có đội, tự sửa CI đỏ, tự chạy retro khi phản hồi vượt ngưỡng. Cổng duyệt vẫn giữ (G0 trước onboard, G5 trước prod). Release (merge, tag, deploy) vẫn chờ anh gõ | Claude | xong
 - 2026-11-13 | Hook không chặn gì nữa: skill và rule chỉ là quy tắc làm việc (v0.6.0, `SPEC-OVERRIDES.md` mục 5, ADJ-34, K-96). Khóa mới `enforcement` trong `.team/config.json`: `"warn"` (mặc định, cả với dự án cũ chưa có khóa này) = hook chỉ nhắc Claude quy tắc rồi cho lệnh chạy, `stop-check` không chạy lint/test mỗi lần agent dừng; `"block"` = chặn như trước. Team-leader hết bị role-policy chặn khi đọc file, chạy `python3 -c`, `bench`, `git reflog`…; đội cũng tự sửa được `.team/profile.json`, `.team/config.json` (K-91) | Claude | xong
 - 2026-11-12 | Commit và PR không có dòng `Co-Authored-By` (STD-GIT-8): hook `check-git.sh` chặn commit hoặc `gh pr` có dòng `Co-Authored-By:` hoặc "Generated with Claude"; template settings tắt sẵn `attribution`. Áp dụng cho mọi dự án dùng kit và cho commit của chính repo kit | Claude | xong
 - 2026-11-12 | Khi có yêu cầu thì cho nhiều agent chạy đồng thời, không để thời gian chết (v0.6.0, `SPEC-OVERRIDES.md` mục 4, K-92..K-95): build giao việc theo lượt cuốn chiếu, mỗi lượt là một tin nhắn gồm mọi việc bắt đầu được ngay (dev cho task sẵn sàng không chung file với task đang chạy, dev sửa lại, reviewer), không chờ tick hết cả đợt; câu hỏi Explore độc lập gửi cùng lúc; một yêu cầu nhiều việc độc lập được tách mỗi việc một intake và chạy chung một đợt; mặc định mới `max_parallel_dev` 4, reviewer 4, architect 1, các vai khác 2 (dự án cũ tự sửa `.team/config.json`); số liệu không còn đếm trùng tech-lead | Claude | xong
@@ -166,9 +167,9 @@ Nhật ký chỉ thêm, mới nhất ở trên. Anh viết yêu cầu ở đây 
 | `/team:analyze` | cả hai | analyst | docs/team/features/<ID>/spec.md, <kit>/templates/artifacts/spec.md, docs/team/features/<ID>/questions.md | Dùng khi feature đã qua intake và cần spec có Definition of Done, hoặc khi spec đã duyệt phải sửa đổi (--amend). |
 | `/team:architect` | cả hai | architect | docs/team/architecture.md, docs/team/features/<ID>/arch-impact.md, arch-impact.md | Dùng khi việc cỡ L hay dự án mới cần kiến trúc hệ thống, khi thay đổi chạm nhiều module, hợp đồng hay NFR cần đánh giá tác động, hoặc khi design.md cần review ba câu về độ khớp kiến trúc. |
 | `/team:asbuilt` | cả hai | writer | docs/team/features/<ID>/asbuilt.md, docs/team/features/<ID>/pr-body.md, CHANGELOG.md | Dùng khi feature đã accepted và duyệt G4, cần As-Built, release notes, mục CHANGELOG, cập nhật README/tài liệu người dùng và nội dung PR trước khi phát hành. |
-| `/team:audit-kit` | người | coach | docs/team/kit-issues.md | Dùng khi cần kiểm toán chính bộ kit team đang chạy trong dự án: hook có thể bị lách, quyền quá rộng, chỉ dẫn mâu thuẫn, tên lệch, skill không dùng, agent chạm trần lượt. |
+| `/team:audit-kit` | cả hai | coach | docs/team/kit-issues.md | Dùng khi cần kiểm toán chính bộ kit team đang chạy trong dự án: hook có thể bị lách, quyền quá rộng, chỉ dẫn mâu thuẫn, tên lệch, skill không dùng, agent chạm trần lượt. |
 | `/team:build` | cả hai | tech-lead | team/<ID>, docs/team/features/<ID>/tasks.md, review-NN.md | Dùng khi plan đã duyệt (hoặc việc cỡ S, bug-fix, hotfix) và cần dev viết test, code, reviewer chấm, rồi gộp từng task vào nhánh feature. |
-| `/team:ci` | người | devops | team/ci-<slug>, docs/team/ci.md, debt.md | Dùng khi pipeline CI đỏ, khi dự án cần dựng CI lần đầu, thêm một bước kiểm, hoặc viết và kiểm script deploy, rollback, smoke. |
+| `/team:ci` | cả hai | devops | team/ci-<slug>, docs/team/ci.md, debt.md | Dùng khi pipeline CI đỏ, khi dự án cần dựng CI lần đầu, thêm một bước kiểm, hoặc viết và kiểm script deploy, rollback, smoke. |
 | `/team:clean` | cả hai | maintainer | team/<ID>, docs/team/features/<ID>/tasks.md, docs/team/debt.md | Dùng khi cần dọn dẹp không đổi hành vi đúng một loại nợ: code chết, đặt tên, cấu trúc, phụ thuộc thừa, test mồ côi, đơn giản hóa, ngừng dùng API cũ, hoặc bổ sung log/metric. |
 | `/team:commit` | cả hai | team-leader (phiên chính) | team/<ID>-… | Dùng khi dev hoặc maintainer đã có thay đổi xanh và cần commit đúng chuẩn của đội. |
 | `/team:design` | cả hai | designer | docs/team/features/<ID>/design.md, questions.md | Dùng khi spec đã duyệt cần thiết kế chi tiết (dữ liệu, API, luồng, quyền, migration, touchpoints, test plan) trước khi lập kế hoạch, hoặc khi refactor cần bản thiết kế ngắn chứng minh hành vi không đổi. |
@@ -177,16 +178,16 @@ Nhật ký chỉ thêm, mới nhất ở trên. Anh viết yêu cầu ở đây 
 | `/team:intake` | cả hai | team-leader (phiên chính) | — | Dùng khi người giao một yêu cầu thô, một số issue, một lỗi hay hotfix cho đội. |
 | `/team:make-agent` | cả hai | team-leader (phiên chính) | .claude/agents/<name>.md, docs/team/agents/<name>.tests.md, docs/team/skills-registry.md | Dùng khi team-leader thấy một chuyên môn riêng của dự án đủ lớn để cần ngữ cảnh, bộ tool hoặc model riêng, mà không vai nào của kit đảm nhận được và một skill tạm không đủ. |
 | `/team:make-skill` | cả hai | team-leader (phiên chính) | .claude/skills/<name>/SKILL.md, .claude/skills/<name>/references/tests.md, docs/team/skills-registry.md | Dùng khi team-leader thấy một task cần chuyên môn riêng của dự án mà kit chưa có, hoặc một chuỗi bước đã lặp lại ở nhiều task, và nêu được nhu cầu một câu kèm bằng chứng. |
-| `/team:onboard` | người | team-leader (phiên chính) | .team/profile.json, .team/config.json, CLAUDE.md | Dùng khi G0 của takeover đã được duyệt, hoặc repo rỗng cần cấu hình đội lần đầu (--new), để cài profile, config, settings, rule, CI và khung docs/team cho dự án. |
+| `/team:onboard` | cả hai | team-leader (phiên chính) | .team/profile.json, .team/config.json, CLAUDE.md | Dùng khi G0 của takeover đã được duyệt, hoặc repo rỗng cần cấu hình đội lần đầu (--new), để cài profile, config, settings, rule, CI và khung docs/team cho dự án. |
 | `/team:plan` | cả hai | tech-lead | docs/team/features/<ID>/plan.md, <kit>/templates/artifacts/plan.md, docs/team/features/<ID>/tasks.md | Dùng khi feature đã có spec và design được duyệt và cần chia thành task 2–5 phút có touchpoints, hoặc khi change-request cần chèn task mới (--insert). |
 | `/team:pr` | cả hai | tech-lead | docs/team/journal/<ID>.md | Dùng khi nhánh feature hoặc nhánh sửa CI đã sẵn sàng cần mở hay cập nhật pull request, hoặc cần trả lời bình luận review của người. |
 | `/team:release` | người | team-leader (phiên chính) | CHANGELOG.md, docs/team/features/<ID>/asbuilt.md | Dùng khi feature đã accepted, duyệt G4 và có As-Built, cần merge, gắn tag, đưa lên staging cho UAT, rồi lên prod khi người đã duyệt G5. |
 | `/team:research` | cả hai | researcher | docs/team/features/<ID>/research.md, docs/team/research/<topic>@<version>.md | Dùng khi spec còn câu hỏi kỹ thuật cần docs chính thức đúng phiên bản, cần so sánh phương án, đọc changelog trước khi nâng cấp phụ thuộc, tìm hiểu API ngoài để tích hợp, hoặc làm spike. |
-| `/team:retro` | người | coach | docs/team/retro/<date>.md, docs/team/proposals/<date>/*.md | Dùng khi đến kỳ nhìn lại, sau feature nhiều rework, khi góp ý vượt ngưỡng hai lần, hoặc scorecard có bất thường, để tìm điểm nghẽn của đội có bằng chứng và đề xuất sửa agent/skill chờ người duyệt. |
-| `/team:run` | người | team-leader (phiên chính) | — | Dùng khi người muốn đội chạy tiếp feature tới giai đoạn hoặc cổng kế tiếp, hoặc chạy liên tục tới khi bị chặn. |
-| `/team:session` | người | team-leader (phiên chính) | .team/session/plan.md, .team/session/notes-<ID>.md | Dùng khi bắt đầu, lưu hoặc nạp lại một phiên làm việc dài cho một feature: chọn kênh tương tác hay headless, model theo vai, ngân sách, điểm nén ngữ cảnh, và ghi chú bàn giao cho phiên sau. |
+| `/team:retro` | cả hai | coach | docs/team/retro/<date>.md, docs/team/proposals/<date>/*.md | Dùng khi đến kỳ nhìn lại, sau feature nhiều rework, khi góp ý vượt ngưỡng hai lần, hoặc scorecard có bất thường, để tìm điểm nghẽn của đội có bằng chứng và đề xuất sửa agent/skill chờ người duyệt. |
+| `/team:run` | cả hai | team-leader (phiên chính) | — | Dùng khi người muốn đội chạy tiếp feature tới giai đoạn hoặc cổng kế tiếp, hoặc chạy liên tục tới khi bị chặn. |
+| `/team:session` | cả hai | team-leader (phiên chính) | .team/session/plan.md, .team/session/notes-<ID>.md | Dùng khi bắt đầu, lưu hoặc nạp lại một phiên làm việc dài cho một feature: chọn kênh tương tác hay headless, model theo vai, ngân sách, điểm nén ngữ cảnh, và ghi chú bàn giao cho phiên sau. |
 | `/team:status` | cả hai | team-leader (phiên chính) | — | Dùng khi người hỏi feature đang ở đâu, ai đang chờ ai, hay việc gì đang bị chặn. |
-| `/team:takeover` | người | team-leader (phiên chính) | docs/team/assessment.md, docs/team/ai-readiness.md, docs/team/profile-proposal.md | Dùng khi đội nhận một repo đã có code mà chưa có .team/profile.json, hoặc người hỏi dự án này làm gì, đã tới đâu, việc tiếp theo là gì. |
+| `/team:takeover` | cả hai | team-leader (phiên chính) | docs/team/assessment.md, docs/team/ai-readiness.md, docs/team/profile-proposal.md | Dùng khi đội nhận một repo đã có code mà chưa có .team/profile.json, hoặc người hỏi dự án này làm gì, đã tới đâu, việc tiếp theo là gì. |
 | `/team:using-team` | cả hai | team-leader (phiên chính) | — | Dùng khi bắt đầu bất kỳ việc gì không tầm thường trong dự án có đội team, trước khi hành động hay hỏi lại: kiểm skill và playbook phù hợp. |
 | `/team:verify` | cả hai | qa | docs/team/features/<ID>/acceptance.md, <kit>/templates/artifacts/acceptance.md, .team/current.json | Dùng khi mọi task của feature đã tick và cần nghiệm thu độc lập từng tiêu chí bằng lệnh chạy thật trước khi phát hành. |
 <!-- /gen:skills -->
@@ -511,9 +512,9 @@ Các mốc sau do script và cổng đọc bằng máy: **không bao giờ dịc
 
 ## Số liệu
 <!-- gen:stats -->
-- Phiên bản kit: 0.6.0
+- Phiên bản kit: 0.6.1
 - Skill: 26 · agent: 13 · playbook: 16 (+ 4 lô) · script: 31
 - Số từ trung vị (tiếng Anh): skill nạp thường xuyên 386.0, skill khác 1531.0, agent 939
-- Commit: 7897d49
+- Commit: 6f5a6b5
 - Ngày sinh file: 2026-11-13
 <!-- /gen:stats -->

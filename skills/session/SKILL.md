@@ -2,7 +2,6 @@
 name: session
 description: Use when starting, saving or reloading a long working session for one feature: choosing between interactive and headless, the model per role, the budget, the context-compaction points, and the handoff note for the next session.
 argument-hint: "[plan|save|load] [<ID>]"
-disable-model-invocation: true
 allowed-tools: Bash(python3 *) Bash(cat *) Bash(jq *) Bash(ls *) Bash(git status *) Bash(git rev-parse *) Bash(wc *)
 ---
 

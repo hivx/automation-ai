@@ -2,7 +2,6 @@
 name: takeover
 description: Use when the team receives a repo that already has code but no .team/profile.json, or when the human asks what this project does, how far it has got, and what comes next.
 argument-hint: "[--full]"
-disable-model-invocation: true
 allowed-tools: Read Glob Bash(bash ${CLAUDE_PLUGIN_ROOT}/scripts/detect-stack.sh *) Bash(bash ${CLAUDE_PLUGIN_ROOT}/scripts/explore-cache.sh *) Bash(git log *) Bash(git branch *) Bash(git tag *) Bash(ls *) Bash(cat *) Bash(jq *) Bash(gh issue list *) Bash(gh pr list *)
 ---
 

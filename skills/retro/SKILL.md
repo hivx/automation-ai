@@ -2,7 +2,6 @@
 name: retro
 description: Use when a retrospective is due, after a feature with a lot of rework, when feedback crosses its threshold twice, or when the scorecard shows an anomaly, to find the team's bottlenecks with evidence and propose agent/skill fixes awaiting the human's approval.
 argument-hint: "[--since <YYYY-MM-DD>] [--decide]"
-disable-model-invocation: true
 context: fork
 agent: team:coach
 background: false

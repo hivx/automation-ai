@@ -2,7 +2,6 @@
 name: ci
 description: Use when the CI pipeline is red, when a project needs CI set up for the first time, a check step added, or deploy, rollback and smoke scripts written and tested.
 argument-hint: "setup|fix|add-stage|deploy-script [<run-id>|<stage>]"
-disable-model-invocation: true
 context: fork
 agent: team:devops
 background: false
