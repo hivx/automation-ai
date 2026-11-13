@@ -11,7 +11,7 @@
 A repo with < 30 tracked files: T2 may read files directly instead of using Explore; record "read directly, < 30 files" in the Scanned table. T3 still runs only on a contradiction or with `--full`.
 
 ## AI-readiness — what to examine
-- The existing CLAUDE.md: line count, content, staleness, contradictions with the code.
+- The existing CLAUDE.md: line count, content, staleness, contradictions with the code; keep / cut / rewrite per section (onboard applies it to the project block).
 - `.claude/`, plugins, MCP, AGENTS.md: keep / cut / rewrite.
 - Conclude with one of three: `ready` / `adjust-profile` / `clean-first`.
 

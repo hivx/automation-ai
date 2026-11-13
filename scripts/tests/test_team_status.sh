@@ -101,5 +101,12 @@ wexp '[.dispatch[] | select(.skill=="build") | .devs] | join(",")' "2,2" "wave: 
 wexp '[.held[] | select(.id=="FEAT-017") | .reason] | join("")' "WAITING_FOR_APPROVAL" "wave: a feature at a gate is not dispatched"
 wexp '.headcount.designer // "default"' "default" "wave: roles without headcount default to 1"
 
+# metrics: SubagentStop repeats one agent's row each time an agent it called stops; only the last row counts
+M="$(mktemp -d)"; mkdir -p "$M/docs/team/metrics"
+for d in 10 20 30; do printf '{"agent":"team:tech-lead","agent_id":"a1","size":"M","duration_s":%s,"result":"done"}\n' "$d"; done > "$M/docs/team/metrics/runs.jsonl"
+printf '{"agent":"team:dev","agent_id":"a2","size":"M","duration_s":5,"result":"done"}\n' >> "$M/docs/team/metrics/runs.jsonl"
+wj="$(python3 -I "$KIT/scripts/team.py" metrics --json --root "$M")"; rm -rf "$M"
+wexp '.[] | select(.subject=="agent:team:tech-lead") | "\(.calls) \(.median_duration_s)"' "1 30" "metrics: repeated rows of one agent_id count once, last row kept"
+
 echo "test_team_status: $pass passed, $failn failed"
 (( failn == 0 ))

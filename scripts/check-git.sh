@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # check-git.sh — PreToolUse hook (Bash): the team's git rules.
 # Blocks (exit 2): push outside team/* (protected branches named explicitly), --force/-f/+refspec, push --delete,
-#   rebase -i / reset --hard on a protected branch, commit --no-verify/-n, filter-branch/filter-repo.
+#   rebase -i / reset --hard on a protected branch, commit --no-verify/-n, filter-branch/filter-repo,
+#   a commit or `gh pr create|edit|merge` message with a Co-Authored-By trailer or "Generated with Claude" (STD-GIT-8).
+#   Exit 2 only when .team/config.json has "enforcement": "block"; by default ("warn") the same check is a reminder
+#   in additionalContext and the tool runs.
 # Warns (exit 0, stderr + additionalContext): commit message that breaks STD-NAME-5.
 # Reads hook JSON from stdin: tool_input.command, cwd. Protected branches: config.protected_branches + base_branch.
 # Usage: check-git.sh [--root DIR] < hook.json ; check-git.sh --help
@@ -11,5 +14,5 @@ set -uo pipefail
 team_init "$@"
 read_input
 cmd="$(input_get '.tool_input.command')"
-[[ $cmd == *git* ]] || allow
+[[ $cmd == *git* || $cmd == *"gh pr"* ]] || allow
 python3 -I "$TEAMLIB" check-git --root "$TEAM_ROOT" <<<"$HOOK_INPUT"

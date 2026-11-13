@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # session-start.sh — SessionStart hook (startup|resume|compact|clear|fork).
-# Writes ${CLAUDE_PLUGIN_ROOT} to .team/plugin_root (inside a git repo); records the session start time;
+# Writes ${CLAUDE_PLUGIN_ROOT} to .team/plugin_root (only when .team/ exists: takeover/onboard create it); records the session start time;
 # returns additionalContext of at most 12 lines: team.py status summary; latest handoff when source is
 # resume/compact; the 6 core rules when source is compact; a warning for missing plugins.required.
 # Usage: session-start.sh [--root DIR] < hook.json ; session-start.sh --help
@@ -12,10 +12,12 @@ read_input
 source="$(input_get '.source')"; sid="$(input_get '.session_id')"
 cd "$TEAM_ROOT" 2>/dev/null || exit 0
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0
-if [[ -n ${CLAUDE_PLUGIN_ROOT:-} ]]; then
-  mkdir -p .team && printf '%s\n' "$CLAUDE_PLUGIN_ROOT" >.team/plugin_root
+if [[ ! -d .team ]]; then  # not a team project: never create .team/ in a repo nobody took over
+  printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' \
+    "team: project not onboarded — run /team:takeover (existing code) or /team:onboard --new."
+  exit 0
 fi
-[[ -d .team ]] || exit 0
+[[ -n ${CLAUDE_PLUGIN_ROOT:-} ]] && printf '%s\n' "$CLAUDE_PLUGIN_ROOT" >.team/plugin_root
 mkdir -p .team/session
 [[ -n $sid && ! -f .team/session/$sid.start ]] && date +%s >".team/session/$sid.start"
 

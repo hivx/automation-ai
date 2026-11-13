@@ -5,6 +5,8 @@
 #   .github, build/cache directories, non-code files, helper files __init__/conftest/setup/fixtures/
 #   helpers/utils); runs cmd.lint, cmd.typecheck (if set), cmd.test_one for each changed test file
 #   (matching naming.test_file), check-structure.sh. Failure → exit 2 with the first 40 lines.
+#   Only with config `enforcement: "block"`; in the default "warn" mode the build pass is skipped and the research
+#   check below is a reminder (systemMessage), never a stop.
 # When a researcher stops (or, outside a subagent, the current stage is research): the research.md of that
 #   agent's feature (hook_feature: from its transcript) must have '## Sources' with at least one http URL.
 # Commands run in the hook's `cwd` (the dev's worktree); configuration is read from the project root.
@@ -26,6 +28,7 @@ if [[ -n $feat && ( ${agent#team:} == researcher || ( -z $agent && "$(current_st
   fi
 fi
 
+[[ "$(enforcement)" == block ]] || allow  # warn mode: devs run their own tests; no lint/test pass at every stop
 build_active || allow
 cd "$WD" || allow
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || allow
@@ -65,7 +68,6 @@ if [[ -n $one && -n $test_glob ]]; then
 fi
 run structure "bash $(printf '%q' "$KIT_DIR/scripts/check-structure.sh") --root $(printf '%q' "$WD")"
 if (( fail )); then
-  { echo "BLOCKED (STD-TEST-3): the build is not clean — fix it before stopping (also STD-STYLE-2, STD-STRUCT-6)."; head -n 40 "$out"; } >&2
-  exit 2
+  block "$(echo "BLOCKED (STD-TEST-3): the build is not clean — fix it before stopping (also STD-STYLE-2, STD-STRUCT-6)."; head -n 40 "$out")"
 fi
 allow

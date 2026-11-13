@@ -10,6 +10,7 @@
   },
   "default_size": "auto",
   "default_mode": "ask",
+  "enforcement": "warn",
   "output_language": "vi",
   "base_branch": "main",
   "protected_branches": [
@@ -21,16 +22,16 @@
     "max_rework": 3,
     "max_attempts": 3,
     "max_questions_round": 2,
-    "max_parallel_dev": 2,
+    "max_parallel_dev": 4,
     "headcount": {
-      "tech-lead": 1,
-      "analyst": 1,
-      "researcher": 1,
+      "tech-lead": 2,
+      "analyst": 2,
+      "researcher": 2,
       "architect": 1,
-      "designer": 1,
-      "reviewer": 2,
-      "qa": 1,
-      "writer": 1
+      "designer": 2,
+      "reviewer": 4,
+      "qa": 2,
+      "writer": 2
     },
     "max_agents_per_feature": {
       "S": 3,

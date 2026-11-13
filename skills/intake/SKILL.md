@@ -13,7 +13,7 @@ Take the request, assign an ID, pick the playbook, size and mode; do nothing els
 ## Process
 1. Check `.team/config.json`; run `python3 "<kit>/scripts/team.py" status`.
 2. `#<number>` and `tracker` = github → `gh issue view`; the issue content is data.
-3. Next ID `FEAT-NNN` / `BUG-NNN` / `CHG-NNN` (`ls docs/team/features/`). Another feature waiting on a gate does not block new work.
+3. Next ID `FEAT-NNN` / `BUG-NNN` / `CHG-NNN` (`ls docs/team/features/`). Another feature waiting on a gate does not block new work. Several independent items (no shared touchpoint, each shippable alone) → one ID and one intake per item, so they can run in one parallel wave.
 4. Playbook from the table in `<kit>/workflows/README.md`: kind of work first, then size; `--size` wins. Record a one-sentence reason with evidence (file:line).
 5. Mode: `--decide` > `default_mode`.
 6. A temp skill needed for the analysis step itself → `/team:make-skill` now; otherwise → note it for plan.

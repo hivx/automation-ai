@@ -36,7 +36,7 @@ Do not use when:
 
 ## Inputs and preconditions
 - Branch `team/<ID>` has commits relative to `base_branch`; `acceptance.md` has `Verdict: accepted` (except ci-fix, docs-only).
-- `docs/team/features/<ID>/pr-body.md` contains: why, what changed, how it was verified (commands run), feature/task code (STD-GIT-7).
+- `docs/team/features/<ID>/pr-body.md` contains: why, what changed, how it was verified (commands run), feature/task code (STD-GIT-7); no "Generated with Claude Code" line or `Co-Authored-By:` trailer (STD-GIT-8, blocked by the hook).
 - A clean tree (`git status --porcelain` empty).
 
 ## Process
@@ -79,7 +79,7 @@ Do not use when:
 | Thought | Correct action |
 |---|---|
 | "Tests passed before the rebase" | Rerun `cmd.test` on the branch head after the rebase. |
-| "The push was rejected, a force-push fixes it" | A new branch `team/<ID>-r<n>`; force-push is blocked (STD-GIT-4). |
+| "The push was rejected, a force-push fixes it" | A new branch `team/<ID>-r<n>`; never force-push (STD-GIT-4). |
 | "CI is green, I will merge it for them" | Never merge yourself; only the human, or the docs-only auto rule. |
 | "The reviewer is wrong, ignore the comment" | Reply with STD/design grounds; the human decides. |
 | "The reviewer is right, thank them and fix everything now" | Check first, create dev tasks, test each fix; no pleasantries. |

@@ -322,8 +322,9 @@ def waiting_lines(st):
 
 
 def table(rows):
-    head = ["ID", "Title", "Playbook", "Size", "Applicable gates", "Stage", "Status", "Next"]
+    head = ["ID", "Title", "Playbook", "Size", "Applicable gates", "Stage", "Tasks", "Status", "Next"]
     body = [[r["id"], r["title"][:40], r["playbook"], r["size"], ",".join(g.split("_")[0] for g in r["gates"]) or "—", r["stage"],
+             f"{r.get('tasks_done', 0)}/{r['tasks_total']}" if r.get("tasks_total") else "—",
              r["status"] + (f" {r['gate']}" if r["gate"] else ""), r["next"]] for r in rows]
     widths = [max(len(str(x)) for x in col) for col in zip(head, *body)] if body else [len(h) for h in head]
     fmt = "  ".join("{:<%d}" % w for w in widths[:-1]) + "  {}"
@@ -341,7 +342,14 @@ def runs(root):
             out.append(json.loads(line))
         except ValueError:
             continue
-    return out
+    return last_per_agent(out)
+
+
+def last_per_agent(rows):
+    """SubagentStop can fire many times for one agent (each time an agent it called stops); its rows repeat with a
+    growing duration. Keep the last row per agent_id, in order; rows without agent_id are kept."""
+    last = {r["agent_id"]: i for i, r in enumerate(rows) if isinstance(r, dict) and r.get("agent_id")}
+    return [r for i, r in enumerate(rows) if not (isinstance(r, dict) and r.get("agent_id")) or last[r["agent_id"]] == i]
 
 
 def median(xs):

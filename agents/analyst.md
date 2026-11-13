@@ -22,7 +22,7 @@ Anything missing: return ≤ 5 lines, `NEEDS_CONTEXT`, then stop.
 ## 3. Discover the stack first
 - `.team/profile.json`: `stack`, `language`, `structure`, `ui`, `tracker` — context only; never run the `cmd.*` slots.
 - `.team/config.json`: `limits.max_questions_round`; `docs/team/glossary.md`.
-- Exploration cache (`explore-cache.sh <dir>`): `HIT` → read the cache; `MISS` → Explore with a precise question ("where does behavior X live, what constrains it").
+- Exploration cache (`explore-cache.sh <dir>`): `HIT` → read the cache; `MISS` → Explore with a precise question per area, all calls in ONE message ("where does behavior X live, what constrains it").
 
 ## 4. Procedure
 Numbered as in `/team:analyze` so the two can be compared:

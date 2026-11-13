@@ -10,7 +10,7 @@ Các bảng giữa dấu `<!-- gen:… -->` do `scripts/gen-vi-guide.py` sinh t�
 - Việc đi qua 9 giai đoạn: tiếp nhận yêu cầu → phân tích → nghiên cứu → kiến trúc → thiết kế → kế hoạch → xây dựng → nghiệm thu → phát hành, rồi vận hành.
 - Giữa các giai đoạn có **cổng duyệt** (G0–G5). Cổng bật thì đội dừng chờ anh duyệt bằng một dòng trong file; cổng tắt thì đội chạy tiếp.
 - Mỗi giai đoạn để lại một file (artifact) trong `docs/team/` của dự án. Vị trí công việc được tính lại từ các file đó, nên phiên mới, CI hay máy khác vẫn tiếp tục đúng chỗ.
-- Luật không được sai (không sửa file bí mật, không push nhánh chính, không bỏ test) do hook và script chặn, không phụ thuộc AI có nhớ hay không.
+- Luật (không sửa file bí mật, không push nhánh chính, không bỏ test…) nằm trong skill và rule; hook chỉ **nhắc** Claude khi thấy vi phạm, lệnh vẫn chạy (`enforcement: "warn"`, mặc định từ 0.6.0). Muốn hook chặn thật thì đặt `"enforcement": "block"` trong `.team/config.json`.
 - Lệnh build/test/lint và quy ước của từng dự án nằm trong `.team/profile.json`; lõi của kit không biết stack cụ thể.
 - Đội tự ghi sổ công tác, tự đo (scorecard, `measure.py`) và đề xuất sửa chính agent/skill của mình; anh duyệt trước khi áp dụng.
 - Anh có thể chỉ duyệt ở cổng, hoặc tắt cổng và cho chạy tự động hoàn toàn (trừ lên production luôn cần người).
@@ -22,8 +22,8 @@ Các bảng giữa dấu `<!-- gen:… -->` do `scripts/gen-vi-guide.py` sinh t�
 ## 2. Bắt đầu trên một dự án
 1. Cài plugin (một lần cho mỗi máy, trong Claude Code): `/plugin marketplace add hivx/automation-ai` rồi `/plugin install team@automation-ai`. Hoặc chép vào dự án: `bash <kit>/scripts/install-local.sh <thư-mục-dự-án>` (khi đó lệnh là `/team-<tên>`).
 2. Mở Claude Code trong dự án, gõ `/team:takeover`. Đội chỉ quét và viết 5 báo cáo vào `docs/team/` (không sửa gì): `assessment.md` (làm gì / đến đâu / cần làm gì), `ai-readiness.md`, `profile-proposal.md`, `debt.md`, `open-questions.md`.
-3. Đọc `docs/team/ai-readiness.md` và `profile-proposal.md`. Đồng ý thì thêm vào 20 dòng đầu của `ai-readiness.md` một dòng: `Approved-by: <tên anh> <YYYY-MM-DD>` (đây là cổng G0). Nếu kết luận là `clean-first` (CLAUDE.md cũ sai lệch), nên dọn trước; muốn chạy luôn thì dùng cờ `--accept-clean-first`.
-4. Gõ `/team:onboard`. Đội tạo `.team/profile.json`, `.team/config.json` (có `output_language: "vi"`), khối luật trong `CLAUDE.md`, `.claude/settings.json`, rule, mẫu CI và khung `docs/team/`. Kiểm `docs/team/onboarding.md`, rồi commit.
+3. Đọc `docs/team/ai-readiness.md` và `profile-proposal.md`. Đồng ý thì thêm vào 20 dòng đầu của `ai-readiness.md` một dòng: `Approved-by: <tên anh> <YYYY-MM-DD>` (đây là cổng G0). Nếu kết luận là `clean-first` (CLAUDE.md cũ sai lệch), đội sẽ tự viết lại CLAUDE.md ở bước onboard; anh chỉ cần xác nhận, hoặc chạy với cờ `--accept-clean-first`.
+4. Gõ `/team:onboard`. Đội tạo `.team/profile.json`, `.team/config.json` (có `output_language: "vi"`), `CLAUDE.md` mô tả chính dự án (hệ thống làm gì, lệnh, cấu trúc, thuật ngữ, quy ước, bẫy — khối `project`) kèm khối ngắn về cách làm việc với đội (khối `team`), `.claude/settings.json`, rule, mẫu CI và khung `docs/team/`. Kiểm `docs/team/onboarding.md`, rồi commit.
 5. Giao việc đầu tiên: gõ thẳng yêu cầu ("Thêm báo cáo quá hạn như README mô tả"), hoặc `/team:intake "<yêu cầu>"`. Thêm `--decide` nếu muốn đội tự quyết, `--size S|M|L` nếu muốn ép cỡ.
 6. Cho chạy tiếp tới khi gặp cổng: `/team:run <ID> --until-blocked`. Xem tiến độ: `/team:status`.
 
@@ -60,14 +60,14 @@ Các bảng giữa dấu `<!-- gen:… -->` do `scripts/gen-vi-guide.py` sinh t�
 - Ngôn ngữ artifact: `output_language: "vi"` (mặc định) hoặc `"en"`. Chỉ đổi văn xuôi; mốc máy đọc giữ tiếng Anh.
 - Cỡ việc: `default_size: "auto"` (team-leader chấm) hoặc ép bằng `--size` / nhãn `team:size:*`.
 - Giới hạn: `limits.max_rework`, `max_attempts`, `max_questions_round`, `max_parallel_dev`, `max_agents_per_feature` (S/M/L), `feature_budget_usd`, `max_temp_skills`.
-- Số người mỗi vai: `limits.headcount`, ví dụ `{"analyst": 2, "designer": 2, "tech-lead": 2}` và `max_parallel_dev: 5` (5 dev tính chung cả đội, chia đều cho các feature đang build). Chạy nhiều feature cùng lúc: `/team:run --all`. Các bước trong một feature vẫn tuần tự.
+- Số người mỗi vai: `limits.headcount`. Mặc định của kit (từ 0.6.0): `max_parallel_dev: 4` (4 dev tính chung cả đội, chia đều cho các feature đang build), reviewer 4, architect 1, các vai khác 2. Dự án onboard trước đó giữ số cũ (thường là 2 dev, mỗi vai 1); muốn nhanh hơn thì tự sửa `.team/config.json`. Nhiều agent chạy cùng lúc thì xong nhanh hơn nhưng tốn tiền nhanh hơn trong cùng một khoảng thời gian. Chạy nhiều feature cùng lúc: `/team:run --all`. Các bước trong một feature vẫn tuần tự.
 - Model theo vai: `models.<vai>`; mặc định ghi trong frontmatter của `agents/<vai>.md` (bảng "Đội ngũ").
 - Lệnh của dự án (test, lint, build…), thư mục được tạo file, vùng cấm: `.team/profile.json` (`cmd.*`, `structure.*`, `protected_paths`). Chỉ người sửa, hoặc chạy lại `/team:onboard`.
 - Toàn bộ khóa và ý nghĩa: bảng "Cấu hình" bên dưới.
 
-## 7. Khi bị chặn
-- Hook chặn hiện `BLOCKED (STD-XXX-n): …` (tiếng Anh). Tra mã ở bảng "Mã quy tắc STD" bên dưới để biết luật nào. Ví dụ `STD-SEC-1` = chạm file bí mật/vùng cấm; `STD-STRUCT-1` = tạo file ngoài thư mục cho phép; `STD-GIT-3` = push nhánh không phải `team/*`.
-- `BLOCKED (role-policy)`: vai đó không được làm việc này (ví dụ team-leader không được push). Đúng thiết kế; việc đó thuộc vai khác.
+## 7. Khi bị chặn hoặc bị nhắc
+- Mặc định hook không chặn, chỉ nhắc: `RULE (reminder, not enforced) (STD-XXX-n): …`, lệnh vẫn chạy. Với `"enforcement": "block"` thì hook chặn và hiện `BLOCKED (STD-XXX-n): …` (tiếng Anh). Tra mã ở bảng "Mã quy tắc STD" bên dưới để biết luật nào. Ví dụ `STD-SEC-1` = chạm file bí mật/vùng cấm; `STD-STRUCT-1` = tạo file ngoài thư mục cho phép; `STD-GIT-3` = push nhánh không phải `team/*`.
+- `(role-policy)`: vai đó không nên làm việc này (ví dụ team-leader push). Ở chế độ nhắc, Claude vẫn làm được nhưng sẽ được nhắc là việc đó thuộc vai khác.
 - File mới bị chặn ngoài thư mục cho phép: nếu đúng là cần, thêm thư mục vào `structure.allowed_new_file_roots` trong `.team/profile.json`.
 - Đội dừng ở cổng: tin cuối có 4 dòng `STOP / Work / Who does what / Resume` — làm theo dòng "Who does what", rồi chạy lệnh ở dòng "Resume". `team.py status` hiện `WAITING_FOR_APPROVAL Gx` cho biết file cần duyệt.
 - Task `BLOCKED` sau nhiều lần thử, hay vòng sửa vượt trần: đọc journal của feature; thường là thiếu thông tin hoặc lỗi cấu hình profile.
@@ -139,6 +139,11 @@ Anh viết tiếng Việt; Claude dịch sang đúng skill/khái niệm theo b�
 ## 9. QUYẾT ĐỊNH & YÊU CẦU CỦA CHỦ REPO
 Nhật ký chỉ thêm, mới nhất ở trên. Anh viết yêu cầu ở đây bằng tiếng Việt; mọi phiên sau của Claude đọc mục này trước khi làm. Mẫu: `- YYYY-MM-DD | <quyết định hoặc yêu cầu> | <ai ghi> | <trạng thái: mới / đang làm / xong / bỏ>`
 
+- 2026-11-13 | Hook không chặn gì nữa: skill và rule chỉ là quy tắc làm việc (v0.6.0, `SPEC-OVERRIDES.md` mục 5, ADJ-34, K-96). Khóa mới `enforcement` trong `.team/config.json`: `"warn"` (mặc định, cả với dự án cũ chưa có khóa này) = hook chỉ nhắc Claude quy tắc rồi cho lệnh chạy, `stop-check` không chạy lint/test mỗi lần agent dừng; `"block"` = chặn như trước. Team-leader hết bị role-policy chặn khi đọc file, chạy `python3 -c`, `bench`, `git reflog`…; đội cũng tự sửa được `.team/profile.json`, `.team/config.json` (K-91) | Claude | xong
+- 2026-11-12 | Commit và PR không có dòng `Co-Authored-By` (STD-GIT-8): hook `check-git.sh` chặn commit hoặc `gh pr` có dòng `Co-Authored-By:` hoặc "Generated with Claude"; template settings tắt sẵn `attribution`. Áp dụng cho mọi dự án dùng kit và cho commit của chính repo kit | Claude | xong
+- 2026-11-12 | Khi có yêu cầu thì cho nhiều agent chạy đồng thời, không để thời gian chết (v0.6.0, `SPEC-OVERRIDES.md` mục 4, K-92..K-95): build giao việc theo lượt cuốn chiếu, mỗi lượt là một tin nhắn gồm mọi việc bắt đầu được ngay (dev cho task sẵn sàng không chung file với task đang chạy, dev sửa lại, reviewer), không chờ tick hết cả đợt; câu hỏi Explore độc lập gửi cùng lúc; một yêu cầu nhiều việc độc lập được tách mỗi việc một intake và chạy chung một đợt; mặc định mới `max_parallel_dev` 4, reviewer 4, architect 1, các vai khác 2 (dự án cũ tự sửa `.team/config.json`); số liệu không còn đếm trùng tech-lead | Claude | xong
+- 2026-11-12 | Phân tích dự án thật `erp_ai` và tối ưu vòng build (v0.6.0, K-82..K-89 trong `docs/kit-issues.md`): tech-lead tự chạy `cmd.test` dạng `cd ../.. && bench …` (trước phải nhờ dev); `/team:run --until-blocked` tính task đã tick là tiến triển nên không dừng sau mỗi lần tech-lead hết lượt; bỏ file `review-pkg-*`/`.diff` (221 file, 4,4 MB); xóa nhánh task đã merge (49 nhánh thừa); đưa lỗi review lặp lại vào lời giao cho dev (34 vòng làm lại); khe `test.shared_state` để không chạy hai bộ test cùng lúc trên site chung (deadlock); ghi baseline test đỏ có sẵn; hook không còn tạo `.team/` trong repo khác (`erpnext`) | Claude (theo yêu cầu của chủ repo) | xong
+- 2026-11-11 | CLAUDE.md phải mô tả dự án, và đội có trách nhiệm viết, tối ưu nó liên tục (v0.6.0, `SPEC-OVERRIDES.md` mục 3): khối `project` (≤ 150 dòng) do `/team:onboard` viết từ báo cáo tiếp nhận (CLAUDE.md cũ được nhận vào và sửa, mỗi dòng cắt/sửa có lý do trong `onboarding.md`); `/team:asbuilt` (writer) cập nhật sau mỗi feature; `/team:retro` báo chỗ lệch; `scripts/check-claude-md.py` kiểm máy (dấu khối, độ dài, chỗ trống, đường dẫn cũ). Khối `team` thu gọn, nằm cuối file. Dự án đã onboard trước đó: chạy lại `/team:onboard` để có khối project | Claude (theo yêu cầu của chủ repo) | xong
 - 2026-11-11 | Đội có số người theo vai (v0.5.0): `limits.headcount` cho từng vai; `/team:run --all` chạy song song nhiều feature theo đợt (`team.py wave` chọn feature, giới hạn theo số người, tách các build đụng chung file, chia dev cho các build); cờ build riêng cho từng feature; hook biết agent làm feature nào qua transcript | Claude (theo yêu cầu của chủ repo) | xong
 - 2026-11-11 | Build chạy song song theo đợt (v0.4.1): các task sẵn sàng, không chung file được tech-lead giao cùng lúc cho nhiều dev (tối đa `limits.max_parallel_dev`, mặc định 2), review cũng song song, merge vẫn lần lượt. Các bước của một feature (analyze → design → plan → build → verify) vẫn tuần tự vì bước sau cần kết quả bước trước | Claude (theo yêu cầu của chủ repo) | xong
 - 2026-11-11 | Đổi model theo tính chất việc (v0.4.1, `SPEC-OVERRIDES.md` mục 2): lead (team-leader, tech-lead) dùng fable; vai thực thi một việc (dev, maintainer, devops, architect, designer, reviewer, qa) dùng opus; vai phân tích và viết tài liệu (analyst, researcher, coach, writer) dùng sonnet | Claude (theo yêu cầu của chủ repo) | xong
@@ -256,6 +261,7 @@ Nhật ký chỉ thêm, mới nhất ở trên. Anh viết yêu cầu ở đây 
 | `gates.G5_prod` | boolean (True) | — | Duyệt lên production (Approved-by-prod trong asbuilt.md); luôn là người. |
 | `default_size` | string (auto / S / M / L) | — | Cỡ việc mặc định: auto (team-leader chấm) hoặc S/M/L. |
 | `default_mode` | string (ask / decide) | — | Chế độ mặc định: ask (hỏi điều lớn) hoặc decide (tự quyết, ghi lý do). |
+| `enforcement` | string (warn / block) | "warn" | Hook nhắc hay chặn: warn (mặc định, chỉ nhắc quy tắc, lệnh vẫn chạy) hoặc block (chặn lệnh vi phạm, kiểm lint/test trước khi agent dừng). |
 | `output_language` | string (vi / en) | "vi" | Ngôn ngữ văn xuôi của artifact đội viết ra: vi (mặc định) hoặc en; mốc máy đọc luôn tiếng Anh. |
 | `base_branch` | string | — | Nhánh nền để tạo nhánh team/* và mở PR. |
 | `protected_branches` | array | — | Nhánh không được push thẳng hay force-push. |
@@ -349,6 +355,7 @@ Nhật ký chỉ thêm, mới nhất ở trên. Anh viết yêu cầu ở đây 
 | `naming.branch` | string | — | Mẫu tên nhánh (team/{id}-{slug}). |
 | `test` | object | — | Cấu hình test. |
 | `test.skip_markers` | array | — | Dấu bỏ qua test bị cấm dùng để cho xanh |
+| `test.shared_state` | boolean | — | true khi các lần chạy test dùng chung một database/site/dịch vụ (hai bộ test chạy cùng lúc sẽ deadlock, rò dữ liệu); khi đó build chỉ chạy đủ cmd.test sau mỗi lần merge tuần tự, không chạy trong đợt song song |
 | `protected_paths` | array | — | Glob không agent nào được sửa: secret, lockfile, vendored, cấu hình prod |
 | `ci` | object | — | Cấu hình CI. |
 | `ci.provider` | string (github / gitlab / none) | — | Nhà cung cấp CI: github, gitlab hoặc none. |
@@ -421,6 +428,7 @@ Nhật ký chỉ thêm, mới nhất ở trên. Anh viết yêu cầu ở đây 
 | `STD-GIT-5` | 2 | Không commit file sinh ra, kết quả build hay file riêng của máy; khai chúng trong file ignore. |
 | `STD-GIT-6` | 2 | Cập nhật từ `config.base_branch` trước khi mở PR; giải xung đột mà không làm mất thay đổi của người khác. |
 | `STD-GIT-7` | 2 | Viết mô tả PR gồm: vì sao, đổi gì, cách kiểm, mã feature/task. |
+| `STD-GIT-8` | 3 | Không ghi AI vào commit hay PR: không có dòng `Co-Authored-By:`, không có dòng "Generated with Claude Code". |
 | `STD-CI-1` | 3 | Chạy lint, typecheck và test của profile trên mọi PR. |
 | `STD-CI-2` | 3 | Không merge khi CI đỏ. |
 | `STD-CI-3` | 2 | Không xóa, tắt hay nới một bước kiểm để CI xanh. |
@@ -458,7 +466,7 @@ Nhật ký chỉ thêm, mới nhất ở trên. Anh viết yêu cầu ở đây 
 | `STD-OPS-6` | 1 | Đặt thay đổi rủi ro cao sau cờ tính năng hoặc có đường tắt nhanh. |
 | `STD-OPS-7` | 3 | Không để agent thao tác trực tiếp trên dữ liệu hay hạ tầng prod. |
 
-Thông báo chặn không có mã STD: `BLOCKED (role-policy)` = vai đó không được ghi/chạy/gọi việc này (xem `hooks/role-policy.json`); `BLOCKED (research)` = `research.md` thiếu mục `## Sources` có URL.
+Mặc định (`enforcement: "warn"`) hook không chặn: nó báo `RULE (reminder, not enforced) (STD-XXX-n): …` cho Claude rồi để lệnh chạy tiếp. Chỉ khi đặt `"enforcement": "block"` mới hiện `BLOCKED …` và lệnh bị dừng. Thông báo không có mã STD: `(role-policy)` = vai đó không nên ghi/chạy/gọi việc này (xem `hooks/role-policy.json`); `(research)` = `research.md` thiếu mục `## Sources` có URL.
 <!-- /gen:std -->
 
 ## Mốc không dịch
@@ -503,9 +511,9 @@ Các mốc sau do script và cổng đọc bằng máy: **không bao giờ dịc
 
 ## Số liệu
 <!-- gen:stats -->
-- Phiên bản kit: 0.5.0
-- Skill: 26 · agent: 13 · playbook: 16 (+ 4 lô) · script: 30
-- Số từ trung vị (tiếng Anh): skill nạp thường xuyên 370.5, skill khác 1509.5, agent 918
-- Commit: 15e1ef2
-- Ngày sinh file: 2026-11-11
+- Phiên bản kit: 0.6.0
+- Skill: 26 · agent: 13 · playbook: 16 (+ 4 lô) · script: 31
+- Số từ trung vị (tiếng Anh): skill nạp thường xuyên 386.0, skill khác 1531.0, agent 939
+- Commit: 7897d49
+- Ngày sinh file: 2026-11-13
 <!-- /gen:stats -->

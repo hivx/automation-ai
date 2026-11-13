@@ -26,3 +26,8 @@ Approved-by:
 
 ## Gọi thừa agent
 <số agent mỗi feature so với max_agents_per_feature>
+
+## CLAUDE.md
+<!-- Đầu ra `check-claude-md.py`, rồi mỗi sự thật dự án cần thêm, sửa hoặc bỏ một dòng, kèm nguồn. /team:asbuilt (writer) áp các dòng này vào khối project. -->
+- `check-claude-md.py`: <dòng tổng kết>
+- add | fix | remove: <dòng nguyên văn> — mục <tên> — nguồn: <dòng journal / review-NN / defects>

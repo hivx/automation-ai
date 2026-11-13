@@ -10,7 +10,7 @@ allowed-tools: Bash(git status *) Bash(git diff *) Bash(git add *) Bash(git comm
 ## Overview
 This skill turns a change that is already green into one or a few small commits, each with one intent, in the format `type(scope): description (<ID>)` (STD-NAME-5), containing only files within the touchpoints. Its users are the dev or the maintainer, running it directly in their own worktree (no fork). A commit is a save point: each commit must be revertible on its own while the project still builds and passes its tests (STD-GIT-2).
 
-The `check-git.sh` hook blocks `--no-verify`, `-n` and force-push, and warns when a message has the wrong format; this skill does what the hook cannot: choose the files, separate the intents, write a meaningful message, and scan the staged part for secrets. Example: a task that adds expiry checking and also renames a helper ends up as two commits — `fix(otp): reject expired codes (FEAT-012)` and `refactor(otp): rename check helper (FEAT-012)`.
+The `check-git.sh` hook flags `--no-verify`, `-n`, force-push and a badly formatted message (a reminder by default, a stop with `enforcement: block`); this skill does what the hook cannot: choose the files, separate the intents, write a meaningful message, and scan the staged part for secrets. Example: a task that adds expiry checking and also renames a helper ends up as two commits — `fix(otp): reject expired codes (FEAT-012)` and `refactor(otp): rename check helper (FEAT-012)`.
 
 `$ARGUMENTS`: the `<ID>`, `--task T<N>`. The touchpoints come from the handoff message or from the task line in `docs/team/features/<ID>/tasks.md`.
 
@@ -48,14 +48,14 @@ Do not use when:
    - Secrets: search for the patterns in `${CLAUDE_SKILL_DIR}/references/secret-patterns.md`; any hit → stop and report to the human through the tech-lead (STD-SEC-1, STD-SEC-8). Record the location, never copy the value.
 8. **Atomicity test.** "If this commit alone were reverted, would the project still build and pass its tests?" No → merge or re-split.
 9. **Size.** > 300 changed lines or > 3 files on a size S task → record a `DONE_WITH_CONCERNS` concern suggesting the tech-lead split the task; never change the scope yourself.
-10. **Write the message.** First line: `type(scope): description (<ID>)`, imperative, standing on its own, ≤ 72 characters where possible. Body (for a non-trivial change): WHY, constraints, the `AC-n` criteria covered. First lines like "fix", "update", "misc", "phase 1" are forbidden. Examples: `${CLAUDE_SKILL_DIR}/references/messages.md`.
+10. **Write the message.** No `Co-Authored-By:` trailer and no "Generated with" line (STD-GIT-8; the hook flags them). First line: `type(scope): description (<ID>)`, imperative, standing on its own, ≤ 72 characters where possible. Body (for a non-trivial change): WHY, constraints, the `AC-n` criteria covered. First lines like "fix", "update", "misc", "phase 1" are forbidden. Examples: `${CLAUDE_SKILL_DIR}/references/messages.md`.
 11. **Commit.** `git commit` (NO `--no-verify`, no `-n`).
     If the project's commit hook reports an error (decision point):
     - Format/lint error on a touchpoint file → fix it, rerun `cmd.lint`, stage again, make a NEW commit.
     - Test error → back to dev work: run `cmd.test_one`, fix, rerun; never commit while red.
     - Error on a file outside the touchpoints (the hook scans the whole repo) → do not fix that file; record it in the report and return `DONE_WITH_CONCERNS` for the tech-lead to decide.
     - The hook cannot run (missing tool) → record the error verbatim, return `BLOCKED`; never bypass the hook.
-    The kit's `check-git.sh` hook hard-blocks `--no-verify`/`-n`; its message is a rule, not a suggestion.
+    The kit's `check-git.sh` hook flags `--no-verify`/`-n`; its message is a rule, not a suggestion, even when it only reminds.
 12. **Save point when red.** After a slice where `cmd.test_one` turns red for no clear reason: do not pile more edits on top. Go back to the last green commit for your own files (`git restore <file>` on touchpoint files), find the cause, then redo it in small steps. Never use `reset --hard` (it loses other people's work, and it is not in this skill's permissions).
 13. **Never rewrite shared history.** No `--amend`, no `reset --hard`, no rebase of commits the reviewer has already seen; rework rounds use new commits.
 14. **Check after committing.** `git log -1 --stat` for each commit; `git status --short` clean for the task's files.
@@ -77,7 +77,7 @@ Do not use when:
 | Thought | Correct action |
 |---|---|
 | "One task, so one commit for everything" | Split by intent: test + code of one behavior; rename/reformat separately. |
-| "The commit hook is slow, `--no-verify`" | Never; fix what the hook reports (the machine hook blocks it anyway). |
+| "The commit hook is slow, `--no-verify`" | Never; fix what the hook reports. |
 | "I will write the message later" | Write the first line in the right format now. |
 | "That extra file is only a small edit" | Take it out of the commit and report `DESIGN_CONFLICT`. |
 | "Tests were green before the last edit" | Rerun `cmd.test_one` and `cmd.lint` after it. |

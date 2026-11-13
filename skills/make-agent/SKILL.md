@@ -77,7 +77,7 @@ Do not use when:
 | "opus to be safe" | Choose by the cost of a mistake; record the reason in the registry. |
 | "It does not need the handbook" | Preloading is mandatory; prove it with one trial run. |
 | "Keep the test cases next to the agent, it is handy" | Put them in `docs/team/agents/`, never in `.claude/agents/`. |
-| "tech-lead calls this agent during build" | The hook blocks it; team-leader calls it, or proposes promoting it to a role. |
+| "tech-lead calls this agent during build" | role-policy flags it; team-leader calls it, or proposes promoting it to a role. |
 
 ## Red flags
 - A description that does not start with "Delegate when", or is > 300 characters.

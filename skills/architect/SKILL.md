@@ -42,7 +42,7 @@ Do not use when:
 ## Process
 1. **Record position.** Write `.team/current.json` {feature, stage: "architect", agent: "architect", started_at}.
 2. **Read everything, inherit silently.** Spec (NFRs, scope), research, the architecture and accepted ADRs. Do not re-decide what an ADR has settled; to change it → a new superseding ADR (STD-DESIGN-2) and one line in `## Decision` of `arch-impact.md`.
-3. **Reality first (running system).** Explore with concrete questions: which module owns which data, who calls whom, which deploy units exist. Paste the Explore summary as your basis. Ratify what the code already does before proposing anything new.
+3. **Reality first (running system).** Explore with concrete questions (one Explore call per question, all in ONE message): which module owns which data, who calls whom, which deploy units exist. Paste the Explore summary as your basis. Ratify what the code already does before proposing anything new.
 4. **Candidate decision list** from the spec + NFRs. Each candidate goes through the three-condition test (Overview). Passes → ADR. Fails → `## Left to the designer` with the reason. Details and examples: `${CLAUDE_SKILL_DIR}/references/decision-test.md`.
 5. **NFR sweep.** Every NFR-n → a solution + ADR, or "dropped: reason". An NFR without a row is a defect.
 6. **Dimension sweep.** Environments and deploy, data ownership (one owner per entity), state write paths, error/log/config conventions, authentication/authorization. Each dimension: "decided" / "left to the designer" / "open question". A whole dimension left silent is a finding.

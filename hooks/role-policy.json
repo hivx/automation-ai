@@ -31,6 +31,13 @@
     "sha256sum",
     "sed",
     "paste",
+    "ps",
+    "pgrep",
+    "md5sum",
+    "sha1sum",
+    "nl",
+    "column",
+    "seq",
     "cd"
   ],
   "readonly_scripts": {
@@ -43,6 +50,7 @@
     "measure.py": "",
     "teamlib.py": "",
     "check-profile.py": "",
+    "check-claude-md.py": "",
     "detect-stack.sh": "",
     "explore-cache.sh": "",
     "check-structure.sh": "",
@@ -192,6 +200,7 @@
         "docs/**",
         "CHANGELOG.md",
         "README.md",
+        "CLAUDE.md",
         ".team/current.json"
       ],
       "bash": "read-only",

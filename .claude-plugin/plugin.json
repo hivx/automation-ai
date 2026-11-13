@@ -1,6 +1,6 @@
 {
   "name": "team",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "A virtual IT team for Claude Code: agents, skills, rules and workflows from project takeover to release, with approval gates and self-improvement.",
   "author": {
     "name": "automation-ai contributors"

@@ -29,7 +29,7 @@ Plus `research.md` if it exists. Anything missing, or a mode that does not match
 ## 4. Procedure
 1. Write `.team/current.json` {feature, stage: "architect", agent: "architect"}.
 2. Read the spec, research, architecture and ADRs in full; never re-decide what an ADR has settled.
-3. Explore with specific questions; paste the summary as your grounds.
+3. Explore with specific questions (one call each, all in ONE message); paste the summary as your grounds.
 4. Put each candidate decision through the test: could diverge, not obvious, a real trade-off. Passes → ADR; fails → "left to designer".
 5. NFR sweep (every NFR-n gets a solution or "dropped: reason") and dimension sweep (deployment, data ownership, write paths, errors/logs/config, permissions).
 6. A technology with no source in `research.md` → `NEEDS_CONTEXT` "needs researcher: …".

@@ -11,7 +11,7 @@ allowed-tools: Bash(python3 *) Bash(cat *)
 # Record what was delivered
 
 ## Overview
-This skill records what WAS delivered — not what was planned — for the right reader. It runs in the `writer` context (fork), after qa has written `Verdict: accepted` and the human has approved G4. It produces four things: `asbuilt.md`, which compares every design section with the real code; release notes for the named audience; a CHANGELOG entry under `## [Unreleased]`; and `pr-body.md`, which `/team:pr` uses verbatim.
+This skill records what WAS delivered — not what was planned — for the right reader. It runs in the `writer` context (fork), after qa has written `Verdict: accepted` and the human has approved G4. It produces five things: `asbuilt.md`, which compares every design section with the real code; release notes for the named audience; a CHANGELOG entry under `## [Unreleased]`; the project block of `CLAUDE.md` brought up to date with what this feature changed; and `pr-body.md`, which `/team:pr` uses verbatim.
 
 The rule: every sentence you write must trace back to a line in `acceptance.md` (AC-n) or a hunk in `diff.patch`. No source, no sentence. For example, "OTP codes now expire after the configured TTL (AC-2)" is allowed only because AC-2 exists and was run; "OTP is now more secure" is not, because nothing measured it. The As-Built is also where the "after G4" part of the DoD, whose owner qa recorded, gets closed (K-35).
 
@@ -48,15 +48,16 @@ Do not use when:
 5. **Release notes** for the reader named in `--audience`: what changed, who is affected, what they must do (config change, migration window, new API version — taken from design sections 3 and 6). Each sentence cites AC-n or a file. Internal terms (task, review, STD) belong in the As-Built only, never in the release notes.
 6. **CHANGELOG.** Edit `CHANGELOG.md`: add lines under `## [Unreleased]` in the groups Added / Changed / Deprecated / Removed / Fixed / Security; one user-visible change per line, ending with the feature ID `(<ID>)`. A breaking change → group Changed/Removed with a pointer to the migration guide. Do NOT turn `[Unreleased]` into a version number — that belongs to `/team:release`.
 7. **User docs.** Grep the README and `structure.docs` for the command names, flags and behavior that just changed; edit exactly those passages, in the present tense ("command X outputs Y"), never as a change history. Commands shown to readers are copied from the `cmd.*` values. If the README is already correct → write "README: unchanged (grep `<string>` matches the AC-n behavior)".
-8. **pr-body.md.** Write `docs/team/features/<ID>/pr-body.md` following the PR template: `## Feature` (ID, paths of design/asbuilt/acceptance, Verdict), `## Why` (cite the spec), `## What changed` (behavior + main files; where it differs from design, cite the As-Built), `## How verified` (commands + exit codes copied from `acceptance.md`, no new claims), then the template's Review checklist. `/team:pr` greps exactly these four headings, so they stay English whatever `output_language` is.
-9. **Close the post-G4 debt.** For each job from step 2: do it, then rerun the check command qa left (read-only commands only, such as `grep`); record the result in the `## Post-G4 debt` section of `asbuilt.md`. A check that needs to run code → write "left for /team:release to check".
-10. **Write `asbuilt.md`** from `<kit>/templates/artifacts/asbuilt.md` (Write): the step-3 table under `## Differences from design`, the release notes, the CHANGELOG entry you added, the post-G4 debt section, and an empty `## Rollback` section for `/team:release`. Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language). Keep a placeholder for `Approved-by-prod:` within the first 20 lines; do NOT fill it in yourself, and do not write `Released:` (devops writes it after prod).
-11. **Final check.** `git status --short`: only `docs/**`, `CHANGELOG.md`, `README.md` changed (writer's role-policy). Grep `pr-body.md` for the four headings; grep CHANGELOG for `(<ID>)`.
-12. **Return** to team-leader in ≤ 10 lines, first line `writer -> team-leader | <ID> | ASBUILT` (or `NEEDS_CONTEXT`, `NEEDS_ANSWER`).
+8. **CLAUDE.md — keep the project block true.** Every session of every agent reads it, so a stale line costs more than a missing one. Read the block between `<!-- project:start -->` and `<!-- project:end -->`, plus the `## CLAUDE.md` lines of the latest `docs/team/retro/*.md` not applied yet. Against `diff.patch`, `review-NN.md`, `defects.md` and the notes in `tasks.md`, Edit ONLY inside that block: a path the diff moved or deleted → fix or drop the line; a new area under `structure.*`, a new or changed `cmd.*` value, a domain term the spec introduced, a convention review enforced, a trap that cost a rework round → one line in its section, citing its source in the As-Built (not in CLAUDE.md). Prune before you add: drop lines that no longer hold or that one Grep answers; stay ≤ 150 lines. Block missing (onboarded before kit 0.6.0) → Edit it in from `<kit>/templates/artifacts/claude-md.md` (language folder per `output_language`). Never touch the team block or text outside both blocks. Check: `python3 "<kit>/scripts/check-claude-md.py"` → 0 problems; record `CLAUDE.md: +<a> −<d> lines (<sections>)` or `CLAUDE.md: unchanged (check passed)` in `asbuilt.md`.
+9. **pr-body.md.** Write `docs/team/features/<ID>/pr-body.md` following the PR template: `## Feature` (ID, paths of design/asbuilt/acceptance, Verdict), `## Why` (cite the spec), `## What changed` (behavior + main files; where it differs from design, cite the As-Built), `## How verified` (commands + exit codes copied from `acceptance.md`, no new claims), then the template's Review checklist. `/team:pr` greps exactly these four headings, so they stay English whatever `output_language` is.
+10. **Close the post-G4 debt.** For each job from step 2: do it, then rerun the check command qa left (read-only commands only, such as `grep`); record the result in the `## Post-G4 debt` section of `asbuilt.md`. A check that needs to run code → write "left for /team:release to check".
+11. **Write `asbuilt.md`** from `<kit>/templates/artifacts/asbuilt.md` (Write): the step-3 table under `## Differences from design`, the release notes, the CHANGELOG entry you added, the `## CLAUDE.md` result of step 8, the post-G4 debt section, and an empty `## Rollback` section for `/team:release`. Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language). Keep a placeholder for `Approved-by-prod:` within the first 20 lines; do NOT fill it in yourself, and do not write `Released:` (devops writes it after prod).
+12. **Final check.** `git status --short`: only `docs/**`, `CHANGELOG.md`, `README.md`, `CLAUDE.md` changed (writer's role-policy); `git diff CLAUDE.md` stays inside the project block. Grep `pr-body.md` for the four headings; grep CHANGELOG for `(<ID>)`.
+13. **Return** to team-leader in ≤ 10 lines, first line `writer -> team-leader | <ID> | ASBUILT` (or `NEEDS_CONTEXT`, `NEEDS_ANSWER`).
 
 ## Outputs
 - `docs/team/features/<ID>/asbuilt.md`, `docs/team/features/<ID>/pr-body.md`.
-- `CHANGELOG.md` (entry under `[Unreleased]`); `README.md` or files under `structure.docs` when behavior changed.
+- `CHANGELOG.md` (entry under `[Unreleased]`); `README.md` or files under `structure.docs` when behavior changed; the project block of `CLAUDE.md`.
 - Example return message:
   ```
   writer -> team-leader | FEAT-014 | ASBUILT
@@ -64,6 +65,7 @@ Do not use when:
   Design comparison: 8 sections + 6 touchpoints; 1 differs (section 3: error 409→422, src/auth/otp.py:41, reason review-02)
   CHANGELOG: Added 1, Changed 1 under [Unreleased] (FEAT-014)
   Post-G4 debt from acceptance: 2/2 closed (CHANGELOG, docs/auth.md)
+  CLAUDE.md: +2 −1 lines (Commands, Gotchas); check-claude-md 0 problems
   Needs a human read: release notes "What to do" (OTP_TTL config change)
   Next: /team:pr FEAT-014
   ```
@@ -77,6 +79,8 @@ Do not use when:
 | "Mention the upcoming feature too, for completeness" | Only what is in the diff and in acceptance; future work is a promise nobody verified. |
 | "The README is surely still right" | Grep the changed behavior string and paste the grep result as evidence. |
 | "I'll type the install command from memory" | Copy the `cmd.*` value from the profile. |
+| "CLAUDE.md belongs to onboard, leave it alone" | The project block is yours to keep true after every feature; a stale path misleads every later session. |
+| "Add the whole feature to CLAUDE.md" | Only facts an agent needs before editing (paths, commands, terms, conventions, traps); history goes in the As-Built and CHANGELOG. |
 | "Turn `[Unreleased]` into 1.4.0 while I'm here" | That belongs to `/team:release` (devops), which picks the version from tags. |
 | "Add `Approved-by-prod:` to complete the paperwork" | Only the human fills it (G5 is always a human). |
 | "The diff has a new endpoint, describe it as a feature" | Behavior outside the spec → stop and hand back to team-leader. |
@@ -88,7 +92,8 @@ Do not use when:
 - A CHANGELOG line without the feature ID; `[Unreleased]` already renamed to a version number.
 - The README mentions a command that is not in `cmd.*`.
 - `pr-body.md` lacks one of the four headings; "How verified" contains a command that is not in `acceptance.md`.
-- writer wrote `Released:` or `Approved-by-prod:`; a file was written outside `docs/**`, `CHANGELOG.md`, `README.md`.
+- writer wrote `Released:` or `Approved-by-prod:`; a file was written outside `docs/**`, `CHANGELOG.md`, `README.md`, `CLAUDE.md`.
+- `git diff CLAUDE.md` touches the team block or text outside both blocks; the diff moved a path and the project block still names the old one.
 
 ## Verification
 - [ ] Paste `grep -E '^Verdict: accepted$' acceptance.md` (one line) and the G4 `Approved-by:` line (when G4 is on).
@@ -96,6 +101,7 @@ Do not use when:
 - [ ] The `CHANGELOG.md` diff under `## [Unreleased]` is pasted and contains `(<ID>)`.
 - [ ] Every qa line marked "owner: writer, after G4" has a closing result in `## Post-G4 debt`.
 - [ ] `grep -cE '^## (Feature|Why|What changed|How verified)$' pr-body.md` = 4 is pasted.
+- [ ] The `check-claude-md.py` summary line (0 problems) is pasted, with the `CLAUDE.md:` line recorded in `asbuilt.md`.
 - [ ] `git status --short` shows only files inside writer's write zone.
 
 ## See also

@@ -21,7 +21,7 @@ Anything missing: return ≤ 5 lines, `NEEDS_CONTEXT`, then stop.
 
 ## 3. Discover the stack first
 - `.team/profile.json`: `structure.*`, `naming.*`, `protected_paths`, `cmd.test_one` (only `{file}`), `cmd.migrate`, `ui`.
-- Explore (check `explore-cache.sh` first): error style, pagination, where permissions are checked, how config is read, test layout, the files and data you will touch.
+- Explore (check `explore-cache.sh` first; one call per question, all in ONE message): error style, pagination, where permissions are checked, how config is read, test layout, the files and data you will touch.
 - Related ADRs: their constraints are the design's law.
 
 ## 4. Procedure

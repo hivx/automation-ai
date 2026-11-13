@@ -22,7 +22,7 @@ Goal: before the team changes a single line of code, you and the team both know 
 4. Add `Approved-by: <name> <YYYY-MM-DD>` at the top of `ai-readiness.md`.
 
 ## Step 3 — `/team:onboard`
-- Writes `.team/profile.json`, `.team/config.json`, `.claude/settings.json` (permissions, protected branches, team-leader as the main-session agent), `.claude/rules/`, the `team` block in `CLAUDE.md`.
+- Writes `.team/profile.json`, `.team/config.json`, `.claude/settings.json` (permissions, protected branches, team-leader as the main-session agent), `.claude/rules/`, and `CLAUDE.md`: a project block that describes this codebase (from the takeover reports; an old CLAUDE.md is adopted and corrected, one reason row per change in `onboarding.md`) plus the short `team` block.
 - Prints the install commands for the recommended plugins; you decide whether to install them.
 - Commit these files.
 

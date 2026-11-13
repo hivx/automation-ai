@@ -3,7 +3,7 @@
 ## Dev status (first line of the return message)
 | Status | Meaning | What the tech-lead does |
 |---|---|---|
-| DONE | Done, with red then green, lint clean | Check the evidence → review package |
+| DONE | Done, with red then green, lint clean | Check the evidence → review package (in the reviewer handoff) |
 | DONE_WITH_CONCERNS | Done, but with a concern | Concern about correctness/scope → resolve it before review |
 | NEEDS_CONTEXT | Missing information to do it right | Add it, call again (never resend the old message) |
 | BLOCKED | Several attempts and still not passing | Change one thing; after max_attempts → stop |
@@ -17,13 +17,15 @@ Touchpoints: src/auth/otp.py, tests/auth/test_otp.py — modify ONLY inside the 
 Test: cmd.test_one with {file}=tests/auth/test_otp.py
 Branch: team/FEAT-012-task-3 (created from team/FEAT-012)
 Shared constraints: docs/team/features/FEAT-012/plan.md#shared-constraints
+Recurring findings (check your diff before DONE): STD-TEST-8 — seed non-default values so a hard-coded constant fails (review-02, review-05)
 Detailed report: docs/team/features/FEAT-012/dev-T3.md; return message ≤ 10 lines, first line is the status
 ```
 
 ## Calling the reviewer
 ```
 Review FEAT-012 T3 — grade against the Review checklist (10)
-Review package: docs/team/features/FEAT-012/review-pkg-T3.md (BASE 9f8e7d..a1b2c3d)
+Range: 9f8e7d..team/FEAT-012-task-3 (run git log / git diff --stat / git diff on it yourself)
+Dev evidence: RED "FAILED test_expired_code - AssertionError: 200 != 401"; GREEN "3 passed"; cmd.test "42 passed"
 Design: docs/team/features/FEAT-012/design.md (sections 7, 8)
 Task criterion: AC-2
 Return: verdict + findings `severity | STD | file:line | description | fix` + a "cannot verify from the diff" section

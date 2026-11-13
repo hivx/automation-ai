@@ -26,3 +26,8 @@ Approved-by:
 
 ## Excess agent calls
 <agents per feature compared with max_agents_per_feature>
+
+## CLAUDE.md
+<!-- `check-claude-md.py` output, then one line per project fact to add, fix or remove, with its source. /team:asbuilt (writer) applies these lines to the project block. -->
+- `check-claude-md.py`: <summary line>
+- add | fix | remove: <the exact line> — section <name> — source: <journal / review-NN / defects line>

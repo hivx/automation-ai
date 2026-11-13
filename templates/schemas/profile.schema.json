@@ -149,6 +149,10 @@
             "type": "string"
           },
           "description": "Test-skip markers that must not be used to get green"
+        },
+        "shared_state": {
+          "type": "boolean",
+          "description": "true when test runs share one database, site or service and two full suites at once interfere (deadlocks, leaked rows); the build then runs the full cmd.test only after each serial merge, never inside a parallel wave"
         }
       },
       "additionalProperties": false

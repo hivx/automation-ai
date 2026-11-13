@@ -30,7 +30,7 @@ Do not use when:
 
 ## Discover the stack first
 1. Read `.team/profile.json`: `structure.*` (`src`, `tests`, `allowed_new_file_roots`), `naming.*` (file, class, function, `test_file`), `protected_paths`, `cmd.test_one` (only the `{file}` placeholder varies), `cmd.migrate`, `ui`.
-2. Explore (concrete questions): the error style in use, the pagination style, where permissions are checked, how configuration is read, the existing test layout, the files and data that will be touched. Check the cache first: `bash "<kit>/scripts/explore-cache.sh" <directory>`; `HIT` → read the cache file.
+2. Explore (concrete questions; one Explore call per question, all in ONE message): the error style in use, the pagination style, where permissions are checked, how configuration is read, the existing test layout, the files and data that will be touched. Check the cache first: `bash "<kit>/scripts/explore-cache.sh" <directory>`; `HIT` → read the cache file.
 3. Read `docs/team/architecture.md` / `arch-impact.md` and the relevant ADRs (size L): an ADR's constraints are law for the design.
 
 ## Inputs and preconditions

@@ -1,10 +1,11 @@
 <!-- team:start -->
-## The `team` crew (plugin automation-ai)
-This project is run by the `team` plugin. Do not invent your own process: use the `/team:*` skills.
-- Start: `/team:status` (where we are), `/team:intake "<request>"` (new work), `/team:run` (continue).
-- Sources of truth: commands and structure in `.team/profile.json`; team behavior in `.team/config.json`;
-  artifacts in `docs/team/`; standards in the `handbook` skill.
-- Check one test file: `{{cmd.test_one}}`. Lint: `{{cmd.lint}}`.
+## Working with the AI team
+Work in this repo goes through the `team` plugin: use the `/team:*` skills, do not invent a process.
+- `/team:status` (where we are), `/team:intake "<request>"` (new work), `/team:run` (continue).
+- Commands and structure: `.team/profile.json`; team behavior: `.team/config.json`;
+  artifacts: `docs/team/`; standards: the `handbook` skill.
+- The project block above is kept true by the team (`/team:onboard` writes it, `/team:asbuilt` updates it
+  after each feature). Edit it freely; text outside both blocks is yours and the team never touches it.
 
 Six core rules:
 1. New files only inside `structure.allowed_new_file_roots`.

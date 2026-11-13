@@ -166,6 +166,9 @@ def main(argv):
             i += 1
     mdir = os.path.join(opts["--root"], "docs", "team", "metrics")
     runs = read_jsonl(opts.get("--runs") or os.path.join(mdir, "runs.jsonl"))
+    last = {r["agent_id"]: i for i, r in enumerate(runs) if isinstance(r, dict) and r.get("agent_id")}
+    runs = [r for i, r in enumerate(runs)  # SubagentStop repeats one agent's row; keep its last one
+            if not (isinstance(r, dict) and r.get("agent_id")) or last[r["agent_id"]] == i]
     feedback = read_jsonl(opts.get("--feedback") or os.path.join(mdir, "feedback.jsonl"))
     if opts.get("--since"):
         runs = [r for r in runs if str(r.get("ts", "")) >= opts["--since"]]

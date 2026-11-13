@@ -1,8 +1,8 @@
 # When something goes wrong
 
-## A hook blocks
-Signal: Claude reports that an action was blocked, with a reason from the hook.
-1. Read the reason. A hook is a rule (P3); do not look for a way around it.
+## A hook blocks or reminds
+Signal: Claude reports a `RULE (reminder, not enforced)` line (default `enforcement: "warn"`), or an action blocked with a reason (`enforcement: "block"`).
+1. Read the reason. A hook states a rule (P3); follow it, or say in the report why this case is an exception.
 2. Editing a protected file (`protected_paths`) → the human edits it, or fixes the profile if the path was declared by mistake.
 3. Creating a file outside `allowed_new_file_roots` → choose the right place, or add the directory to the list (human approval).
 4. Pushing a protected branch / force-push → push only `team/*` branches; open a PR.

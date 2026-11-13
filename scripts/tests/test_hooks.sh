@@ -14,7 +14,7 @@ check() { # check <name> <expected code> <script> <json> [--root dir]
 mkdir -p "$T/p/.team" "$T/p/src" "$T/p/tests" "$T/p/docs/team/features/FEAT-001"
 cd "$T/p" && git init -q -b main && git -c user.name=t -c user.email=t@t commit -q --allow-empty -m init && git switch -q -c team/FEAT-001-x
 cp "$KIT/profiles/python.json" .team/profile.json
-cp "$KIT/templates/project/team/config.json" .team/config.json
+jq '.enforcement = "block"' "$KIT/templates/project/team/config.json" > .team/config.json  # the checks below test the block mode
 echo 'x = 1' > src/existing.py
 P="$T/p"
 w() { jq -nc --arg t "$1" --arg f "$2" '{hook_event_name:"PreToolUse", tool_name:$t, tool_input:{file_path:$f}}'; }
@@ -39,6 +39,11 @@ check "protect: new root CHANGELOG.md allowed"   0 protect.sh "$(w Write "$P/CHA
 
 # check-git.sh
 check "git: push origin main blocked"            2 check-git.sh "$(b 'git push origin main')"
+check "git: commit with Co-Authored-By blocked (STD-GIT-8)" 2 check-git.sh "$(b $'git commit -m "feat(x): add y (FEAT-001)\n\nCo-Authored-By: Claude <noreply@anthropic.com>"')"
+check "git: heredoc commit with co-authored-by blocked" 2 check-git.sh "$(b $'git commit -m "$(cat <<\'EOF\'\nfix(x): z (BUG-001)\n\nco-authored-by: Someone <a@b.c>\nEOF\n)"')"
+check "git: plain commit allowed"                0 check-git.sh "$(b 'git commit -m "feat(x): add y (FEAT-001)"')"
+check "gh: PR body with Generated with Claude Code blocked" 2 check-git.sh "$(b $'gh pr create --title t --body "Why\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)"')"
+check "gh: PR without attribution allowed"       0 check-git.sh "$(b 'gh pr create --title t --body "Why: x"')"
 check "git: push HEAD:main blocked"              2 check-git.sh "$(b 'git push origin HEAD:main')"
 check "git: push team/x allowed"                 0 check-git.sh "$(b 'git push -u origin team/FEAT-001-x')"
 check "git: push without refspec on team/* allowed" 0 check-git.sh "$(b 'git push')"
@@ -88,10 +93,22 @@ check "role: team-leader jq >> feedback allowed" 0 role-policy.sh "$(b 'jq -nc {
 check "role: qa runs any check command allowed"  0 role-policy.sh "$(b 'python3 -c "print(1)"' team:qa)"
 check "role: tech-lead runs cmd.test allowed"    0 role-policy.sh "$(b 'pytest -q tests/test_x.py' team:tech-lead)"
 check "role: tech-lead curl blocked"             2 role-policy.sh "$(b 'curl https://example.com' team:tech-lead)"
+# cmd.* values with several segments (`cd ../.. && bench …`): each segment is allowed on its own
+jq '.cmd.migrate="cd ../.. && bench --site s1 migrate"' .team/profile.json > .team/p && mv .team/p .team/profile.json
+check "role: tech-lead runs segment of multi-part cmd allowed" 0 role-policy.sh "$(b 'bench --site s1 migrate' team:tech-lead)"
+check "role: tech-lead runs whole multi-part cmd allowed" 0 role-policy.sh "$(b 'cd ../.. && bench --site s1 migrate' team:tech-lead)"
+check "role: tech-lead other bench command blocked" 2 role-policy.sh "$(b 'bench --site s1 drop-site s1' team:tech-lead)"
+jq '.cmd.migrate="alembic upgrade head"' .team/profile.json > .team/p && mv .team/p .team/profile.json
 check "role: tech-lead calls team:dev allowed"   0 role-policy.sh "$(ag team:dev team:tech-lead)"
 check "role: tech-lead calls team:qa blocked"    2 role-policy.sh "$(ag team:qa team:tech-lead)"
 check "role: analyst calls Explore allowed"      0 role-policy.sh "$(ag Explore team:analyst)"
 check "role: dev calls an agent blocked"         2 role-policy.sh "$(ag Explore team:dev)"
+# v0.6.0: writer keeps the project block of CLAUDE.md; every role may run the check
+check "role: writer edits CLAUDE.md allowed"     0 role-policy.sh "$(rw Edit "$P/CLAUDE.md" team:writer)"
+check "role: writer edits src blocked"           2 role-policy.sh "$(rw Edit "$P/src/existing.py" team:writer)"
+check "role: team-leader edits CLAUDE.md outside onboard blocked" 2 role-policy.sh "$(rw Edit "$P/CLAUDE.md" team:team-leader)"
+check "role: writer runs check-claude-md allowed" 0 role-policy.sh "$(b "python3 $KIT/scripts/check-claude-md.py" team:writer)"
+check "role: coach runs check-claude-md allowed" 0 role-policy.sh "$(b "python3 $KIT/scripts/check-claude-md.py --root ." team:coach)"
 # K-39: read-only must not write or run commands
 check "role: reviewer sed e cmd blocked"         2 role-policy.sh "$(b "sed '1e touch x' src/existing.py" team:reviewer)"
 check "role: reviewer sed w file blocked"        2 role-policy.sh "$(b "sed -n 'w out.txt' src/existing.py" team:reviewer)"
@@ -193,6 +210,33 @@ check "stop: parallel researcher, its feature has Sources → allowed" 0 stop-ch
 check "role: tech-lead touch .team/active-build-<ID> allowed" 0 role-policy.sh "$(b 'touch .team/active-build-FEAT-003' team:tech-lead)"
 check "role: tech-lead rm -f .team/active-build-<ID> allowed" 0 role-policy.sh "$(b 'rm -f .team/active-build-FEAT-003' team:tech-lead)"
 rm -f "$P/.team/tr.jsonl"
+
+# session-start.sh never creates .team/ in a repo nobody took over; refreshes plugin_root in a team project
+mkdir -p "$T/other" && (cd "$T/other" && git init -q -b main)
+ss() { (cd "$1" && CLAUDE_PROJECT_DIR="$1" CLAUDE_PLUGIN_ROOT="$KIT" bash "$KIT/scripts/session-start.sh" <<<'{"source":"startup","session_id":"s1"}'); }
+out="$(ss "$T/other")"
+if [[ ! -e $T/other/.team && $out == *"not onboarded"* ]]; then pass=$((pass + 1)); echo "ok   session-start: no .team/ in a foreign repo";
+else failn=$((failn + 1)); echo "FAIL session-start: created .team/ in a foreign repo or no hint"; fi
+rm -f "$P/.team/plugin_root"; ss "$P" >/dev/null
+if [[ $(cat "$P/.team/plugin_root" 2>/dev/null) == "$KIT" ]]; then pass=$((pass + 1)); echo "ok   session-start: plugin_root refreshed in a team project";
+else failn=$((failn + 1)); echo "FAIL session-start: plugin_root not written in a team project"; fi
+
+check "role-policy: team-leader K=\$(cat .team/plugin_root); team.py status is read-only" 0 role-policy.sh "$(b 'K=$(cat .team/plugin_root); python3 "$K/scripts/team.py" status' team:team-leader)"
+check "role-policy: team-leader git reflog is read-only" 0 role-policy.sh "$(b 'git reflog -5' team:team-leader)"
+check "role-policy: team-leader ps is read-only"         0 role-policy.sh "$(b 'ps -eo pid,cmd' team:team-leader)"
+check "role-policy: team-leader other substitution still flagged (block mode)" 2 role-policy.sh "$(b 'echo $(rm -rf x)' team:team-leader)"
+# default "warn" mode: the same violations only remind (exit 0 + additionalContext / systemMessage)
+jq '.enforcement = "warn"' .team/config.json > .team/c.tmp && mv .team/c.tmp .team/config.json
+check "warn mode: push origin main runs, reminded"       0 check-git.sh "$(b 'git push origin main')"
+check "warn mode: edit .team/profile.json runs"           0 protect.sh "$(w Edit "$P/.team/profile.json")"
+check "warn mode: rm of protected path runs"             0 protect.sh "$(b 'rm .claude/settings.json')"
+check "warn mode: team-leader non-read-only Bash runs"    0 role-policy.sh "$(b 'python3 -c "print(1)"' team:team-leader)"
+out="$(CLAUDE_PROJECT_DIR="$P" bash "$KIT/scripts/check-git.sh" <<<"$(b 'git push origin main')" 2>/dev/null)"
+if jq -e '.hookSpecificOutput.additionalContext | test("RULE \\(reminder")' <<<"$out" >/dev/null; then pass=$((pass + 1)); echo "ok   warn mode: reminder reaches Claude as additionalContext";
+else failn=$((failn + 1)); echo "FAIL warn mode: no additionalContext reminder — $out"; fi
+jq 'del(.enforcement)' .team/config.json > .team/c.tmp && mv .team/c.tmp .team/config.json
+check "no enforcement key = warn: push origin main runs" 0 check-git.sh "$(b 'git push origin main')"
+jq '.enforcement = "block"' .team/config.json > .team/c.tmp && mv .team/c.tmp .team/config.json
 
 echo "test_hooks: $pass passed, $failn failed"
 (( failn == 0 ))

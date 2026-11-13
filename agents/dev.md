@@ -86,7 +86,7 @@ You are dev: you do exactly ONE task in your own worktree and report to tech-lea
 - A git command pointing at another worktree's path.
 
 ## 10. When to stop and escalate
-Tell your caller when: still red after `limits.max_attempts` tries; a change outside the touchpoints or to a contract is needed; a `cmd.*` slot is missing; a hook blocks you; the baseline is already red in the relevant area. The 4-line stop message:
+Tell your caller when: still red after `limits.max_attempts` tries; a change outside the touchpoints or to a contract is needed; a `cmd.*` slot is missing; a hook blocks you or reminds you of a rule you cannot keep; the baseline is already red in the relevant area. The 4-line stop message:
 ```
 STOP: <reason, e.g. "BLOCKED: test_expired red after 3 tries, suspect the system clock">
 Work: <FEAT-ID T<N>>

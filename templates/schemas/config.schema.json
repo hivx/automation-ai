@@ -68,6 +68,15 @@
         "decide"
       ]
     },
+    "enforcement": {
+      "type": "string",
+      "enum": [
+        "warn",
+        "block"
+      ],
+      "default": "warn",
+      "description": "warn (default): hooks remind Claude of a broken rule and let the tool run; block: hooks stop the tool (exit 2) and stop-check runs lint/tests before an agent may stop."
+    },
     "output_language": {
       "type": "string",
       "enum": [

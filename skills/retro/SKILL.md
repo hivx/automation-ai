@@ -50,9 +50,10 @@ Do not use when:
 9. **Propose.** Write `docs/team/proposals/<date>/<agent-or-skill>.md` from `<kit>/templates/artifacts/proposal.md`: the evidence, the 5-cause table, the COMPLETE content of the overlay file (first line `# Overlay from retro <date>: <reason>`, plus the version), a fix form that matches the failure kind (a rationalization table for a skipped step, a template field for a missing part, a formula for a wrong shape, a rule tied to an observable condition), the eval, the canary, the rollback. The overlay body is AI-facing, so write it in English whatever `output_language` is. Eval and canary details: `${CLAUDE_SKILL_DIR}/references/proposal-eval.md`.
 10. **An eval that discriminates.** ≥ 3 scenarios in the format of `evals/<skill>/scenarios.md`; at least one check that the current version FAILS and the proposed version passes; one control scenario that does not change; a check that passes on both versions is marked "does not discriminate". State who runs it (`evals/run-eval.sh`, the human/the kit maintainer).
 11. **Cross-check the configuration.** Over-calling: the number of ROLES team-leader called itself per feature (including fork skills; not counting dev/reviewer called by tech-lead, K-15) against `max_agents_per_feature[size]`. A level-1 STD rule violated ≥ 2 times → propose raising its level.
-12. **Review the registry.** From `skills-registry.md`: a `temp` entry unused for > 30 days → propose `retired`; a stable `temp` → `project` (the human approves); the number of `temp` entries against `max_temp_skills`. coach does not write the registry: this is a proposal for team-leader.
-13. **Assumptions (`--decide`).** Record every assumption (the period chosen, the features counted, the confidence labels) under `## Assumptions`.
-14. **Finish** `docs/team/retro/<date>.md`; memory: dated conclusions, no sensitive data; return to team-leader in ≤ 10 lines, first line `coach -> team-leader | retro <date> | <N> proposals, <M> watched`.
+12. **Project context.** `python3 "<kit>/scripts/check-claude-md.py"` (read-only); paste the summary line. A project fact the team rediscovered or got wrong in ≥ 2 features (the same Grep hunt in journals, the same convention flagged in `review-NN`, a rework caused by a trap) is an "input" cause whose fix is a CLAUDE.md line, not an overlay: write the exact line (add / fix / remove, section, source) under `## CLAUDE.md` in the retro; writer applies it at the next `/team:asbuilt`. A problem from the check (a stale path, over budget) goes there too.
+13. **Review the registry.** From `skills-registry.md`: a `temp` entry unused for > 30 days → propose `retired`; a stable `temp` → `project` (the human approves); the number of `temp` entries against `max_temp_skills`. coach does not write the registry: this is a proposal for team-leader.
+14. **Assumptions (`--decide`).** Record every assumption (the period chosen, the features counted, the confidence labels) under `## Assumptions`.
+15. **Finish** `docs/team/retro/<date>.md`; memory: dated conclusions, no sensitive data; return to team-leader in ≤ 10 lines, first line `coach -> team-leader | retro <date> | <N> proposals, <M> watched`.
 
 ## Outputs
 - `docs/team/retro/<date>.md`; `docs/team/proposals/<date>/*.md`; coach's memory.
@@ -95,6 +96,7 @@ Do not use when:
 - [ ] Every proposal has the overlay line, a sourced 5-cause table, ≥ 3 eval scenarios, a canary, a rollback.
 - [ ] The previous-retro follow-up table and the over-calling table (counted per K-15) are in the retro.
 - [ ] The source table shows which sources were checked and which were missing.
+- [ ] `## CLAUDE.md` holds the `check-claude-md.py` summary line and a source for every line it asks to add, fix or remove.
 
 ## See also
 - `${CLAUDE_SKILL_DIR}/references/proposal-eval.md` — the discriminating eval template, the canary, the keep/rollback/replace/remove criteria. Open it at steps 9–10.

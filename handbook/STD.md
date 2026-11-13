@@ -98,6 +98,7 @@ A level-1 rule violated ≥ 2 times → coach proposes raising its level (to 2 o
 | STD-GIT-5 | Do not commit generated files, build output or machine-specific files; list them in the ignore file. | 2 | reviewer | — |
 | STD-GIT-6 | Update from `config.base_branch` before opening a PR; resolve conflicts without losing other people's changes. | 2 | reviewer | config.base_branch |
 | STD-GIT-7 | Write a PR description covering: why, what changed, how it was verified, the feature/task ID. | 2 | reviewer | — |
+| STD-GIT-8 | No AI attribution in commits or PRs: no `Co-Authored-By:` trailer, no "Generated with Claude Code" line. | 3 | hook | — |
 
 ## STD-CI — Continuous integration
 | Code | Rule | Level | Enforced by | Profile slot |

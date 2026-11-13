@@ -19,5 +19,6 @@ Every skill names the tool for each step according to this table. When the prefe
 | Know a feature's state | `scripts/team.py status` | Read the artifacts in `docs/team/features/<ID>/` | Store no pointer |
 | Schedule periodic runs | Claude Code scheduled tasks | GitHub Actions `schedule` | `decide` mode only |
 | Long or parallel work | a separate worktree (`isolation: worktree`) | A separate branch in the main repo | Two tasks touching the same file never run in parallel |
+| Several independent calls (Explore questions, devs, reviewers, features) | ONE message with one Agent call each, so they run at the same time | One call after another only when a call needs an earlier one's result | Waiting on one call while independent work sits idle wastes the run |
 | Ask the human | `AskUserQuestion` in the main session | Issue comment + label `team:needs-answer` | Only team-leader asks |
 | Track tasks | the feature's `tasks.md` | — | State lives on disk |

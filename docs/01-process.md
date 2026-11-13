@@ -16,7 +16,7 @@ Artifacts live in `docs/team/features/<ID>/` unless stated otherwise.
 | 5 | Planning | `/team:plan` | tech-lead | `plan.md`, `tasks.md` | G3 on |
 | 6 | Build | `/team:build` | tech-lead → dev, reviewer | code, commits, `review-NN.md` | — |
 | 7 | Acceptance | `/team:verify` | qa | `acceptance.md` | G4 on |
-| 8 | Release | `/team:asbuilt`, `/team:pr`, `/team:release` | writer, tech-lead, devops | `asbuilt.md`, CHANGELOG, PR | G5 always a human |
+| 8 | Release | `/team:asbuilt`, `/team:pr`, `/team:release` | writer, tech-lead, devops | `asbuilt.md`, CHANGELOG, CLAUDE.md project block, PR | G5 always a human |
 | 9 | Operations | `/team:intake --type bug`, `/team:clean`, `/team:ci`, `/team:retro` | team-leader, maintainer, devops, coach | `defects.md`, `debt.md`, `retro/` | — |
 
 **Approving a gate:** add the line `Approved-by: <name> <YYYY-MM-DD>` at the top of the artifact (G5 uses `Approved-by-prod:`), or comment `@claude approve Gn` on the issue. A gate set to `false` in `.team/config.json` does not block.
@@ -48,10 +48,10 @@ team-leader sets the size at intake. Force a size with `--size S|M|L` or the lab
 5. tech-lead ticks the task, writes `review-NN.md`, merges into `team/<ID>`, runs `cmd.test`.
 6. No tasks left → `/team:verify`.
 
-A task takes 2–5 minutes and names concrete file paths. Two tasks that touch the same file never run in parallel; ready tasks that share no file run as a wave of up to `limits.max_parallel_dev` devs at once (skill `build`). Nobody says "done" before pasting the output.
+A task takes 2–5 minutes and names concrete file paths. Two tasks that touch the same file never run in parallel; the build dispatches in rounds: each round is one message carrying every call that can start now (devs for ready tasks that share no file with a task in flight, reworks, reviews), up to the dev and reviewer headcount, and never waits for a whole wave to be ticked (skill `build`). Independent Explore questions also go in one message. Nobody says "done" before pasting the output.
 
 ## Several features at once
-One role can have several people: `limits.headcount.<role>` in `.team/config.json` (default 1; dev from `max_parallel_dev`). `/team:run --all` runs parallel waves: `team.py wave` picks every feature that can move now, caps each role at its headcount, keeps builds with overlapping `files:` apart and splits the team-wide dev/reviewer headcount between builds; the team-leader dispatches the whole wave in one message (skill `run`). The stages of ONE feature stay sequential.
+One role can have several people: `limits.headcount.<role>` in `.team/config.json` (template defaults: dev 4 via `max_parallel_dev`, reviewer 4, architect 1, the other roles 2; a missing key means 1, dev from `max_parallel_dev`). A request with several independent items becomes one intake per item, run together. `/team:run --all` runs parallel waves: `team.py wave` picks every feature that can move now, caps each role at its headcount, keeps builds with overlapping `files:` apart and splits the team-wide dev/reviewer headcount between builds; the team-leader dispatches the whole wave in one message (skill `run`). The stages of ONE feature stay sequential.
 
 ## Stopping and escalation
 The team stops when: a task is BLOCKED after `max_attempts`; `max_rework` is exceeded; it hits `DESIGN_CONFLICT` or a design-defect verdict; an enabled gate is not approved; `feature_budget_usd` is exceeded; it touches `protected_paths`; two rework rounds hit the same error.

@@ -3,7 +3,8 @@
 
 Placeholders: {{a.b}} comes from .team/profile.json (then .team/config.json); {{kit}} = the kit directory
 (as //absolute/path inside permission rules). Lists are joined with ", ". A missing value → empty string.
-JSON templates (--json): an array element "{{cmd.*}}" expands to Bash(<command> *) for every non-empty cmd.* slot;
+JSON templates (--json): an array element "{{cmd.*}}" expands to Bash(<command> *) for every non-empty cmd.* slot
+  (plus one entry per subcommand of a `a && b` value, `cd` left out);
 an element containing "{{protected_paths}}" expands to one element per protected path.
 
 Usage:
@@ -81,7 +82,11 @@ def expand_json(node, ctx, profile):
             if item == "{{cmd.*}}":
                 for v in (profile.get("cmd") or {}).values():
                     if isinstance(v, str) and v.strip():
-                        out.append(f"Bash({v.split('{file}')[0].strip()} *)")
+                        head = v.split('{file}')[0].strip()
+                        out.append(f"Bash({head} *)")
+                        parts = [s for s in re.split(r"\s*(?:&&|\|\||;)\s*", head) if s]
+                        if len(parts) > 1:  # `cd <dir> && <tool> …`: permissions are checked per subcommand
+                            out += [f"Bash({s} *)" for s in parts if not re.match(r"^cd(\s|$)", s)]
             elif isinstance(item, str) and "{{protected_paths}}" in item:
                 for p in profile.get("protected_paths") or []:
                     out.append(item.replace("{{protected_paths}}", perm_path(p)))

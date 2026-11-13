@@ -3,6 +3,8 @@
 # Reads agent_type from the hook JSON; when the role is listed in hooks/role-policy.json it checks:
 #   file writes only into the `write` patterns; Bash per `bash` ("any" | "read-only" | {"allow": [...]});
 #   Agent may only call a subagent_type listed in `agents`. A role not in the file → allowed.
+#   Exit 2 only when .team/config.json has "enforcement": "block"; by default ("warn") the same check is a reminder
+#   in additionalContext and the tool runs.
 # Usage: role-policy.sh [--root DIR] [--policy FILE] < hook.json ; role-policy.sh --help
 set -uo pipefail
 . "$(dirname "${BASH_SOURCE[0]}")/lib.sh"

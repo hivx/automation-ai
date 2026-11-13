@@ -78,5 +78,17 @@ hook_stage() { [[ "$(hook_feature)" == "$(current_feature)" ]] && current_stage;
 # build_active: a build is running (.team/active-build-<ID> per feature; the old single .team/active-build still counts).
 build_active() { compgen -G "$TEAM_ROOT/.team/active-build*" >/dev/null; }
 
-block() { printf '%s\n' "$*" >&2; exit 2; }
+# enforcement: config `enforcement` = "block" makes a rule violation stop the tool (exit 2). Anything else (default
+# "warn") lets the tool run and hands the rule to Claude as context: skills and rules guide the work, hooks remind.
+enforcement() { [[ "$(jq -r '.enforcement // empty' "$TEAM_ROOT/.team/config.json" 2>/dev/null)" == block ]] && echo block || echo warn; }
+remind() { # remind <message>: the rule as a reminder, never a stop (PreToolUse/PostToolUse → additionalContext, else systemMessage)
+  local msg="${1/#BLOCKED/RULE (reminder, not enforced)}" ev; ev="$(input_get '.hook_event_name')"
+  printf '%s\n' "$msg" >&2
+  if [[ $ev == PreToolUse || $ev == PostToolUse ]]; then
+    jq -nc --arg e "$ev" --arg m "$msg" '{hookSpecificOutput:{hookEventName:$e, additionalContext:$m}}'
+  else
+    jq -nc --arg m "$msg" '{systemMessage:$m}'
+  fi
+}
+block() { [[ "$(enforcement)" == block ]] && { printf '%s\n' "$*" >&2; exit 2; }; remind "$*"; exit 0; }
 allow() { exit 0; }

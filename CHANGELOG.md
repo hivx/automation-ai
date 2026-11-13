@@ -5,6 +5,35 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follo
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-13
+
+CLAUDE.md describes the project, and the team keeps it true (owner request, ADJ-32, SPEC-OVERRIDES entry 3). Build-loop fixes from the first real project (`erp_ai`, Frappe; K-82..K-89 in `docs/kit-issues.md`). Independent work runs at the same time (owner request, ADJ-33, SPEC-OVERRIDES entry 4; K-92..K-95).
+
+### Added
+- Project block in the project's `CLAUDE.md` (`<!-- project:start -->…<!-- project:end -->`, ≤ 150 lines): what the system is, commands copied from `cmd.*`, layout, domain terms, conventions, gotchas. Template `templates/artifacts/claude-md.md` (+ `vi/`).
+- `scripts/check-claude-md.py`: one block of each kind, project before team, line budgets (150 / 25 / 200), no `{{` or `<fill:` left, no stale path in the project block. Read-only for every role. Tests in `test_check_claude_md.py`.
+- `## CLAUDE.md` section in the As-Built and retro templates.
+- Hooks remind instead of block (owner decision, ADJ-34, SPEC-OVERRIDES entry 5, K-96): config `enforcement` `"warn"` (default, also when the key is missing) lets every tool run and hands the broken rule to Claude as context; stop-check skips its lint/test pass. `"block"` restores the old stops. The team can now edit `.team/profile.json`/`config.json` in decide mode (K-91).
+- STD-GIT-8 (owner decision): no AI attribution in commits or PRs. `check-git.sh` blocks a `git commit` or `gh pr create|edit|merge` whose message (inline or `-F`/`--body-file`) has a `Co-Authored-By:` trailer or a "Generated with Claude" line; the settings template sets `attribution` to empty and `includeCoAuthoredBy: false`.
+- `test.shared_state` profile slot (K-87): tests that share one database or site never run as two full suites at once.
+- Build baseline (K-88): the first build run records the red tests that already existed; green = nothing red outside that list.
+- `team.py status` shows a Tasks column (`done/total`).
+
+### Changed
+- `/team:onboard` writes the project block from the takeover reports and adopts an old CLAUDE.md into it (one reason row per cut or corrected line in `onboarding.md`); re-running onboard on a project onboarded earlier adds the missing block.
+- `/team:asbuilt` (writer) step 8 keeps the project block true after every feature (paths, `cmd.*`, terms, conventions, traps; prune before adding) and applies the open `## CLAUDE.md` lines of the latest retro. writer may now write `CLAUDE.md` (role-policy).
+- `/team:retro` step 12 runs the check and turns repeated project-knowledge misses into CLAUDE.md lines instead of overlays.
+- `/team:takeover` gives keep / cut / rewrite per CLAUDE.md section for onboard to apply; a wrong CLAUDE.md is no longer manual work for the human.
+- Team block retitled "Working with the AI team", placed after the project block; its command line moved to the project block's Commands.
+- role-policy allows each segment of a multi-segment `cmd.*` value (`cd ../.. && bench …`), and `render.py` adds one allow entry per subcommand, so tech-lead runs `cmd.test` itself instead of through a dev (K-82).
+- `/team:run --until-blocked` and `--all` count ticked tasks as progress, so a build that ran out of turns is resumed instead of stopping the loop (K-83).
+- Build: the review package travels in the reviewer handoff (range + dev's RED/GREEN lines), never as a `review-pkg-*` file or diff copy; one `review-NN.md` per task (K-84). Merged task branches and dev worktrees are removed after the tick (K-85). Every dev handoff carries the feature's recurring review findings (K-86).
+- Build dispatches in rounds instead of waves (K-92): each round is ONE message with every call that can start now (devs for ready tasks that share no file with a task in flight, rework devs, reviewers); it never waits for a whole wave to be ticked.
+- Config template defaults (K-93): `max_parallel_dev` 2 → 4; `headcount` reviewer 2 → 4, tech-lead, analyst, researcher, designer, qa, writer 1 → 2, architect stays 1. Projects onboarded earlier keep their values.
+- Independent Explore questions go out as one Explore call each in one message (analyze, design, architect, takeover); intake gives each independent item of a request its own ID so the items run as one wave (K-94).
+- `team.py metrics`/`scorecard` and `measure.py` count one row per `agent_id` (the last one): SubagentStop repeated tech-lead's row each time a dev or reviewer it called stopped (K-95).
+- `session-start.sh` no longer creates `.team/` in repos that were never taken over; takeover and onboard write `.team/plugin_root` on first run (K-89).
+
 ## [0.5.0] - 2026-11-11
 
 A team has fixed roles but a variable number of people per role (owner request, ADJ-31).

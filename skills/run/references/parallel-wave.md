@@ -21,10 +21,10 @@ Forked skills run one at a time (`background: false`, ADJ-13). To run several ro
    Report: ≤ 10 lines, first line is the status
    ```
 6. Read each return by its first line, as in team-leader step 9. A stop in one feature never cancels the others. Journal after each handoff; `bash "<kit>/scripts/log-run.sh" --feature <ID> --skill <skill> --result <result>` (always pass `--feature` in a wave).
-7. Rerun `team.py wave --json`. A feature whose stage did not change since its dispatch is held for the rest of this run (report it; never redispatch the same skill). Loop to step 2.
+7. Rerun `team.py wave --json`. A feature with no progress since its dispatch (same stage and, for a build, same `tasks_done`) is held for the rest of this run (report it; never redispatch the same skill). Loop to step 2.
 
 ## Headcount
-- `limits.headcount.<role>` in `.team/config.json` caps how many agents of one role run at once, team-wide (default 1). Example: `{"analyst": 2, "designer": 2, "tech-lead": 2}` with `max_parallel_dev: 5`.
+- `limits.headcount.<role>` in `.team/config.json` caps how many agents of one role run at once, team-wide (a missing key means 1). The config template ships `max_parallel_dev: 4`, reviewer 4, architect 1 and 2 for the other roles; a project onboarded earlier keeps its own values.
 - dev uses `limits.headcount.dev`, else `limits.max_parallel_dev`; reviewer defaults to the dev value. When several features build at once, `team.py wave` splits the dev and reviewer headcount between them (`devs=`, `reviewers=`), and tech-lead's build loop uses that share.
 - Two builds whose `tasks.md` `files:` overlap never run in the same wave; the later one waits.
 - Cost grows with the number of agents running at once; `limits.feature_budget_usd` still applies per feature.

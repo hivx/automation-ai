@@ -34,7 +34,7 @@ The analyst does not choose technology, but must know what the project already h
 1. Read `.team/profile.json`: `stack`, `language`, `structure.src`, `structure.tests`, `ui`, `tracker`. This is context, not a proposal.
 2. Read `docs/team/glossary.md` (if present) to use the business terms correctly.
 3. Check the exploration cache: `bash "<kit>/scripts/explore-cache.sh" <relevant directory>`; on `HIT` read the cache file instead of re-reading the code.
-4. On a cache `MISS`, call Explore (Agent) for the relevant code with one precise question: "where does behavior X live today, and what constrains it".
+4. On a cache `MISS`, call Explore (Agent) for the relevant code with one precise question per area: "where does behavior X live today, and what constrains it"; several areas → one Explore call each, all in ONE message.
 Do not run any `cmd.*` command in this stage.
 
 ## Inputs and preconditions

@@ -51,6 +51,7 @@
 - STD-GIT-5 (2) Do not commit generated files, build output or machine-specific files; list them in the ignore file.
 - STD-GIT-6 (2) Update from `config.base_branch` before opening a PR; resolve conflicts without losing other people's changes.
 - STD-GIT-7 (2) Write a PR description covering: why, what changed, how it was verified, the feature/task ID.
+- STD-GIT-8 (3) No AI attribution in commits or PRs: no `Co-Authored-By:` trailer, no "Generated with Claude Code" line.
 - STD-CI-1 (3) Run the profile's lint, typecheck and tests on every PR.
 - STD-CI-2 (3) Do not merge while CI is red.
 - STD-CI-3 (2) Do not delete, disable or loosen a check step to make CI green.

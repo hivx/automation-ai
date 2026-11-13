@@ -17,7 +17,7 @@ Requirements: Claude Code ≥ 2.1; `bash`, `python3`, `jq`, `git`; `gh` optional
 ## After installing: takeover → onboard
 1. Project already has code: `/team:takeover` → read `docs/team/` → approve `ai-readiness.md` (G0).
 2. Empty repo: skip takeover and run `/team:onboard --new`.
-3. `/team:onboard` creates `.team/profile.json`, `.team/config.json`, the `<!-- team:start -->…<!-- team:end -->` block in `CLAUDE.md` (inserted, never overwritten), `.claude/settings.json`, `.claude/rules/`, GitHub templates. It also sets `team-leader` as the main-session agent (ADJ-01). Set `output_language` in `.team/config.json` (`vi` default, or `en`) to choose the prose language of artifacts (`docs/04-profile.md`).
+3. `/team:onboard` creates `.team/profile.json`, `.team/config.json`, `CLAUDE.md` with two blocks — a project block (`<!-- project:start -->…<!-- project:end -->`: what the system is, commands, layout, domain terms, conventions, gotchas, written from the takeover reports; an old CLAUDE.md is adopted into it) and a short team block (`<!-- team:start -->…<!-- team:end -->`) — text outside both is never touched, `.claude/settings.json`, `.claude/rules/`, GitHub templates. It also sets `team-leader` as the main-session agent (ADJ-01). Set `output_language` in `.team/config.json` (`vi` default, or `en`) to choose the prose language of artifacts (`docs/04-profile.md`).
 
 ## Three settings scopes
 | Scope | File | Used for |
@@ -38,9 +38,11 @@ Permission mode per stage: `plan` during analysis/architecture; `acceptEdits` du
 ## Uninstalling
 - Marketplace: `/plugin uninstall team@automation-ai`, then `/plugin marketplace remove automation-ai` if you no longer use it.
 - Local: delete the `.claude/agents/` and `.claude/skills/` entries the kit copied (see the install-local log), `.claude/team-kit/`, `.team/plugin_root`.
-- The team's data (`docs/team/`, `.team/profile.json`, `.team/config.json`) belongs to the project: keep or delete it as you like. The `team` block in `CLAUDE.md` sits between the `team:start`/`team:end` markers; delete the whole block.
+- The team's data (`docs/team/`, `.team/profile.json`, `.team/config.json`) belongs to the project: keep or delete it as you like. The `team` block in `CLAUDE.md` sits between the `team:start`/`team:end` markers; delete the whole block. The project block describes your project: keep it (drop only its two marker lines).
 
 ## Installed hooks (machine rules)
+By default (`enforcement: "warn"` in `.team/config.json`) every hook below only reminds: it hands the broken rule to Claude as context and the tool still runs, and `stop-check.sh` skips its lint/test pass. Set `"enforcement": "block"` to make the checks stop the tool (exit 2) — "Blocks" in the table means that mode.
+
 The plugin's `hooks/hooks.json`; in a local install, `install-local.sh` merges the same content into `.claude/settings.json` with the path `${CLAUDE_PROJECT_DIR}/.claude/team-kit/scripts/`.
 
 | Event | Script | What it does |
@@ -60,4 +62,4 @@ Per-role limits live in `hooks/role-policy.json`; a session with no agent (the h
 ## Notes on settings
 - `skillOverrides` in `.claude/settings.json` is empty by default. Use it to hide another plugin's duplicate skills: `{"<plugin>:<skill>": "off"}` or `"user-invocable-only"`. JSON does not allow comments, so the note lives here.
 - `Read(//<kit>/**)` sits in `.claude/settings.local.json` (per machine) so that agents can read the kit's `handbook/STD-short.md`.
-- `.claude/settings*.json` cannot be changed with Edit/Write (the hook blocks it); change it through `/team:onboard` or edit it by hand.
+- `.claude/settings*.json` changes through `/team:onboard` or by hand; an Edit/Write by the team is flagged (blocked with `enforcement: "block"`).

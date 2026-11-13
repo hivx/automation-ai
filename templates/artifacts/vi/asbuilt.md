@@ -21,6 +21,10 @@ Approved-by:
 ## CHANGELOG
 <mục đã thêm dưới [Unreleased]>
 
+## CLAUDE.md
+<CLAUDE.md: +<a> −<d> dòng (<các mục>), mỗi dòng một nguồn (review-NN / defects / hunk diff) — hoặc: CLAUDE.md: unchanged (check passed)>
+- `check-claude-md.py`: <dòng tổng kết>
+
 ## Nợ sau G4
 | Mục DoD qa ghi chủ | Đã làm | Kiểm lại (lệnh → kết quả) |
 |---|---|---|

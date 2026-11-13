@@ -3,6 +3,8 @@
 # Bash (K-24): recognizable write targets (redirection, tee, rm, mv, cp, sed -i, …) — see teamlib.protect_bash.
 # Blocks (exit 2): .git/**, .claude/settings*.json, protected_paths (STD-SEC-1);
 #   a NEW file outside structure.allowed_new_file_roots (STD-STRUCT-1).
+#   Exit 2 only when .team/config.json has "enforcement": "block"; by default ("warn") the same check is a reminder
+#   in additionalContext and the tool runs.
 # Always allowed: docs/team/**, .team/** (except profile/config outside onboard), .claude/{agent-memory,skills,agents,rules}/**, CHANGELOG.md at the root.
 # Reads hook JSON from stdin: tool_name, tool_input.file_path | tool_input.notebook_path.
 # Usage: protect.sh [--root DIR] < hook.json ; protect.sh --help

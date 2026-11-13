@@ -204,10 +204,36 @@ def branch_matches(name, patterns):
     return any(fnmatch.fnmatchcase(name, p) for p in patterns)
 
 
+ATTRIBUTION = re.compile(r"(?i)\bco-authored-by:|generated (with|by) \W*claude|noreply@anthropic\.com")
+
+
+def attribution_in(cmd, cwd):
+    """A commit or PR command whose message (inline or in a -F/--file/--body-file file) carries a co-author trailer
+    or a "Generated with Claude" line (STD-GIT-8). Returns the offending line or ''."""
+    if not re.search(r"\bgit\b[^|;&]*\bcommit\b|\bgh\s+pr\s+(create|edit|merge)\b", cmd):
+        return ""
+    texts = [cmd]
+    for m in re.finditer(r"(?:-F|--file|--body-file)[ =]+(['\"]?)([^'\"\s]+)\1", cmd):
+        try:
+            with open(os.path.join(cwd, m.group(2)), encoding="utf-8", errors="replace") as fh:
+                texts.append(fh.read())
+        except OSError:
+            pass
+    for t in texts:
+        m = ATTRIBUTION.search(t)
+        if m:
+            return t[m.start():].split("\n", 1)[0].strip()[:80]
+    return ""
+
+
 def check_git(root, data):
     """Return (exit code, message, warnings)."""
     cmd = get(data, "tool_input.command", "") or ""
     cwd = data.get("cwd") or root
+    hit = attribution_in(cmd, cwd)
+    if hit:
+        return 2, (f"BLOCKED (STD-GIT-8): no AI attribution in commits or PRs — remove `{hit}` "
+                   "(no Co-Authored-By trailer, no \"Generated with Claude Code\" line)."), []
     cfg = config(root)
     protected = list(get(cfg, "protected_branches", []) or []) + [get(cfg, "base_branch", "main") or "main"]
     warnings = []
@@ -304,7 +330,7 @@ def check_push(args, wd, current, protected):
 # ---------- per-role limits ----------
 READONLY_GIT = {"status", "log", "diff", "show", "branch", "rev-parse", "ls-files", "blame", "grep",
                 "shortlog", "rev-list", "tag", "describe", "merge-base", "remote", "symbolic-ref", "cat-file",
-                "ls-tree", "for-each-ref", "show-ref", "worktree", "name-rev", "count-objects"}
+                "ls-tree", "for-each-ref", "show-ref", "worktree", "name-rev", "count-objects", "reflog"}
 READONLY_GH = {("issue", "view"), ("issue", "list"), ("pr", "view"), ("pr", "list"), ("pr", "checks"),
                ("pr", "diff"), ("run", "view"), ("run", "list"), ("auth", "status"), ("repo", "view")}
 
@@ -589,7 +615,11 @@ def cmd_prefixes(root):
     out = []
     for v in (prof.get("cmd") or {}).values():
         if isinstance(v, str) and v.strip():
-            out.append(v.split("{file}")[0].strip())
+            head = v.split("{file}")[0].strip()
+            out.append(head)
+            segs = segments(head)
+            if len(segs) > 1:  # `cd <dir> && <tool> …`: the hook checks one segment at a time, so allow each
+                out += [" ".join(strip_prefix(s)) for s in segs if strip_prefix(s)]
     return out
 
 
@@ -642,8 +672,12 @@ def role_policy(root, data, policy_path):
                 kit_path = fh.read().strip() or kit
         except OSError:
             kit_path = kit
+        for m in re.finditer(r"\b([A-Za-z_][A-Za-z0-9_]*)=\"?\$\(cat\s+\.team/plugin_root\)\"?\s*(?:;|&&)?", command):
+            var = m.group(1)  # `K=$(cat .team/plugin_root); python3 "$K/scripts/team.py" …` — the usual way to name the kit
+            command = command.replace(m.group(0), " ")
+            command = re.sub(r"\$\{%s\}|\$%s(?![A-Za-z0-9_])" % (re.escape(var), re.escape(var)), lambda _: kit_path, command)
         for form in ('"$(cat .team/plugin_root)"', "$(cat .team/plugin_root)"):
-            command = command.replace(form, kit_path)  # how skills call kit scripts; any other substitution is still blocked
+            command = command.replace(form, kit_path)  # how skills call kit scripts; any other substitution is still flagged
         base, cwd = data.get("cwd") or root, ""
         for seg in segments(command):
             clean, targets = redirect_targets(seg)
@@ -685,6 +719,11 @@ def agent_feature(transcript):
     return max(sorted(counts), key=counts.get) if counts else ""
 
 
+def enforcement(root):
+    """config `enforcement`: "block" → a rule violation stops the tool (exit 2); anything else (default "warn") → reminder."""
+    return "block" if (load_json(os.path.join(root, ".team", "config.json"), {}) or {}).get("enforcement") == "block" else "warn"
+
+
 def main(argv):
     if not argv or argv[0] in ("-h", "--help"):
         print(__doc__.strip())
@@ -720,34 +759,33 @@ def main(argv):
         print(agent_feature(pos[0]) if pos else "")
         return 0
     if sub in ("check-git", "role-policy", "protect-bash"):
+        block = enforcement(root) == "block"
         try:
             data = json.loads(sys.stdin.read() or "{}")
         except ValueError:
-            if sub == "check-git":
+            if sub == "check-git" or not block:
                 return 0
             label = "STD-SEC-1" if sub == "protect-bash" else sub  # protect-bash enforces STD-SEC-1
             print(f"BLOCKED ({label}): malformed hook JSON — a safety hook does not allow what it cannot read.", file=sys.stderr)
             return 2
+        warns = []
         if sub == "check-git":
             code, msg, warns = check_git(root, data)
-            for w in warns:
-                print(w, file=sys.stderr)
-            if code:
-                print(msg, file=sys.stderr)
-                return code
-            if warns:
-                print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse",
-                                                         "additionalContext": " ".join(warns)}}, ensure_ascii=False))
-            return 0
-        if sub == "protect-bash":
+        elif sub == "protect-bash":
             code, msg = protect_bash(root, data)
-            if code:
-                print(msg, file=sys.stderr)
-            return code
-        code, msg = role_policy(root, data, policy)
+        else:
+            code, msg = role_policy(root, data, policy)
+        if code and not block:  # default: the rule is a reminder, the tool still runs
+            warns, code = [msg.replace("BLOCKED", "RULE (reminder, not enforced)", 1)] + list(warns), 0
+        for w in warns:
+            print(w, file=sys.stderr)
         if code:
             print(msg, file=sys.stderr)
-        return code
+            return code
+        if warns:
+            print(json.dumps({"hookSpecificOutput": {"hookEventName": data.get("hook_event_name") or "PreToolUse",
+                                                     "additionalContext": " ".join(warns)}}, ensure_ascii=False))
+        return 0
     print(f"teamlib.py: unknown subcommand {sub}", file=sys.stderr)
     return 64
 

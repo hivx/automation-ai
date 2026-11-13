@@ -37,6 +37,7 @@ The profile holds everything that is specific to the stack. Agents, skills and h
 | `naming.file`, `class`, `function`, `constant`, `test_file` | Naming conventions | `"snake_case"`, `"PascalCase"`, `"test_{name}.py"` |
 | `naming.branch` | Branch pattern | `"team/{id}-{slug}"` |
 | `test.skip_markers[]` | Test-skip markers that must not be used to make things green | `["@pytest.mark.skip", "xfail"]` |
+| `test.shared_state` | `true` when test runs share one database, site or service, so two full suites at once interfere; the build then runs the full `cmd.test` only after each serial merge, never inside a parallel wave | `true` (Frappe/ERPNext site, one shared dev DB) |
 | `protected_paths[]` | No agent may edit these: secrets, lockfiles, vendored libraries, prod config | `[".env*", "poetry.lock", "vendor/**"]` |
 | `ci.provider`, `ci.runner`, `ci.setup[]` | CI platform | `"github"`, `"ubuntu-latest"` |
 | `deploy.staging`, `deploy.smoke`, `deploy.prod_requires_reviewer` | Staging deploy command, smoke test; prod always needs a human | `true` |
@@ -49,7 +50,7 @@ The profile holds everything that is specific to the stack. Agents, skills and h
 ## Rules
 - `cmd.test_one` is required. Every command runs from the repo root.
 - `{file}` is the only placeholder.
-- `allowed_new_file_roots` is a closed list: outside it, the hook blocks file creation.
+- `allowed_new_file_roots` is a closed list: outside it, the hook flags file creation (a stop with `enforcement: "block"`).
 - Monorepo: root profile + `packages` overrides per directory.
 - Enums: `ci.provider` and `tracker` ∈ `github|gitlab|none`; `deploy.prod_requires_reviewer` accepts only `true`; `output_language` (config) ∈ `vi|en`.
 - Do not add new slots yourself; propose them through `/team:feedback`. The schema has `additionalProperties: false`, so unknown slots are reported as errors.

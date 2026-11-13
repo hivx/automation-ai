@@ -21,6 +21,10 @@ Approved-by:
 ## CHANGELOG
 <entry added under [Unreleased]>
 
+## CLAUDE.md
+<CLAUDE.md: +<a> −<d> lines (<sections>), one source per line (review-NN / defects / diff hunk) — or: CLAUDE.md: unchanged (check passed)>
+- `check-claude-md.py`: <summary line>
+
 ## Post-G4 debt
 | DoD item qa flagged | Done | Recheck (command → result) |
 |---|---|---|
