@@ -96,8 +96,9 @@ GATES = [("specified", "G1_spec", "spec.md"), ("architected", "G2_arch", "arch-i
          ("verified", "G4_uat", "acceptance.md")]
 
 
-NO_SPEC_PLAYBOOKS = {"bug-fix", "hotfix", "refactor", "dependency-upgrade", "spike", "ci-fix", "docs-only"}
-NO_PLAN_PLAYBOOKS = {"bug-fix", "hotfix", "refactor"}
+NO_SPEC_PLAYBOOKS = {"bug-fix", "hotfix", "refactor", "dependency-upgrade", "spike", "ci-fix", "docs-only", "quick"}
+NO_PLAN_PLAYBOOKS = {"bug-fix", "hotfix", "refactor", "quick"}
+# Right-sized chains (ADJ-36): quick = one dev, done when its task is ticked; size S = acceptance inside build, no As-Built.
 
 
 def feature_state(root, fid, cfg):
@@ -115,6 +116,8 @@ def feature_state(root, fid, cfg):
     gates_cfg = dict(cfg.get("gates") or {})
     if playbook in ("refactor", "data-migration"):
         gates_cfg["G2b_design"] = True
+    if playbook == "quick":
+        size = "S"
     if size == "S":
         gates_cfg["G1_spec"] = False
         gates_cfg["G3_plan"] = False
@@ -201,6 +204,10 @@ def next_cmd(st, cond):
         return f"/team:design {fid}"
     if s == "—":
         return f"/team:intake (no intake.md yet for {fid})"
+    if pb == "quick":
+        if s == "built":
+            return f"Done: branch team/{fid} is ready — merge it, or /team:pr {fid}"
+        return f"team-leader calls one dev (playbook quick) for {fid}"
     if s == "intaken":
         return {"bug-fix": f"/team:build {fid}", "hotfix": f"/team:build {fid}",
                 "refactor": f"/team:design {fid} --short", "dependency-upgrade": f"/team:research {fid}",
@@ -234,6 +241,8 @@ def next_cmd(st, cond):
     if s == "built":
         return f"/team:verify {fid}"
     if s == "verified":
+        if size == "S" and not st["has_asbuilt"]:  # size S: no As-Built; pr writes a short body itself
+            return f"/team:pr {fid}, then /team:release {fid}"
         if not st["has_asbuilt"]:
             return f"/team:asbuilt {fid}"
         if not st["g5_approved"]:
@@ -280,7 +289,9 @@ def wave(root, cfg, rows):
     for r in rows:
         m = NEXT_CMD.match(r["next"])
         if r["status"] in HOLD or not m or m.group(2) != r["id"] or "<" in r["next"]:
-            held.append(dict(id=r["id"], reason=r["status"] if r["status"] in HOLD else "needs the human", next=r["next"]))
+            reason = r["status"] if r["status"] in HOLD else ("team-leader step" if r["next"].startswith("team-leader")
+                                                                else "done" if r["next"].startswith("Done") else "needs the human")
+            held.append(dict(id=r["id"], reason=reason, next=r["next"]))
             continue
         skill = m.group(1)
         role, human_only = skill_meta(skill)

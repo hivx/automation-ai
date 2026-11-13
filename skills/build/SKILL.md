@@ -13,7 +13,7 @@ allowed-tools: Bash(python3 *) Bash(cat *) Bash(git *) Bash(touch .team/active-b
 ## Overview
 This skill runs a feature's build loop until every task in `tasks.md` is ticked: the dev (own worktree) writes a failing test first, then the code; the reviewer (fresh context, read-only) grades it against the Review checklist (10); the dev fixes blockers/majors; the tech-lead merges the task branch into `team/<ID>` and runs `cmd.test`. The skill runs in the `tech-lead` context (fork); the tech-lead calls only `team:dev`, `team:reviewer` and Explore.
 
-One rule never changes with size: **size S still goes through this skill with 1 dev + 1 reviewer** (K-34). Nobody says "done" without the output of a real command. `.team/active-build-<ID>` (one per feature, so parallel builds do not switch each other off) is created at the start and removed on EVERY exit; the `stop-check.sh` hook reads it to run lint/test when the dev and the tech-lead stop. Example: a one-line hotfix still produces a red-then-green `cmd.test_one` output, a `review-01.md` and a merge commit on `team/<ID>`.
+One rule never changes with size: **size S still goes through this skill with 1 dev + 1 reviewer** (K-34); only playbook quick skips it (one dev called by team-leader, ADJ-36). Nobody says "done" without the output of a real command. `.team/active-build-<ID>` (one per feature, so parallel builds do not switch each other off) is created at the start and removed on EVERY exit; the `stop-check.sh` hook reads it to run lint/test when the dev and the tech-lead stop. Example: a one-line hotfix still produces a red-then-green `cmd.test_one` output, a `review-01.md` and a merge commit on `team/<ID>`.
 
 `$ARGUMENTS`: the `<ID>`; `--task T<N>` to run a single task; `--decide`. `<kit>` = the content of `.team/plugin_root`.
 
@@ -60,11 +60,11 @@ Do not use when:
 11. **Break the loop.** Count the rounds; > `limits.max_rework`, or the same defect in two rounds → stop; write a ruling for each open finding (reviewer wrong / real but deferred / blocking) and escalate to the team-leader. The last round before the cap may use a fresh dev with the old report as input.
 12. **Merge and tick** (`approve`): merges are serial, one task at a time in task order; merge `team/<ID>-task-N` into `team/<ID>` (git), run `cmd.test` on `team/<ID>` after each merge. Red → find out whether the merge or an earlier task caused it before doing anything else; do not tick. Green → tick the task (`- [x] T<N>`), Write `review-NN.md` from `<kit>/templates/artifacts/review.md` (verdict, findings of every round, number of rounds, diff command, `deferred` section) — ONE review file per task, rounds appended to it — and write one journal line. Clean up: `git worktree remove <dev worktree>` (never `--force`; a dirty worktree → note it and keep it), then `git branch -d team/<ID>-task-N` (merged branches only, never `-D`). Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language).
 13. **Loop.** After each round: merge and tick the approved tasks (step 12), then back to step 3 and send the next round at once; never wait for every task of the earlier round to be ticked. Done when every task is ticked or stopped.
-14. **All tasks done.** Run `git diff <base_branch>...team/<ID>` and write its output to `docs/team/features/<ID>/diff.patch` with Write (for the writer). Record the number of roles used (distinct roles, not counting re-calls within rework rounds) against `limits.max_agents_per_feature`.
+14. **All tasks done.** Size S (bug-fix, hotfix or new-feature S; ADJ-36): automated acceptance here, no `/team:verify` and no As-Built — Write `acceptance.md` from `<kit>/templates/artifacts/acceptance.md` (one row per criterion → the test that covers it → green; the `cmd.test` output on `team/<ID>`; `Verdict: accepted` only when every criterion has a green test, else `rework`) and add a CHANGELOG line if the project keeps one. Size M/L: run `git diff <base_branch>...team/<ID>` and write its output to `docs/team/features/<ID>/diff.patch` with Write (for the writer). Record the number of roles used (distinct roles, not counting re-calls within rework rounds) against `limits.max_agents_per_feature`.
 15. **Every exit** (done, stopped, error): `rm -f .team/active-build-<ID>`.
 
 ## Outputs
-- Commits on `team/<ID>`; `docs/team/features/<ID>/tasks.md` ticked; a `review-NN.md` per task; `diff.patch`.
+- Commits on `team/<ID>`; `docs/team/features/<ID>/tasks.md` ticked; a `review-NN.md` per task; `diff.patch` (M/L) or `acceptance.md` (size S).
 - One journal line per dev/reviewer call (the reason before the call, the result after), prose in `output_language`.
 - Return message to the team-leader, ≤ 10 lines:
   ```
@@ -80,7 +80,7 @@ Do not use when:
 ## Common rationalizations
 | Thought | Correct action |
 |---|---|
-| "Size S, a one-line fix, no reviewer needed" | Still call `team:reviewer` (K-34). |
+| "Size S, a one-line fix, no reviewer needed" | Still call `team:reviewer` (K-34); a trivial change is playbook quick, chosen at intake, not inside build. |
 | "The dev says the tests are green" | You need the pasted red-then-green output; missing → send it back. |
 | "Red because of an import error is still red" | Red must come from missing behavior; send the dev back to fix the test. |
 | "A flaky red test, unrelated, merge anyway" | Stop: reproduce it, record it in `debt.md` (STD-TEST-7); do not merge. |
@@ -113,6 +113,7 @@ Do not use when:
 - [ ] Each task: the red output (name of the failing assertion) and the green output of `cmd.test_one` are pasted.
 - [ ] `cmd.test` on `team/<ID>` after the last merge: exit 0 (or red exactly the `baseline:` list), output pasted.
 - [ ] `git log --oneline <base_branch>..team/<ID>` is pasted; each commit has the form `type(scope): description (<ID>)`.
+- [ ] Size S: `acceptance.md` maps every criterion to a green test; no qa or writer was called.
 - [ ] `git diff --name-only` of each task is a subset of its touchpoints.
 - [ ] Each task has a `review-NN.md` with verdict, diff command and round count; rework rounds have ADDRESSED/NOT ADDRESSED.
 - [ ] `tasks.md` progress lists each round; every task that was ready, in rework or waiting for review at that time (up to the shares) is in it.

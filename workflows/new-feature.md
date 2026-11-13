@@ -15,8 +15,8 @@ From intake (S, M or L).
 4. `/team:design` → designer → `design.md` (skipped at size S).
 5. `/team:plan` → tech-lead → `plan.md`, `tasks.md` (skipped at size S).
 6. `/team:build` → tech-lead → dev, reviewer (size S: 1 dev).
-7. `/team:verify` → qa → `acceptance.md` (size S: automated checks, no separate qa call).
-8. `/team:asbuilt` → writer → `asbuilt.md`.
+7. `/team:verify` → qa → `acceptance.md` (size S: skipped; tech-lead writes `acceptance.md` at the end of build, no qa call).
+8. `/team:asbuilt` → writer → `asbuilt.md` (skipped at size S).
 9. `/team:pr` → tech-lead → PR.
 10. `/team:release` → devops.
 
@@ -27,7 +27,7 @@ G1, G3, G4 (+ G2 at size L, G5 when going to prod). Size S skips G1 and G3.
 - An enabled gate is not approved; analyst returns `NEEDS_ANSWER`; reviewer reports design-defect.
 
 ## Done criteria
-- `acceptance.md` is accepted; As-Built and CHANGELOG exist; the PR is open or merged.
+- `acceptance.md` is accepted; As-Built and CHANGELOG exist (size S: a CHANGELOG line only); the PR is open or merged.
 
 ## Common mistakes
 - Sizing a schema/API change as S.

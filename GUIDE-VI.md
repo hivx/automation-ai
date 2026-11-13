@@ -139,6 +139,7 @@ Anh viết tiếng Việt; Claude dịch sang đúng skill/khái niệm theo b�
 ## 9. QUYẾT ĐỊNH & YÊU CẦU CỦA CHỦ REPO
 Nhật ký chỉ thêm, mới nhất ở trên. Anh viết yêu cầu ở đây bằng tiếng Việt; mọi phiên sau của Claude đọc mục này trước khi làm. Mẫu: `- YYYY-MM-DD | <quyết định hoặc yêu cầu> | <ai ghi> | <trạng thái: mới / đang làm / xong / bỏ>`
 
+- 2026-11-13 | Chỉ gọi đúng vai cần thiết, không gọi cả đội cho việc nhỏ hay câu hỏi (v0.6.2, ADJ-36, K-97): câu hỏi, giải thích, hỏi tiến độ → team-leader tự trả lời, không intake, không agent; việc vặt (sửa chữ, giá trị config, một dòng hiển nhiên, tối đa 2 file) → playbook `quick`, chỉ 1 dev; việc cỡ S → tech-lead + 1 dev + 1 reviewer, nghiệm thu ngay trong build, không qa, không asbuilt; cỡ M/L giữ chuỗi đầy đủ, research/architect/design chỉ chạy khi cần | Claude | xong
 - 2026-11-13 | Chỉ còn `/team:release` là lệnh người phải tự gõ (v0.6.1, ADJ-35): 7 skill takeover, onboard, run, retro, audit-kit, session, ci bỏ `disable-model-invocation`, nên team-leader tự chạy takeover/onboard khi dự án chưa có đội, tự sửa CI đỏ, tự chạy retro khi phản hồi vượt ngưỡng. Cổng duyệt vẫn giữ (G0 trước onboard, G5 trước prod). Release (merge, tag, deploy) vẫn chờ anh gõ | Claude | xong
 - 2026-11-13 | Hook không chặn gì nữa: skill và rule chỉ là quy tắc làm việc (v0.6.0, `SPEC-OVERRIDES.md` mục 5, ADJ-34, K-96). Khóa mới `enforcement` trong `.team/config.json`: `"warn"` (mặc định, cả với dự án cũ chưa có khóa này) = hook chỉ nhắc Claude quy tắc rồi cho lệnh chạy, `stop-check` không chạy lint/test mỗi lần agent dừng; `"block"` = chặn như trước. Team-leader hết bị role-policy chặn khi đọc file, chạy `python3 -c`, `bench`, `git reflog`…; đội cũng tự sửa được `.team/profile.json`, `.team/config.json` (K-91) | Claude | xong
 - 2026-11-12 | Commit và PR không có dòng `Co-Authored-By` (STD-GIT-8): hook `check-git.sh` chặn commit hoặc `gh pr` có dòng `Co-Authored-By:` hoặc "Generated with Claude"; template settings tắt sẵn `attribution`. Áp dụng cho mọi dự án dùng kit và cho commit của chính repo kit | Claude | xong
@@ -219,7 +220,8 @@ Nhật ký chỉ thêm, mới nhất ở trên. Anh viết yêu cầu ở đây 
 | `new-project` | Repo trống | onboard --new → intake(L) → analyze → research → architect → design → plan (walking skeleton) → build… | G1, G2, G2b, G3, G4, G5 |
 | `new-feature` | Tính năng mới trên hệ thống có | intake → analyze → [research] → design → plan → build → verify → asbuilt → pr → release | G1, G2, G3, G4, G5 |
 | `change-request` | Đổi yêu cầu trên feature đã phát hành | analyze --amend → architect (impact) → plan (chèn) → build… | G1, G2, G3, G4, G5 |
-| `bug-fix` | Hành vi sai so với spec đã nghiệm thu | intake(bug) → test fail trước → build (1 task) → verify → pr | G4, G5 |
+| `bug-fix` | Hành vi sai so với spec đã nghiệm thu | intake(bug) → test fail trước → build (1 task: tech-lead, 1 dev, 1 reviewer; cỡ S nghiệm thu luôn trong build) → pr | G4, G5 |
+| `quick` | Việc vặt: sửa chữ, giá trị config, một dòng hiển nhiên; tối đa 2 file, không đụng schema/API/bảo mật | intake → 1 dev (không tech-lead, reviewer, qa, writer) → xong, nhánh team/<ID> chờ merge | G5 |
 | `hotfix` | Production đang lỗi | intake(hotfix) → build tối thiểu từ prod → verify nhanh → pr → release prod (người duyệt) → bug-fix đầy đủ sau | G5 |
 | `refactor` | Đổi cấu trúc, không đổi hành vi | intake → design ngắn → maintainer → verify (test trước = sau) → pr | G2b, G4 |
 | `dependency-upgrade` | Nâng version thư viện | research (changelog, breaking) → plan → build → verify toàn bộ → pr | G3, G4 |
@@ -512,9 +514,9 @@ Các mốc sau do script và cổng đọc bằng máy: **không bao giờ dịc
 
 ## Số liệu
 <!-- gen:stats -->
-- Phiên bản kit: 0.6.1
-- Skill: 26 · agent: 13 · playbook: 16 (+ 4 lô) · script: 31
-- Số từ trung vị (tiếng Anh): skill nạp thường xuyên 386.0, skill khác 1531.0, agent 939
-- Commit: 6f5a6b5
+- Phiên bản kit: 0.6.2
+- Skill: 26 · agent: 13 · playbook: 17 (+ 4 lô) · script: 31
+- Số từ trung vị (tiếng Anh): skill nạp thường xuyên 391.0, skill khác 1542.0, agent 939
+- Commit: b178279
 - Ngày sinh file: 2026-11-13
 <!-- /gen:stats -->

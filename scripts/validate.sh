@@ -19,7 +19,7 @@ SKILL_HEADING_EXEMPT="handbook using-team"         # preloaded skills need no ar
 HUMAN_ONLY_SKILLS="release"  # merge, tag, deploy stay with the human; every other skill is callable by Claude (ADJ-28, ADJ-35)
 FORK_SKILLS="analyze=analyst research=researcher architect=architect design=designer plan=tech-lead build=tech-lead verify=qa asbuilt=writer clean=maintainer ci=devops retro=coach pr=tech-lead audit-kit=coach"
 WORKFLOW_HEADINGS="## When it applies|## Default size|## Chain|## Gates|## Stop points|## Done criteria|## Common mistakes|## Related playbooks"
-PLAYBOOKS="takeover new-project new-feature change-request bug-fix hotfix refactor dependency-upgrade data-migration integration ci-fix docs-only client-docs release spike retro"
+PLAYBOOKS="takeover new-project new-feature change-request bug-fix quick hotfix refactor dependency-upgrade data-migration integration ci-fix docs-only client-docs release spike retro"
 BATCH_FLOWS="build-all-tasks verify-all weekly-retro clean-sweep"
 PLAYBOOK_WORDS=300
 BATCH_WORDS=400

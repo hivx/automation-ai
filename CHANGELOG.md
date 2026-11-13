@@ -5,6 +5,18 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follo
 
 ## [Unreleased]
 
+## [0.6.2] - 2026-11-13
+
+Right-size the team: only the roles the work needs (owner request, ADJ-36, K-97).
+
+### Added
+- Playbook `quick` (17th): a trivial change (text, config value, one obvious line; ≤ 2 files; no schema/API/security) → team-leader calls ONE dev, done when T1 is ticked; no tech-lead, reviewer, qa or writer.
+
+### Changed
+- A question, explanation or status check is answered by team-leader directly: no intake, no ID, no agent (team-leader step 3, `using-team`).
+- Size S: build (tech-lead, 1 dev + 1 reviewer) writes `acceptance.md` itself; no `/team:verify` (qa) and no As-Built; `/team:pr` writes a short body. `team.py` sends an accepted size S feature straight to `/team:pr`. Supersedes ADJ-29.
+- `team.py wave` holds quick work as a "team-leader step" and finished quick work as "done".
+
 ## [0.6.1] - 2026-11-13
 
 Only `/team:release` stays human-only (owner decision, ADJ-35).

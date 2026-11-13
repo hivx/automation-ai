@@ -97,7 +97,11 @@
   },
   "bug-fix": {
    "khi": "Hành vi sai so với spec đã nghiệm thu",
-   "chuoi": "intake(bug) → test fail trước → build (1 task) → verify → pr"
+   "chuoi": "intake(bug) → test fail trước → build (1 task: tech-lead, 1 dev, 1 reviewer; cỡ S nghiệm thu luôn trong build) → pr"
+  },
+  "quick": {
+   "khi": "Việc vặt: sửa chữ, giá trị config, một dòng hiển nhiên; tối đa 2 file, không đụng schema/API/bảo mật",
+   "chuoi": "intake → 1 dev (không tech-lead, reviewer, qa, writer) → xong, nhánh team/<ID> chờ merge"
   },
   "hotfix": {
    "khi": "Production đang lỗi",

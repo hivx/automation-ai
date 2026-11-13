@@ -9,6 +9,7 @@ Source: `workflows/README.md`. Each playbook's skill chain, gates and stop point
 | Repo has code the team has never worked on (no `.team/profile.json` yet) | [takeover](../../workflows/takeover.md) | — |
 | Empty repo, building a system from scratch | [new-project](../../workflows/new-project.md) | L |
 | Production is broken and needs a fix now | [hotfix](../../workflows/hotfix.md) | S |
+| Trivial change: a text, a config value, one obvious line; ≤ 2 files; no schema/API/security change | [quick](../../workflows/quick.md) | S |
 | Behavior differs from the spec, reproducible, not urgent | [bug-fix](../../workflows/bug-fix.md) | S |
 | CI pipeline is red or a CI workflow needs fixing | [ci-fix](../../workflows/ci-fix.md) | S |
 | Change to the requirements of a feature that passed G1 | [change-request](../../workflows/change-request.md) | M |

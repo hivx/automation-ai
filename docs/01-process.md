@@ -26,9 +26,12 @@ Artifacts live in `docs/team/features/<ID>/` unless stated otherwise.
 **Artifact language:** artifact prose is written in `config.output_language` (`vi` by default, or `en`); machine-read anchors (`Approved-by:`, `## Definition of Done`, `Verdict: …`, statuses) stay in English. See `docs/04-profile.md`.
 
 ## Work size
+The team calls only the roles the work needs (ADJ-36). A question, an explanation or a status check is answered by team-leader directly: no intake, no ID, no agent (Explore only when it spans several areas).
+
 | Size | Signals | Chain |
 |---|---|---|
-| S | The diff can be described in one sentence; ≤ 3 files; no schema/API change | intake → short analyze (no G1) → build (1 dev + reviewer) → verify (qa, shortened check; counts toward the 3-role cap: analyst, tech-lead, qa — K-15) → release |
+| quick | Trivial: a text, a config value, one obvious line; ≤ 2 files; no schema/API/security change | intake → ONE dev called by team-leader → done (branch `team/<ID>`); no tech-lead, reviewer, qa or writer |
+| S | The diff can be described in one sentence; ≤ 3 files; no schema/API change | intake → [short analyze for a feature, no G1] → build (tech-lead: 1 dev + 1 reviewer; acceptance written inside build, no qa) → pr (no As-Built) |
 | M | One module; changes data or an API; 1–5 person-days | intake → analyze → [research] → design → plan → build → verify → release |
 | L | Several modules; new NFRs; > 5 person-days | all 9 stages; architecture is mandatory; the first task is a walking skeleton |
 
@@ -58,4 +61,4 @@ The team stops when: a task is BLOCKED after `max_attempts`; `max_rework` is exc
 Every stop states: the reason, which piece of work, who must do what, and the command to resume. Handling: `docs/guides/incidents.md`.
 
 ## Playbooks
-16 playbooks in `workflows/`, chosen by type of work and then by size: see `docs/guides/decision-tree.md`.
+17 playbooks in `workflows/`, chosen by type of work and then by size: see `docs/guides/decision-tree.md`.

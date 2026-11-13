@@ -9,9 +9,9 @@ S.
 
 ## Chain
 0. `/team:intake --type bug` → team-leader → `intake.md`, a new entry in `docs/team/defects.md`.
-1. `/team:build` → dev (1 task): write a failing test that reproduces the bug FIRST, paste the red output → fix → `cmd.test_one` green → reviewer.
-2. `/team:verify` → qa (size S: automated checks) → `acceptance.md`.
-3. `/team:pr` → tech-lead → PR.
+1. `/team:build` → tech-lead → dev (1 task): write a failing test that reproduces the bug FIRST, paste the red output → fix → `cmd.test_one` green → reviewer. Size S: tech-lead writes `acceptance.md` at the end of build (automated acceptance, no qa call).
+2. Size M: `/team:verify` → qa → `acceptance.md`.
+3. `/team:pr` → tech-lead → PR (size S: no As-Built; pr writes a short body).
 
 ## Gates
 G4 if enabled; G5 when releasing to prod.

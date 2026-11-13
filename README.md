@@ -93,7 +93,7 @@ Full table: [`docs/guides/want-x-type-y.md`](docs/guides/want-x-type-y.md).
 agents/           13 roles: team-leader, tech-lead, coach, analyst, researcher, architect,
                   designer, dev, reviewer, qa, writer, maintainer, devops
 skills/<name>/    26 skills = commands /team:<name>
-workflows/        16 playbooks + batch/
+workflows/        17 playbooks + batch/
 hooks/            hooks.json (machine rules)
 scripts/          validate.sh, install-local.sh, team.py, ... (bash + python3 stdlib + jq)
 handbook/         STD.md (engineering handbook) and appendices

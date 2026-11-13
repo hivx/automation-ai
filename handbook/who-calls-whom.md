@@ -20,7 +20,7 @@ Row = caller, column = callee. ✓ = may call; — = may not.
 | devops | — | — | — | — | — | — | — | — | — | — | — | — | — | — |
 
 - Only team-leader and tech-lead call other roles. Other roles may call only `Explore`, and only when they have the `Agent` tool.
-- team-leader never calls `dev` directly to do a task: every size, S included, goes through `/team:build` (tech-lead → dev + reviewer, K-34).
+- team-leader calls `dev` directly only for playbook quick (one trivial change, ADJ-36); every other size, S included, goes through `/team:build` (tech-lead → dev + reviewer, K-34). A question calls nobody: team-leader answers it.
 - Temp agents (`/team:make-agent`) are called only by team-leader; the hook applies the `_temp` role (read-only Bash + basic git + `cmd.*`, may call only Explore).
 - Nobody calls team-leader: it is the main session and the only door to the human.
 - The matrix is enforced by the role-policy hook (STD level 3), not just written down.
@@ -46,6 +46,7 @@ A return message always has:
 | Direction | Required fields |
 |---|---|
 | tech-lead → dev | task ID; acceptance criteria; touchpoints; `cmd.test_one`; branch; the sentence "edit only within the touchpoints" |
+| team-leader → dev (quick) | the same, with branch `team/<ID>` from `base_branch` |
 | dev → tech-lead | files changed; tests run with real output; what is still missing |
 | tech-lead → reviewer | diff (commit or branch); `design.md`; task criteria; the sentence "grade against the Review checklist (10)" |
 | reviewer → tech-lead | verdict approve / request-changes / design-defect; findings in the STD format |

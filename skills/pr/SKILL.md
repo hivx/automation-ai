@@ -24,7 +24,7 @@ Use when:
 
 Do not use when:
 - `cmd.test` is red on the branch → `/team:build`.
-- There is no `pr-body.md` yet → `/team:asbuilt`.
+- There is no `pr-body.md` yet → `/team:asbuilt` (size M/L only; size S and quick: step 4 writes a short body).
 - You want to deploy to an environment → `/team:release` (after the PR is approved and merged).
 - You want to change code because of a comment → create a task for the dev through `/team:build --task`; never change it here.
 
@@ -35,7 +35,7 @@ Do not use when:
 4. The project's PR template: `.github/PULL_REQUEST_TEMPLATE.md` (if present) — `pr-body.md` must fill in exactly its sections.
 
 ## Inputs and preconditions
-- Branch `team/<ID>` has commits relative to `base_branch`; `acceptance.md` has `Verdict: accepted` (except ci-fix, docs-only).
+- Branch `team/<ID>` has commits relative to `base_branch`; `acceptance.md` has `Verdict: accepted` (except ci-fix, docs-only, quick).
 - `docs/team/features/<ID>/pr-body.md` contains: why, what changed, how it was verified (commands run), feature/task code (STD-GIT-7); no "Generated with Claude Code" line or `Co-Authored-By:` trailer (STD-GIT-8, blocked by the hook).
 - A clean tree (`git status --porcelain` empty).
 
@@ -43,7 +43,7 @@ Do not use when:
 1. **Record the position.** Write `.team/current.json` {feature, stage: "pr", agent: "tech-lead", started_at}.
 2. **Catch up with the target branch.** `git fetch`; rebase `team/<ID>` onto `config.base_branch`. Conflicts → resolve them without losing anyone else's changes; if you cannot resolve them with certainty → stop and report.
 3. **Test the branch head AFTER the rebase.** Run `cmd.test` on the commit that will go into the PR; paste the output. Red → stop (never open a PR with red code). Results from before the rebase are no longer valid.
-4. **Check the content.** `pr-body.md` has the four required sections: `grep -cE '^## (Feature|Why|What changed|How verified)$'` = 4 (if the project's PR template has other sections, add those too); missing → back to the writer through the team-leader. A change of > ~1,000 lines → add a size note and a split suggestion to the PR body.
+4. **Check the content.** `pr-body.md` has the four required sections: `grep -cE '^## (Feature|Why|What changed|How verified)$'` = 4 (if the project's PR template has other sections, add those too); missing → back to the writer through the team-leader. A change of > ~1,000 lines → add a size note and a split suggestion to the PR body. Size S or playbook quick without `pr-body.md` → Write it yourself from `tasks.md`, `review-NN.md` and `acceptance.md` (quick: dev's test lines): the four sections, ≤ 15 lines.
 5. **Push the branch.** `git push -u origin team/<ID>` — only `team/*`, no `--force`, no `+refspec`. Rejected (the remote moved on) → `git fetch`, look at the difference, push a new branch `team/<ID>-r<n>` and use it as the head; never force.
 6. **`create`.** `gh pr create --base <config.base_branch> --head team/<ID> --title "<main commit line>" --body-file docs/team/features/<ID>/pr-body.md`. The title follows the commit format, never "Fix bug" or "Phase 1".
 7. **`update`.** `gh pr edit <number> --body-file …` when the content changed; the new commits were already pushed in step 5.

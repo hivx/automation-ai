@@ -23,7 +23,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BLOCKS = ["skills", "agents", "playbooks", "gates", "config", "std", "anchors", "stats"]
-PLAYBOOKS = ["takeover", "new-project", "new-feature", "change-request", "bug-fix", "hotfix", "refactor",
+PLAYBOOKS = ["takeover", "new-project", "new-feature", "change-request", "bug-fix", "quick", "hotfix", "refactor",
              "dependency-upgrade", "data-migration", "integration", "ci-fix", "docs-only", "client-docs",
              "release", "spike", "retro"]
 GATE_ARTIFACT = {"G0_takeover": "docs/team/ai-readiness.md", "G1_spec": "spec.md", "G2_arch": "arch-impact.md",

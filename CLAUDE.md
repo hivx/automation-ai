@@ -21,7 +21,7 @@ This is the repo of the KIT, not a project that uses the kit. Specification: `SP
 10. Never write a piece of knowledge twice: skills/rules/agents are the source of truth for the AI; `docs/` holds only the overview, installation, the map from tasks to skills, and the design rationale.
 
 ## Layout
-- `.claude-plugin/` manifest · `agents/` 13 roles · `skills/<name>/SKILL.md` 26 skills · `workflows/` 16 playbooks + `batch/`
+- `.claude-plugin/` manifest · `agents/` 13 roles · `skills/<name>/SKILL.md` 26 skills · `workflows/` 17 playbooks + `batch/`
 - `hooks/hooks.json` · `scripts/` · `handbook/` · `profiles/` · `templates/{artifacts,project,schemas}/` · `evals/<skill>/` · `docs/`
 
 ## Add a role (agent)

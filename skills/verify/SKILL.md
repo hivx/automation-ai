@@ -25,6 +25,7 @@ Use when:
 
 Do not use when:
 - Some task is still unticked → `/team:build`.
+- The work is size S (acceptance is written at the end of `/team:build`) or playbook quick (no acceptance step) — ADJ-36.
 - You want a per-task code quality review → that is the reviewer inside `/team:build`.
 - You need a release → `/team:asbuilt`, `/team:pr`, `/team:release` after G4 is approved.
 
