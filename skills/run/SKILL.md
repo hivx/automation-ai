@@ -8,7 +8,7 @@ allowed-tools: Bash(python3 *) Bash(cat *)
 # Move a feature forward
 
 ## Overview
-Run the feature's next stage according to its playbook and gates. `$ARGUMENTS`: a feature ID (default from `.team/current.json`), `--until-blocked` to loop until blocked; `--all` to move every ready feature at once, in parallel waves capped by `limits.headcount` (follow `${CLAUDE_SKILL_DIR}/references/parallel-wave.md` instead of the steps below). Never pass a gate.
+Run the feature's next stage according to its playbook and gates. `$ARGUMENTS`: a feature ID (default: this session's position), `--until-blocked` to loop until blocked; `--all` to move every ready feature at once, in parallel waves capped by `limits.headcount` (follow `${CLAUDE_SKILL_DIR}/references/parallel-wave.md` instead of the steps below). Never pass a gate.
 
 ## Process
 1. Check that `docs/team/features/<ID>/intake.md` exists; if not → print `/team:intake`, stop.

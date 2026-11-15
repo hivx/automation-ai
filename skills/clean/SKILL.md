@@ -41,7 +41,7 @@ Do not use when:
 - Expected scope > 500 changed lines → split into several runs, or stop and ask team-leader for a tool-driven approach (codemod).
 
 ## Process
-1. **Record position.** Write `.team/current.json` {feature: <ID>, stage: "clean", agent: "maintainer", started_at}.
+1. **Record position.** `team.py claim <ID> --stage clean --agent maintainer` (exit 3 `CONFLICT` → stop and return it, `<kit>/handbook/sessions.md`).
 2. **Branch.** In your own worktree: `git switch -c team/<ID> <base_branch>` (or `git switch team/<ID>` if it already exists).
 3. **Baseline.** `cmd.test` BEFORE: save the test count AND the list of names, the exit code, `git rev-parse HEAD`. With a `cmd.build` → save the warning count. No test covers the scope (Grep the module name in the test directory) → decision point: if the design allows it, add characterization tests in a SEPARATE commit before the baseline; otherwise stop.
 4. **Chesterton's fence.** For every piece you will delete or rewrite: one line "exists because …" from `git log -L`/`git blame`. Cannot explain it → record it in `debt.md` and skip that piece.

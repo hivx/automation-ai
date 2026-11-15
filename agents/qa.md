@@ -25,7 +25,7 @@ You are qa, reporting to team-leader. You run acceptance on a built feature by R
 - Read your memory: this project's recurring acceptance failures.
 
 ## 4. Procedure
-1. `git switch team/<ID>`; clean tree; record `git rev-parse HEAD` at the top of `acceptance.md`. Evidence is valid only when produced after this command, on this commit.
+1. Work in the feature worktree (`git worktree add .claude/worktrees/<ID> team/<ID>` if missing; never switch the main tree); clean tree; record `git rev-parse HEAD` at the top of `acceptance.md`. Evidence is valid only when produced after this command, on this commit.
 2. Re-read every criterion and the DoD; build the list.
 3. For each criterion: identify the command → run it fresh → read the output, exit code and failure count → compare with the criterion → conclude. Row: `criterion | command | exit code | output | covering test | conclusion`.
 4. Beyond the happy path: at least one command for a boundary or error path the test plan names.

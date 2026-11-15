@@ -12,7 +12,7 @@ Write one structured feedback line about an agent or skill so coach can measure 
 
 ## Process
 1. Check that the subject exists in the kit's `agents/`/`skills/` or the project's `.claude/`; if not → report it, stop.
-2. Take `feature`, `stage` from `.team/current.json` when not passed.
+2. Take `feature`, `stage` from this session's position (`team.py sessions`) when not passed.
 3. Read `docs/team/metrics/feedback.jsonl` (it may not exist yet), then Write the file back with one new JSON line at the end:
    `{"ts": "<ISO>", "from": "<human|role>", "about": "<agent|skill>:<name>", "feature": "<ID>", "stage": "<stage>", "score": <1-5>, "note": "<comment>"}`.
 4. Check that the last line is valid: `tail -n 1 docs/team/metrics/feedback.jsonl | jq .`.

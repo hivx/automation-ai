@@ -41,7 +41,7 @@ Do not use when:
 - Where to write (K-44): `<kit>` equals the project root, or the project root lies inside `<kit>` (you are running inside the kit repo itself) → do NOT write `docs/team/kit-issues.md`; print the rows in the return message, using the columns of `docs/kit-issues.md`, and say "copy into docs/kit-issues.md".
 
 ## Process
-1. **Record position.** Write `.team/current.json` {feature: "audit-kit", stage: "audit", agent: "coach", started_at}. Checkpoint: the file exists before any check runs, so a stopped run still shows where it was.
+1. **Record position.** `team.py claim audit-kit --stage audit --agent coach`. Checkpoint: the position is recorded before any check runs, so a stopped run still shows where it was.
 2. **Decide where to write** using the K-44 condition above; state the decision (file or return message, and the two `realpath` values) at the top of the report.
 2a. **Skeleton first, then write as you go (K-74).** Write `docs/team/kit-issues.md` from the template immediately: the scope table lists all of S1–S14 and D1–D3 with status "not run yet". After every group of 3–4 checks, Edit in the issue rows and update the scope table. Seventeen checks do not fit one 40-turn run: if turns run out midway, the file still holds every result so far; on a re-run → read the scope table and continue with the checks still "not run yet". Each check gets a few commands at most; when you need to try several command forms, combine them in one command instead of one command per form. Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language).
 3. **Static checks S1–S14** following `${CLAUDE_SKILL_DIR}/references/checks.md`, one after another. For each check: the command run or file read → the result → a scope line (`checked: N files / skipped: reason`). Exit condition: every static check has a scope line, even when it found nothing.
@@ -52,7 +52,7 @@ Do not use when:
 8. **De-duplicate.** Compare with `<kit>/docs/kit-issues.md`: a duplicate → status "known (K-xx)" plus the new evidence (it may have regressed); a new finding → "new".
 9. **Evidence on every row.** `file:line`, or the command plus its output. No evidence → do not write that row; mention it as an unconfirmed lead in the return message instead.
 10. **Write.** Write `docs/team/kit-issues.md` from `<kit>/templates/artifacts/kit-issues.md` (its issue table columns — ID, level, status, location, symptom with evidence, proposal — and its scope table), or print the rows in the return message when K-44 applies.
-11. **Final check.** `git status --short`: only `docs/team/kit-issues.md`, `.team/current.json` (and coach's memory) have changed. The count of rows per level in the return message equals the count in the file.
+11. **Final check.** `git status --short`: only `docs/team/kit-issues.md` (and coach's memory) have changed. The count of rows per level in the return message equals the count in the file.
 12. **Return** to team-leader in ≤ 10 lines, first line `coach -> team-leader | audit-kit <date> | <N> issues`.
 
 ## Outputs

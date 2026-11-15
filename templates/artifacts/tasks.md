@@ -7,7 +7,7 @@ Approved-by:
 
 # Tasks <ID>
 
-Each task takes 2–5 minutes. Two tasks that share a file depend on each other. Append `BLOCKED: <reason>` to the end of the line when a task is blocked.
+Each task is one vertical slice: one behavior with its tests, ≤ 5 files, about 15–30 minutes of work; ≤ 4 lines per task. Only task lines, ticks and one `baseline:` line live here (no progress logs). Two tasks that share a file depend on each other. Append `BLOCKED: <reason>` to the end of the line when a task is blocked.
 
 - [ ] T1 — <title> — files: <path/to/file, ...> — test: <test file> — depends: —
 - [ ] T2 — <title> — files: <...> — test: <...> — depends: T1

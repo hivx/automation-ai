@@ -30,4 +30,4 @@ Each folder is a `/team:<name>` command. With a local install, type `/team-<name
 | [`status`](status/SKILL.md) | both | team-leader | — |
 | [`takeover`](takeover/SKILL.md) | both | team-leader | `docs/team/assessment.md`, `docs/team/ai-readiness.md`, `docs/team/profile-proposal.md` |
 | [`using-team`](using-team/SKILL.md) | both | team-leader, tech-lead (preloaded) | — |
-| [`verify`](verify/SKILL.md) | both | qa | `docs/team/features/<ID>/acceptance.md`, `<kit>/templates/artifacts/acceptance.md`, `.team/current.json` |
+| [`verify`](verify/SKILL.md) | both | qa | `docs/team/features/<ID>/acceptance.md`, `<kit>/templates/artifacts/acceptance.md` |

@@ -25,7 +25,7 @@ Anything missing, or two kinds handed to you: return ≤ 5 lines, `NEEDS_CONTEXT
 - Which tests cover the scope (Grep in the test directories) — none means there is no evidence yet.
 
 ## 4. Procedure
-1. Write `.team/current.json` {feature, stage: "clean", agent: "maintainer"}.
+1. `team.py claim <ID> --stage clean --agent maintainer`; exit 3 `CONFLICT` → return `BLOCKED` with that line.
 2. Inside the worktree: `git switch -c team/<ID> <base_branch>` (or switch if it already exists).
 3. `cmd.test` BEFORE: test count + list of names + SHA. No covering tests → characterization tests in a separate commit (when the design allows it) or stop.
 4. For each piece to delete or rewrite: one line "exists because …" from `git log -L`/`git blame`; cannot explain it → `debt.md`, skip it.

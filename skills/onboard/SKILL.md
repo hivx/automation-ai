@@ -8,7 +8,7 @@ allowed-tools: Read Glob Bash(jq *) Bash(cat *) Bash(ls *) Bash(mkdir *) Bash(cp
 # Bring the team into the project
 
 ## Overview
-This skill turns the project into a place where the team can work: `.team/profile.json`, `.team/config.json`, `CLAUDE.md` (a project block that describes THIS project, plus a short team block), `.claude/settings.json` + `settings.local.json`, path-scoped rules, CI, and the `docs/team/` skeleton. It runs in the main session (team-leader) under the permission exception of the `onboard` stage (it may write `CLAUDE.md`, `.gitignore`, `.claude/rules/**`, `.github/**`, profile/config; `cp` only from `<kit>/templates/`). The exception opens when `.team/current.json` has `stage: onboard` and MUST be closed (`stage: idle`) on every exit, including an early stop.
+This skill turns the project into a place where the team can work: `.team/profile.json`, `.team/config.json`, `CLAUDE.md` (a project block that describes THIS project, plus a short team block), `.claude/settings.json` + `settings.local.json`, path-scoped rules, CI, and the `docs/team/` skeleton. It runs in the main session (team-leader) under the permission exception of the `onboard` stage (it may write `CLAUDE.md`, `.gitignore`, `.claude/rules/**`, `.github/**`, profile/config; `cp` only from `<kit>/templates/`). The exception opens when this session's position has `stage: onboard` (`team.py claim onboard --stage onboard`) and MUST be closed (`stage: idle`) on every exit, including an early stop.
 
 Three rules: merge, never overwrite (settings are merged as JSON, CLAUDE.md gets its two blocks, an existing rule is skipped); print plugin install commands, never install them (SPEC §8); re-running onboard must report "skipped (already present)" for every file — if it does not, onboard has a defect. Example: a project that already has `.claude/settings.json` with its own `permissions.allow` keeps every entry; onboard only adds what is missing and lists any risky leftover as work for the human.
 
@@ -39,7 +39,7 @@ Do not use when:
 
 ## Process
 Details of every file and how it is merged: `${CLAUDE_SKILL_DIR}/references/files.md`.
-1. **Open the exception.** Write `.team/current.json` {stage: "onboard"}. From here on, every exit (including errors) ends with step 13.
+1. **Open the exception.** `team.py claim onboard --stage onboard --agent team-leader`. From here on, every exit (including errors) ends with step 13.
 2. **Plan before writing.** Print a table: target file | write mode (create / merge JSON / insert block / skip because present) | template source. This is also the skeleton of the table in `onboarding.md`. Checkpoint: every file of steps 3–10 appears in the table before anything is written.
 3. **Profile.** From `profile-proposal.md` (or `<kit>/profiles/<stack>.json`) → Write `.team/profile.json`. Check: `python3 "<kit>/scripts/check-profile.py" "<kit>/templates/schemas/profile.schema.json" .team/profile.json` — `cmd.test_one` and `cmd.format` must contain `{file}` (K-01). Red → fix the proposal or stop; never write a wrong profile.
 4. **Config.** `<kit>/templates/project/team/config.json` → `.team/config.json` (already present: keep it, add only the missing keys); a project with code keeps G0 on. The template sets `output_language` to `vi` (the prose language of artifacts the team writes); keep an existing value, and tell the human they can change it to `en`. Check with `check-profile.py` against `config.schema.json`.
@@ -48,10 +48,10 @@ Details of every file and how it is merged: `${CLAUDE_SKILL_DIR}/references/file
 7. **Rules.** Each `<kit>/templates/project/claude/rules/<x>.md.tmpl` → `R --template … --out .claude/rules/<x>.md` (already present → skip).
 8. **CI.** `ci.provider` = `github` → render `<kit>/templates/project/github/workflows/*.yml` into `.github/workflows/`, copy the PR/issue templates and CODEOWNERS with `cp` from `<kit>/templates/` (no overwrite); `gitlab` → a skeleton `.gitlab-ci.yml`; `none` → skip. Record as manual work: the `ANTHROPIC_API_KEY` secret, and that the CI runner needs `--allowedTools` (already in the templates, K-06).
 9. **`docs/team/` skeleton**: `features/`, `adr/`, `research/`, `explore/`, `journal/`, `metrics/`, `retro/`, `proposals/`, `agents/`; `skills-registry.md`, `kit-issues.md` from their templates.
-10. **`.gitignore`.** Merge the missing lines from `<kit>/templates/project/gitignore.tmpl` (it includes `.claude/worktrees/`, `.team/current.json`, `.team/session/`).
+10. **`.gitignore`.** Merge the missing lines from `<kit>/templates/project/gitignore.tmpl` (it includes `.claude/worktrees/`, `.team/session/`).
 11. **Plugins: print only.** `claude plugin install <name>@<marketplace>` for each `plugins.required` (with a blocking warning) and `recommended`. Do not install.
 12. **One trial run.** `git status --short` first; `cmd.install`, `cmd.lint`, `cmd.test` (Bash) — record the command, exit code, output (record red too); `git status --short` after: a changed lockfile or protected file → report it, do not commit it. Check `grep -c '{{' CLAUDE.md .claude/settings.json .claude/rules/*.md` = 0 (no empty placeholder left behind).
-13. **Close the exception.** Write `.team/current.json` {stage: "idle"}. Do this step on EVERY exit.
+13. **Close the exception.** `team.py release onboard`. Do this step on EVERY exit.
 14. **Report.** Write `docs/team/onboarding.md` (template `<kit>/templates/artifacts/onboarding.md`): the step-2 table with the real status, the kit version, the trial-run table, uninstalled plugins, manual work. Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language). One journal line.
 
 ## Outputs
@@ -82,7 +82,7 @@ Details of every file and how it is merged: `${CLAUDE_SKILL_DIR}/references/file
 | "Copy the template files from another project, it is faster" | `cp` only from `<kit>/templates/` (the hook flags other sources, K-26). |
 
 ## Red flags
-- `.team/current.json` still has `stage: onboard` after the run.
+- `team.py sessions` still lists `onboard` for this session after the run.
 - A `{{` left in a rendered file.
 - `git diff CLAUDE.md` touches lines outside the two blocks (other than an old CLAUDE.md adopted with a reason row per change).
 - CLAUDE.md holds only the team block, or a `<fill:` is left in the project block.
@@ -95,7 +95,7 @@ Details of every file and how it is merged: `${CLAUDE_SKILL_DIR}/references/file
 - [ ] The `check-profile.py` output for both profile and config is pasted.
 - [ ] The `check-claude-md.py` output (0 problems, project and team line counts) is pasted; `git diff CLAUDE.md` stays inside the two blocks.
 - [ ] `grep -c '{{'` on the rendered files = 0; `jq '.agent, .permissions.deny' .claude/settings.json` is pasted.
-- [ ] `cat .team/current.json` shows `idle`.
+- [ ] `team.py sessions` no longer lists `onboard` for this session.
 - [ ] The trial-run table in `onboarding.md` has exit codes; `git status --short` before/after `cmd.install` is pasted.
 
 ## See also

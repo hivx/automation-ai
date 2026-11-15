@@ -23,7 +23,7 @@ Every check ends with a scope line `checked: N files / skipped: <reason>`, so th
 ## Metric-based checks (need `docs/team/metrics/runs.jsonl`)
 | # | Check | How | Report when |
 |---|---|---|---|
-| D1 | Unused skills | SubagentStop lines have `skill: null`; only a few skills call `log-run.sh --skill`. Match fork skills through `agent` + `stage` (from `current.json`). A skill that never logs metrics → "no data", NOT "unused". | 0 runs in 30 days for a skill that has data |
+| D1 | Unused skills | SubagentStop lines have `skill: null`; only a few skills call `log-run.sh --skill`. Match fork skills through `agent` + `stage` (the session position at logging time). A skill that never logs metrics → "no data", NOT "unused". | 0 runs in 30 days for a skill that has data |
 | D2 | Agents hitting the turn limit | Normalise the `team:` prefix of `agent`; compare `turns` with `maxTurns` in the frontmatter. `turns` is the number of assistant messages (approximate) — say so. | ≥ 2 times |
 | D3 | Results guessed from text | The scorecard `result` field is guessed from the last message (K-18) — every metric based on `result` is labelled "low confidence". | Always note it |
 

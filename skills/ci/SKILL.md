@@ -42,7 +42,7 @@ Do not use when:
 - Secrets live only in the CI secret store; never read `.env*` (protected).
 
 ## Process
-1. **Record position.** Write `.team/current.json` {feature: "ci", stage: "<subcommand>", agent: "devops", started_at}. Create branch `team/ci-<slug>` from `base_branch`.
+1. **Record position.** `team.py claim ci --stage <subcommand> --agent devops` (exit 3 `CONFLICT` → stop and return it, `<kit>/handbook/sessions.md`). Create branch `team/ci-<slug>` from `base_branch`.
 2. **`fix` — gather evidence.** `gh run view <id> --log-failed` and `gh run view <id> --json headSha,conclusion,jobs`. Quote the first REAL error line (not the final "exit 1" line).
 3. **`fix` — classify (decision point, before any fix).** The evidence each kind needs:
    - code: the same test is red when the matching `cmd.*` slot runs on the same SHA → stop, hand back to team-leader to open a bug-fix. Do not fix.

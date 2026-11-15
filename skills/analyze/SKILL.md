@@ -44,7 +44,7 @@ Do not run any `cmd.*` command in this stage.
 - Any of the above missing → return ≤ 5 lines naming what is missing, with status `NEEDS_CONTEXT`, then stop.
 
 ## Process
-1. **Record the position.** Write `.team/current.json` {feature: <ID>, stage: "analyze", agent: "analyst", started_at}.
+1. **Record the position.** `team.py claim <ID> --stage analyze --agent analyst` (exit 3 `CONFLICT` → stop and return it, `<kit>/handbook/sessions.md`).
    Exit if: `team.py status` shows the spec is already approved and there is no `--amend` → return `SPECIFIED` and do not rewrite anything.
 2. **Hypothesis.** Write one sentence "what the requester wants" + a confidence % + what is still missing. This sentence is the first line of the Goal section and stays there until the spec is complete.
 3. **Look before you ask.** List what the intake, README, glossary and Explore already answered, with paths. Every later question must carry the note "the code/docs do not answer this (checked <path>)".
@@ -61,7 +61,7 @@ Do not run any `cmd.*` command in this stage.
    Return `NEEDS_ANSWER` and stop. At most 2 rounds; if a large point remains after round 2 → `NEEDS_ANSWER` with the note "missing foundation", never open a round 3.
 8. **Vague answers.** If the human answers "up to the team" or "either is fine" on a large point → treat it as decide for that point, record it in Assumptions, and restate it once with 2 options if the point is irreversible.
 9. **Check the volume.** If the criteria split into independent groups, or exceed what the intake's size describes → write a size-change proposal for the team-leader (never change the size yourself).
-10. **Write the spec.** Write `docs/team/features/<ID>/spec.md` from `<kit>/templates/artifacts/spec.md`: 7 sections, an NFR table, a criteria table `AC-n | criterion | how to check`, Assumptions, Definition of Done (always including As-Built, user docs if behavior changes, CHANGELOG, `cmd.test` green). Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language). Size S: at most 5 criteria, and the NFR section may say "none".
+10. **Write the spec.** Write `docs/team/features/<ID>/spec.md` from `<kit>/templates/artifacts/spec.md`: 7 sections, an NFR table, a criteria table `AC-n | criterion | how to check`, Assumptions, Definition of Done (always including As-Built, user docs if behavior changes, CHANGELOG, `cmd.test` green). Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language). Size S: at most 5 criteria, and the NFR section may say "none". Keep `spec.md` ≤ 60 lines at size S, ≤ 150 at M, ≤ 250 at L: every later role reads it; tables over prose.
 11. **`--amend`.** Never delete old text. Add `## Amendment <n> (<date>)`: what changes, which criteria change (mark `[changed]` on the criterion line itself), which later artifacts are affected (design, tasks) so the team-leader can route them (`/team:architect` impact, `/team:plan --insert`).
 12. **Self-check before returning.** Every criterion is measurable; every "must" traces back to a line of the intake; no library/framework name appears as a decision; no "TBD"; nothing contradicts a previously approved spec.
 13. **Return and stop.** Return message to the team-leader, ≤ 10 lines: `SPECIFIED` or `NEEDS_ANSWER`, the number of criteria, the main assumptions, gate G1 (applies or not, per `team.py`). The analyst does not start research or design.
@@ -69,7 +69,7 @@ Do not run any `cmd.*` command in this stage.
 ## Outputs
 - `docs/team/features/<ID>/spec.md` (template `<kit>/templates/artifacts/spec.md`).
 - `docs/team/features/<ID>/questions.md` when ask mode has a large unclear point.
-- `.team/current.json` {stage: "analyze"}.
+- This session's position: `analyze` (`team.py claim`).
 - Example return message:
   ```
   analyst -> team-leader | FEAT-012 | SPECIFIED
@@ -105,6 +105,7 @@ Do not run any `cmd.*` command in this stage.
 
 ## Verification
 - [ ] Paste the numbered list of criteria, each with how it is checked.
+- [ ] `wc -l spec.md` pasted, within the size cap (S 60, M 150, L 250).
 - [ ] `grep -c '^## ' docs/team/features/<ID>/spec.md` shows all 7 sections + Assumptions + Definition of Done.
 - [ ] `grep -nE 'As-Built|CHANGELOG' docs/team/features/<ID>/spec.md` returns matches inside the DoD section.
 - [ ] If `questions.md` exists: ≤ 5 questions, each with 2–4 options + recommendation + consequences, round ≤ 2.

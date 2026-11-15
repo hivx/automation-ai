@@ -27,7 +27,7 @@
 |---|---|---|---|---|
 | `connect()` drops the `timeout` parameter | <URL#breaking> | src/db/pool.py:12, src/jobs/sync.py:40 | use `options.timeout` | low |
 
-Each row is the size of one 2–5 minute task; a row that is too big → split it.
+Each row is the size of one task (one vertical slice); a row that is too big → split it.
 
 ## `--integration` table template
 | Item | Value | Source |

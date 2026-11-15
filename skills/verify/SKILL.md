@@ -37,11 +37,11 @@ Do not use when:
 ## Inputs and preconditions
 - `docs/team/features/<ID>/spec.md` (criteria + DoD), `design.md` (test plan, size M/L), `tasks.md` fully ticked.
 - `python3 "<kit>/scripts/team.py" status <ID>` reports `built`; otherwise hand it back and stop.
-- Branch `team/<ID>` can be checked out, with a clean tree.
+- Branch `team/<ID>` is checked out in the feature worktree `.claude/worktrees/<ID>` (or can be: `git worktree add`), with a clean tree.
 
 ## Process
-1. **Record the position.** Write `.team/current.json` {feature, stage: "verify", agent: "qa", started_at}.
-2. **Pin the commit.** `git switch team/<ID>`; `git status --porcelain` must be empty (dirty tree → stop and report); `git rev-parse HEAD` → write it at the top of `acceptance.md`. All evidence must be produced AFTER this command, on this commit. If the branch moves mid-way (a new commit appears), record the new commit and rerun every criterion — evidence from the old commit is no longer valid.
+1. **Record the position.** `team.py claim <ID> --stage verify --agent qa` (exit 3 `CONFLICT` → stop and return it, `<kit>/handbook/sessions.md`).
+2. **Pin the commit.** Work in the feature worktree (`git worktree add .claude/worktrees/<ID> team/<ID>` if missing; never switch the main tree, other sessions use it); `git status --porcelain` must be empty (dirty tree → stop and report); `git rev-parse HEAD` → write it at the top of `acceptance.md`. All evidence must be produced AFTER this command, on this commit. If the branch moves mid-way (a new commit appears), record the new commit and rerun every criterion — evidence from the old commit is no longer valid.
 3. **Reread the requirements.** Reread every criterion and the DoD in `spec.md` and make a list; never infer them from green tests.
 4. **A gate for each criterion** — identify the command → run it fresh → read the full output, the exit code, the error count → compare with the criterion → only then write the conclusion. Each row: `criterion | command | exit code | output (excerpt) | covering test | conclusion`. Details and the "what a claim needs" table: `${CLAUDE_SKILL_DIR}/references/evidence.md`.
 5. **Regression evidence (bug-fix).** A "bug is fixed" criterion needs a reproducing test: its RED output before the fix must be in the dev report or a `review-NN.md`; if absent → `rework` with the request "paste the red output of the reproducing test". qa never reverts code itself to try it.
@@ -65,7 +65,7 @@ Do not use when:
 
 ## Outputs
 - `docs/team/features/<ID>/acceptance.md` (template `<kit>/templates/artifacts/acceptance.md`).
-- `.team/current.json` {stage: "verify"}.
+- This session's position: `verify` (`team.py claim`).
 - Example return message:
   ```
   qa -> team-leader | FEAT-012 | rework

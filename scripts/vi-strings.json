@@ -16,7 +16,7 @@
   "make-agent": "Dùng khi team-leader thấy một chuyên môn riêng của dự án đủ lớn để cần ngữ cảnh, bộ tool hoặc model riêng, mà không vai nào của kit đảm nhận được và một skill tạm không đủ.",
   "make-skill": "Dùng khi team-leader thấy một task cần chuyên môn riêng của dự án mà kit chưa có, hoặc một chuỗi bước đã lặp lại ở nhiều task, và nêu được nhu cầu một câu kèm bằng chứng.",
   "onboard": "Dùng khi G0 của takeover đã được duyệt, hoặc repo rỗng cần cấu hình đội lần đầu (--new), để cài profile, config, settings, rule, CI và khung docs/team cho dự án.",
-  "plan": "Dùng khi feature đã có spec và design được duyệt và cần chia thành task 2–5 phút có touchpoints, hoặc khi change-request cần chèn task mới (--insert).",
+  "plan": "Dùng khi feature đã có spec và design được duyệt và cần chia thành task (mỗi task một lát cắt hành vi kèm test, khoảng 15–30 phút) có touchpoints, hoặc khi change-request cần chèn task mới (--insert).",
   "pr": "Dùng khi nhánh feature hoặc nhánh sửa CI đã sẵn sàng cần mở hay cập nhật pull request, hoặc cần trả lời bình luận review của người.",
   "release": "Dùng khi feature đã accepted, duyệt G4 và có As-Built, cần merge, gắn tag, đưa lên staging cho UAT, rồi lên prod khi người đã duyệt G5.",
   "research": "Dùng khi spec còn câu hỏi kỹ thuật cần docs chính thức đúng phiên bản, cần so sánh phương án, đọc changelog trước khi nâng cấp phụ thuộc, tìm hiểu API ngoài để tích hợp, hoặc làm spike.",
@@ -34,7 +34,7 @@
    "khong": "Viết code, viết spec, review code"
   },
   "tech-lead": {
-   "viec": "Lập plan, chia task 2–5 phút có touchpoints, giao dev, điều phối review 2 tầng, tích hợp nhánh, tick task, ghi note cấp task",
+   "viec": "Lập plan, chia task theo lát cắt hành vi (khoảng 15–30 phút) có touchpoints, giao dev, điều phối review 2 tầng, tích hợp nhánh, tick task, ghi note cấp task",
    "khong": "Tự code task lớn, bỏ qua review"
   },
   "coach": {
@@ -280,6 +280,7 @@
   "limits.feature_budget_usd": "Ngân sách USD cho một feature; null = không giới hạn.",
   "limits.context_warn_pct": "Ngưỡng % ngữ cảnh để nhắc nén (mức văn bản, không hook đo).",
   "limits.max_temp_skills": "Số skill/agent tạm đang hoạt động tối đa.",
+  "limits.session_idle_min": "Số phút không hoạt động để một phiên bị coi là rảnh: việc nó giữ vẫn phải hỏi anh trước khi phiên khác nhận, nhưng file nó giữ không còn bắt phiên khác chờ (mặc định 120).",
   "models": "Ghi đè model theo vai trò.",
   "models.team-leader": "Model cho vai team-leader.",
   "models.tech-lead": "Model cho vai tech-lead.",

@@ -30,7 +30,7 @@ Các bảng giữa dấu `<!-- gen:… -->` do `scripts/gen-vi-guide.py` sinh t�
 ## 3. Việc hằng ngày
 - Có yêu cầu mới → gõ thẳng bằng tiếng Việt, hoặc `/team:intake "<yêu cầu>"`.
 - Muốn đội chạy tiếp một việc → `/team:run <ID>`; chạy tới khi gặp cổng → thêm `--until-blocked`.
-- Muốn biết đang ở đâu, ai chờ ai → `/team:status`.
+- Muốn biết đang ở đâu, ai chờ ai → `/team:status`. Mở 2–3 phiên Claude cùng lúc trên một dự án được: cột `Session` cho biết phiên nào đang giữ việc nào (`this` = phiên này); xem cả file đang bị giữ: `python3 "$(cat .team/plugin_root)/scripts/team.py" sessions`.
 - Có lỗi → `/team:intake --type bug "<mô tả>"`; production đang lỗi → `--type hotfix`.
 - Muốn dọn code không đổi hành vi → `/team:clean <loại>`.
 - CI đỏ → `/team:ci fix`.
@@ -72,6 +72,7 @@ Các bảng giữa dấu `<!-- gen:… -->` do `scripts/gen-vi-guide.py` sinh t�
 - Đội dừng ở cổng: tin cuối có 4 dòng `STOP / Work / Who does what / Resume` — làm theo dòng "Who does what", rồi chạy lệnh ở dòng "Resume". `team.py status` hiện `WAITING_FOR_APPROVAL Gx` cho biết file cần duyệt.
 - Task `BLOCKED` sau nhiều lần thử, hay vòng sửa vượt trần: đọc journal của feature; thường là thiếu thông tin hoặc lỗi cấu hình profile.
 - CI đỏ: `/team:ci fix` — devops phân loại nguyên nhân (code / test chập chờn / môi trường / cấu hình / phụ thuộc) trước khi sửa; lỗi code thì mở bug-fix.
+- Hai phiên đụng nhau: cùng một việc → phiên sau hỏi anh (để phiên kia làm / nhận về phiên này / làm việc khác); cùng một file → task đó chờ lượt sau, task khác vẫn chạy; nhắc `RULE (reminder, not enforced) … (sessions)` nghĩa là file đang được phiên khác sửa. Phiên tắt (hoặc treo, chết) thì việc và file nó giữ tự được nhả.
 - Hết ngữ cảnh (phiên dài): đội tự viết bàn giao khi nén; mở phiên mới và gõ `/team:session load` hoặc `/team:status`.
 - Chạy headless/CI bị từ chối quyền: phải truyền `--allowedTools` (lấy từ `permissions.allow`); không dùng `--bare` khi có sửa file.
 
@@ -139,6 +140,8 @@ Anh viết tiếng Việt; Claude dịch sang đúng skill/khái niệm theo b�
 ## 9. QUYẾT ĐỊNH & YÊU CẦU CỦA CHỦ REPO
 Nhật ký chỉ thêm, mới nhất ở trên. Anh viết yêu cầu ở đây bằng tiếng Việt; mọi phiên sau của Claude đọc mục này trước khi làm. Mẫu: `- YYYY-MM-DD | <quyết định hoặc yêu cầu> | <ai ghi> | <trạng thái: mới / đang làm / xong / bỏ>`
 
+- 2026-11-14 | Nhiều phiên cùng chạy trên một dự án (v0.6.4, ADJ-38, `SPEC-OVERRIDES.md` mục 7, K-99): trên `erp_ai` 3 phiên cùng ghi một `.team/current.json` (báo file bị sửa, có phiên phải bỏ ghi), một phiên đổi nhánh cây chính khi phiên khác đang làm, code chưa commit của phiên này làm phiên kia rối, cùng một yêu cầu bị làm hai lần. Đã sửa: mỗi phiên một làn (`.team/session/<mã phiên>.json`, ghi bằng `team.py claim`; bỏ `current.json`); khác việc → chạy luôn, không hỏi; trùng việc với phiên khác → hỏi anh (để phiên kia / nhận về / làm việc khác); trùng file → nối tiếp (task chờ lượt sau, task khác vẫn chạy), khác file → song song; intake chỉ hỏi khi yêu cầu trùng việc đang có, cấp ID không bao giờ trùng (`team.py new-id`); không đổi nhánh cây chính, merge và test trong worktree của feature; phiên mở thì thấy các phiên khác đang giữ gì, phiên tắt thì tự nhả; khóa mới `limits.session_idle_min` (mặc định 120 phút) | Claude (theo yêu cầu của chủ repo) | xong
+- 2026-11-13 | Agent đọc quá nhiều, làm quá ít (v0.6.3, ADJ-37, `SPEC-OVERRIDES.md` mục 6, K-98): đo trên `erp_ai` thấy 85–93% token là đọc lại ngữ cảnh; `design.md` 144 KB, `tasks.md` 110 KB; dev mất 61 lượt mỗi task, 24 lượt mới sửa dòng code đầu. Đã sửa: chỉ reviewer/qa đọc STD-short (một lần); file dài đọc theo mục; lời giao việc ghi sẵn tiêu chí, mục design cần đọc, danh sách test đỏ sẵn; `tasks.md` không ghi tiến độ; tech-lead không đọc lại file trong vòng lặp; dev không chạy cả bộ test, commit thẳng; trần độ dài spec/design/plan; task to hơn (một lát cắt hành vi, khoảng 15–30 phút) | Claude | xong
 - 2026-11-13 | Chỉ gọi đúng vai cần thiết, không gọi cả đội cho việc nhỏ hay câu hỏi (v0.6.2, ADJ-36, K-97): câu hỏi, giải thích, hỏi tiến độ → team-leader tự trả lời, không intake, không agent; việc vặt (sửa chữ, giá trị config, một dòng hiển nhiên, tối đa 2 file) → playbook `quick`, chỉ 1 dev; việc cỡ S → tech-lead + 1 dev + 1 reviewer, nghiệm thu ngay trong build, không qa, không asbuilt; cỡ M/L giữ chuỗi đầy đủ, research/architect/design chỉ chạy khi cần | Claude | xong
 - 2026-11-13 | Chỉ còn `/team:release` là lệnh người phải tự gõ (v0.6.1, ADJ-35): 7 skill takeover, onboard, run, retro, audit-kit, session, ci bỏ `disable-model-invocation`, nên team-leader tự chạy takeover/onboard khi dự án chưa có đội, tự sửa CI đỏ, tự chạy retro khi phản hồi vượt ngưỡng. Cổng duyệt vẫn giữ (G0 trước onboard, G5 trước prod). Release (merge, tag, deploy) vẫn chờ anh gõ | Claude | xong
 - 2026-11-13 | Hook không chặn gì nữa: skill và rule chỉ là quy tắc làm việc (v0.6.0, `SPEC-OVERRIDES.md` mục 5, ADJ-34, K-96). Khóa mới `enforcement` trong `.team/config.json`: `"warn"` (mặc định, cả với dự án cũ chưa có khóa này) = hook chỉ nhắc Claude quy tắc rồi cho lệnh chạy, `stop-check` không chạy lint/test mỗi lần agent dừng; `"block"` = chặn như trước. Team-leader hết bị role-policy chặn khi đọc file, chạy `python3 -c`, `bench`, `git reflog`…; đội cũng tự sửa được `.team/profile.json`, `.team/config.json` (K-91) | Claude | xong
@@ -180,7 +183,7 @@ Nhật ký chỉ thêm, mới nhất ở trên. Anh viết yêu cầu ở đây 
 | `/team:make-agent` | cả hai | team-leader (phiên chính) | .claude/agents/<name>.md, docs/team/agents/<name>.tests.md, docs/team/skills-registry.md | Dùng khi team-leader thấy một chuyên môn riêng của dự án đủ lớn để cần ngữ cảnh, bộ tool hoặc model riêng, mà không vai nào của kit đảm nhận được và một skill tạm không đủ. |
 | `/team:make-skill` | cả hai | team-leader (phiên chính) | .claude/skills/<name>/SKILL.md, .claude/skills/<name>/references/tests.md, docs/team/skills-registry.md | Dùng khi team-leader thấy một task cần chuyên môn riêng của dự án mà kit chưa có, hoặc một chuỗi bước đã lặp lại ở nhiều task, và nêu được nhu cầu một câu kèm bằng chứng. |
 | `/team:onboard` | cả hai | team-leader (phiên chính) | .team/profile.json, .team/config.json, CLAUDE.md | Dùng khi G0 của takeover đã được duyệt, hoặc repo rỗng cần cấu hình đội lần đầu (--new), để cài profile, config, settings, rule, CI và khung docs/team cho dự án. |
-| `/team:plan` | cả hai | tech-lead | docs/team/features/<ID>/plan.md, <kit>/templates/artifacts/plan.md, docs/team/features/<ID>/tasks.md | Dùng khi feature đã có spec và design được duyệt và cần chia thành task 2–5 phút có touchpoints, hoặc khi change-request cần chèn task mới (--insert). |
+| `/team:plan` | cả hai | tech-lead | docs/team/features/<ID>/plan.md, <kit>/templates/artifacts/plan.md, docs/team/features/<ID>/tasks.md | Dùng khi feature đã có spec và design được duyệt và cần chia thành task (mỗi task một lát cắt hành vi kèm test, khoảng 15–30 phút) có touchpoints, hoặc khi change-request cần chèn task mới (--insert). |
 | `/team:pr` | cả hai | tech-lead | docs/team/journal/<ID>.md | Dùng khi nhánh feature hoặc nhánh sửa CI đã sẵn sàng cần mở hay cập nhật pull request, hoặc cần trả lời bình luận review của người. |
 | `/team:release` | người | team-leader (phiên chính) | CHANGELOG.md, docs/team/features/<ID>/asbuilt.md | Dùng khi feature đã accepted, duyệt G4 và có As-Built, cần merge, gắn tag, đưa lên staging cho UAT, rồi lên prod khi người đã duyệt G5. |
 | `/team:research` | cả hai | researcher | docs/team/features/<ID>/research.md, docs/team/research/<topic>@<version>.md | Dùng khi spec còn câu hỏi kỹ thuật cần docs chính thức đúng phiên bản, cần so sánh phương án, đọc changelog trước khi nâng cấp phụ thuộc, tìm hiểu API ngoài để tích hợp, hoặc làm spike. |
@@ -190,7 +193,7 @@ Nhật ký chỉ thêm, mới nhất ở trên. Anh viết yêu cầu ở đây 
 | `/team:status` | cả hai | team-leader (phiên chính) | — | Dùng khi người hỏi feature đang ở đâu, ai đang chờ ai, hay việc gì đang bị chặn. |
 | `/team:takeover` | cả hai | team-leader (phiên chính) | docs/team/assessment.md, docs/team/ai-readiness.md, docs/team/profile-proposal.md | Dùng khi đội nhận một repo đã có code mà chưa có .team/profile.json, hoặc người hỏi dự án này làm gì, đã tới đâu, việc tiếp theo là gì. |
 | `/team:using-team` | cả hai | team-leader (phiên chính) | — | Dùng khi bắt đầu bất kỳ việc gì không tầm thường trong dự án có đội team, trước khi hành động hay hỏi lại: kiểm skill và playbook phù hợp. |
-| `/team:verify` | cả hai | qa | docs/team/features/<ID>/acceptance.md, <kit>/templates/artifacts/acceptance.md, .team/current.json | Dùng khi mọi task của feature đã tick và cần nghiệm thu độc lập từng tiêu chí bằng lệnh chạy thật trước khi phát hành. |
+| `/team:verify` | cả hai | qa | docs/team/features/<ID>/acceptance.md, <kit>/templates/artifacts/acceptance.md | Dùng khi mọi task của feature đã tick và cần nghiệm thu độc lập từng tiêu chí bằng lệnh chạy thật trước khi phát hành. |
 <!-- /gen:skills -->
 
 ## Đội ngũ (13 vai)
@@ -208,7 +211,7 @@ Nhật ký chỉ thêm, mới nhất ở trên. Anh viết yêu cầu ở đây 
 | `researcher` | Tài liệu chính thức có URL + ngày, so phương án, POC trong worktree, dự thảo ADR, cache theo version | Quyết định thay architect | sonnet / high | 50 |
 | `reviewer` | Context mới, chỉ thấy diff + design + handbook; finding có mã STD, mức độ, file:line, cách sửa; verdict approve / request-changes / design-defect | Sửa code, góp ý phong cách ngoài STD | opus / high | 25 |
 | `team-leader` | Một cửa anh nói chuyện. Tiếp nhận, chọn playbook & cỡ, quyết hỏi/tự quyết, gọi đúng vai trò có lý do, giữ cổng, leo thang, ghi sổ công tác, điều phối tạo skill tạm khi cần, nâng/hạ cỡ | Viết code, viết spec, review code | fable / low | 30 |
-| `tech-lead` | Lập plan, chia task 2–5 phút có touchpoints, giao dev, điều phối review 2 tầng, tích hợp nhánh, tick task, ghi note cấp task | Tự code task lớn, bỏ qua review | fable / medium | 60 |
+| `tech-lead` | Lập plan, chia task theo lát cắt hành vi (khoảng 15–30 phút) có touchpoints, giao dev, điều phối review 2 tầng, tích hợp nhánh, tick task, ghi note cấp task | Tự code task lớn, bỏ qua review | fable / medium | 60 |
 | `writer` | As-Built (khác design ở đâu), release notes, CHANGELOG, README, mô tả PR | Sửa code | sonnet / medium | 30 |
 <!-- /gen:agents -->
 
@@ -293,6 +296,7 @@ Nhật ký chỉ thêm, mới nhất ở trên. Anh viết yêu cầu ở đây 
 | `limits.feature_budget_usd` | number/null | — | Ngân sách USD cho một feature; null = không giới hạn. |
 | `limits.context_warn_pct` | integer | — | Ngưỡng % ngữ cảnh để nhắc nén (mức văn bản, không hook đo). |
 | `limits.max_temp_skills` | integer | — | Số skill/agent tạm đang hoạt động tối đa. |
+| `limits.session_idle_min` | integer | — | Số phút không hoạt động để một phiên bị coi là rảnh: việc nó giữ vẫn phải hỏi anh trước khi phiên khác nhận, nhưng file nó giữ không còn bắt phiên khác chờ (mặc định 120). |
 | `models` | object | — | Ghi đè model theo vai trò. |
 | `models.team-leader` | string | — | Model cho vai team-leader. |
 | `models.tech-lead` | string | — | Model cho vai tech-lead. |
@@ -514,9 +518,9 @@ Các mốc sau do script và cổng đọc bằng máy: **không bao giờ dịc
 
 ## Số liệu
 <!-- gen:stats -->
-- Phiên bản kit: 0.6.2
+- Phiên bản kit: 0.6.4
 - Skill: 26 · agent: 13 · playbook: 17 (+ 4 lô) · script: 31
-- Số từ trung vị (tiếng Anh): skill nạp thường xuyên 391.0, skill khác 1542.0, agent 939
-- Commit: b178279
-- Ngày sinh file: 2026-11-13
+- Số từ trung vị (tiếng Anh): skill nạp thường xuyên 391.5, skill khác 1565.5, agent 962
+- Commit: 96390b2
+- Ngày sinh file: 2026-11-14
 <!-- /gen:stats -->

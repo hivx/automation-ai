@@ -42,7 +42,7 @@ Run and paste each command; if one condition fails → stop, print what is missi
 - `prod`: the additional conditions in step 8.
 
 ## Process
-1. **Record position and reason.** Write `.team/current.json` {feature, stage: "release", agent: "devops", started_at}; one journal sentence: why devops is being called and with what goal.
+1. **Record position and reason.** `team.py claim <ID> --stage release --agent devops` (`CONFLICT` → stop, `<kit>/handbook/sessions.md`); one journal sentence: why devops is being called and with what goal.
 2. **Pick the version (decision point).** `git tag --sort=-v:refname | head -n 5` + the groups in the feature's CHANGELOG entry: any Removed or "breaking" → bump major; any Added → minor; only Fixed/Security → patch. If the project has another convention (recorded in `profile.notes` or visible in CHANGELOG history), follow it. Record the chosen tag and the reason in the journal.
 3. **Rollback plan before deploy.** Write the `## Rollback` section in `asbuilt.md` (team-leader may write `docs/team/**`): trigger conditions (red smoke; an NFR from the spec violated), the command (copied from `docs/team/ci.md`), the data part (cite the migration up/down/up line in `acceptance.md`), and the expected duration. Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language). No tested rollback command → do not continue.
 4. **Hand off `deploy-staging` to devops** (Agent `team:devops`), handoff message ≤ 10 lines: ID, PR, chosen tag, the `deploy.staging`/`deploy.smoke` commands, the `asbuilt.md` file. devops does:

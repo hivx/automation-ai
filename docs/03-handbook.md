@@ -6,6 +6,7 @@ The canonical content lives in `handbook/`:
 - `handbook/tool-selection.md` — choosing between a hook, a script, a rule, a skill or an agent.
 - `handbook/tool-map.md` — job → preferred tool → fallback tool.
 - `handbook/who-calls-whom.md` — the call relationships between roles.
+- `handbook/sessions.md` — session lanes: several Claude sessions on one project (claims, conflicts, shared files).
 
 ## Three enforcement levels
 | Level | Who enforces it | Examples |

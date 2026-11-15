@@ -40,7 +40,8 @@
     },
     "feature_budget_usd": null,
     "context_warn_pct": 60,
-    "max_temp_skills": 5
+    "max_temp_skills": 5,
+    "session_idle_min": 120
   },
   "models": {
     "team-leader": "fable",

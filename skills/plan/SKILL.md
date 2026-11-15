@@ -1,6 +1,6 @@
 ---
 name: plan
-description: Use when a feature has an approved spec and design and must be split into 2–5 minute tasks with touchpoints, or when a change-request needs new tasks inserted (--insert).
+description: Use when a feature has an approved spec and design and must be split into tasks (one vertical slice each) with touchpoints, or when a change-request needs new tasks inserted (--insert).
 argument-hint: "<ID> [--insert]"
 context: fork
 agent: team:tech-lead
@@ -11,7 +11,7 @@ allowed-tools: Bash(python3 *) Bash(cat *) Bash(git branch *)
 # Planning → plan.md + tasks.md
 
 ## Overview
-This skill splits a feature into 2–5 minute tasks, each with concrete file paths, a test file, criteria and dependencies, so that a dev who sees only one task line can still do it right without asking back. It runs in the `tech-lead` context (fork). A plan is a set of DECISIONS (files, signatures, test names, order), not a pre-written program.
+This skill splits a feature into vertical-slice tasks (one behavior with its tests, about 15–30 minutes), each with concrete file paths, a test file, criteria and dependencies, so that a dev who sees only one task line can still do it right without asking back. It runs in the `tech-lead` context (fork). A plan is a set of DECISIONS (files, signatures, test names, order), not a pre-written program.
 
 A good plan: every touchpoint in `design.md` belongs to at least one task; every criterion in `spec.md` is covered by at least one task; no two parallel tasks touch the same file; size L has a walking skeleton as its first task. Example: "T2 — Reject expired OTP codes — files: src/auth/otp.py — test: tests/auth/test_otp.py — depends: T1" is a task; "do the auth part" is not.
 
@@ -41,7 +41,7 @@ Do not use when:
 - `--insert`: the spec has a latest `## Amendment <n>` that has not been planned yet.
 
 ## Process
-1. **Record the position.** Write `.team/current.json` {feature, stage: "plan", agent: "tech-lead", started_at}.
+1. **Record the position.** `team.py claim <ID> --stage plan --agent tech-lead` (exit 3 `CONFLICT` → stop and return it, `<kit>/handbook/sessions.md`).
 2. **File map first, tasks second.** List every file that will be created or modified and its responsibility (from the design's touchpoints). Tasks are derived from this map, never the other way round. Checkpoint: every touchpoint appears in the map before any task is written.
 3. **Shared constraints.** A `## Shared constraints` section in `plan.md`: copy the values VERBATIM from the spec/design (field names, formats, limits, versions). Every task inherits them; the dev never has to guess.
 4. **Dependency graph.** Write `depends:` from data flow and contracts (what must exist first for the other task's test to run), not from gut feeling. Foundations first; high-risk parts early so they fail early.
@@ -50,8 +50,8 @@ Do not use when:
 7. **Write tasks.md.** Write it from `<kit>/templates/artifacts/tasks.md`, one line per task:
    `- [ ] T<N> — <name> — files: <paths> — test: <test file> — depends: <T… or —>`
    followed by sub-lines: criteria (quote `AC-n`), interface (`Receives:` / `Returns:` with exact names and signatures), and `Expect:` the output of `cmd.test_one`. Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language).
-   No bold around the task code (`team.py` counts tasks by `- [ ] T<N>`).
-8. **Right-size each task.** Split when a reviewer could reject one part and accept the other; fold preparation and docs into the task that needs them. A task with > 5 files, or whose name contains "and" → reconsider it. Each task takes 2–5 minutes.
+   No bold around the task code (`team.py` counts tasks by `- [ ] T<N>`). ≤ 4 lines per task; `plan.md` ≤ 150 lines: every dev and reviewer reads them.
+8. **Right-size each task.** Split when a reviewer could reject one part and accept the other; fold preparation and docs into the task that needs them. A task with > 5 files, or whose name contains "and" → reconsider it. A task is one vertical slice of about 15–30 minutes: every task pays a dev start-up, a review and a merge, so never split below one testable behavior.
 9. **Parallelism.** A "one file, one owner" table in `plan.md`. Two tasks sharing a file → chain them with `depends:`. Migrations and shared state are always sequential. At most `limits.max_parallel_dev` tasks at a time.
 10. **Checkpoints.** After every 2–3 tasks and at the end: `cmd.test` green on `team/<ID>` and the main flow runs — write them in `plan.md`.
 11. **Review focus.** ≤ 5 inputs or failure modes that the spec implies but no task tests yet; add the test to the owning task.
@@ -63,7 +63,7 @@ Do not use when:
 ## Outputs
 - `docs/team/features/<ID>/plan.md` (template `<kit>/templates/artifacts/plan.md`): order, shared constraints, the one-file-one-owner table, checkpoints, risks, review focus.
 - `docs/team/features/<ID>/tasks.md` (template `<kit>/templates/artifacts/tasks.md`).
-- Branch `team/<ID>`; `.team/current.json` {stage: "plan"}.
+- Branch `team/<ID>`; this session's position: `plan`.
 - Example return message:
   ```
   tech-lead -> team-leader | FEAT-012 | planned
@@ -77,7 +77,7 @@ Do not use when:
 | Thought | Correct action |
 |---|---|
 | "The tasks are obvious, just start" | Write tasks.md first; hidden dependencies show up only when you list them. |
-| "Task: 'do the backend part'" | Split down to 2–5 minutes with a concrete file and test file. |
+| "Task: 'do the backend part'" | Split into vertical slices: one behavior, concrete files and a test file each. |
 | "Two tasks share a file but they are quick" | Chain them with `depends:`; never run them in parallel. |
 | "Size L, a walking skeleton is too much effort" | It is mandatory; it proves the riskiest integration first. |
 | "Let the dev pick the test file" | Write `test:` now; the reviewer and qa need it too. |
@@ -100,6 +100,7 @@ Do not use when:
 - [ ] Paste the touchpoint → task table, with no empty row.
 - [ ] Paste the AC → task table; every criterion has at least one task.
 - [ ] `grep -cE '^- \[ \] T[0-9]+' docs/team/features/<ID>/tasks.md` equals the task count in the return message.
+- [ ] `wc -l plan.md tasks.md` pasted: plan.md ≤ 150 lines, tasks.md ≤ 4 lines per task.
 - [ ] Every task line has `files:`, `test:`, `depends:` (paste the empty output of the `grep -L`/awk check).
 - [ ] `git branch --list team/<ID>` shows the branch.
 - [ ] Paste the output of `team.py status <ID>` showing `planned` (or waiting for G3).

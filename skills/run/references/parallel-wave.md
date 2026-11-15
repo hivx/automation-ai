@@ -6,16 +6,16 @@ A wave moves every feature that can move now, one agent per feature, at the same
 Forked skills run one at a time (`background: false`, ADJ-13). To run several roles at once, the team-leader calls the Agent tool once per wave item, all in ONE message, and each agent reads and follows the skill file itself. A wave of one item still goes through the Skill tool as in the normal run loop.
 
 ## Loop
-1. `python3 "<kit>/scripts/team.py" wave --json` (Bash). `dispatch` is what runs now; `held` lists the rest with a reason (gate, question, human-only skill, headcount in use, files shared with a build in this wave).
+1. `python3 "<kit>/scripts/team.py" wave --json` (Bash). `dispatch` is what runs now; `held` lists the rest with a reason (gate, question, human-only skill, headcount in use, files shared with a build in this wave, held by another session).
 2. `dispatch` is empty → print the `held` lines and stop with the 4-line stop message.
-3. For each item: one reason line in `docs/team/journal/<ID>.md` (Write, `output_language`). Write `.team/current.json` once: {feature: first ID, stage: "wave", wave: [IDs], started_at}. Hooks read each agent's feature from its own transcript, so current.json is only a pointer.
+3. For each item: one reason line in `docs/team/journal/<ID>.md` (Write, `output_language`), then `team.py claim <ID> --stage <stage> --agent <role>`; exit 3 `CONFLICT` (another session holds it) → hold the item and ask the human at the end of the wave (`<kit>/handbook/sessions.md`). Hooks read each agent's feature from its own transcript, so the session position is only a pointer.
 4. Role budget: count each item against its own feature's `limits.max_agents_per_feature[size]`, as in the normal loop.
 5. Send ONE message with one Agent call per item: `subagent_type: team:<role>` from the item, and this handoff (≤ 10 lines):
    ```
    Run skill <skill> for <ID>: read <kit>/skills/<skill>/SKILL.md and follow it with $ARGUMENTS = "<args>" (add --decide in decide mode)
    <kit> = contents of .team/plugin_root; ${CLAUDE_SKILL_DIR} = <kit>/skills/<skill>
    Input files: docs/team/features/<ID>/
-   Parallel wave: other agents work on other features now; write only <ID>'s files; current.json may name another feature, use <ID>
+   Parallel wave: other agents work on other features now; write only <ID>'s files; the session position may name another feature, use <ID>
    devs=<n> reviewers=<n>            (build items only, from the wave output)
    Done when: the skill's Verification list holds
    Report: ≤ 10 lines, first line is the status
@@ -26,7 +26,7 @@ Forked skills run one at a time (`background: false`, ADJ-13). To run several ro
 ## Headcount
 - `limits.headcount.<role>` in `.team/config.json` caps how many agents of one role run at once, team-wide (a missing key means 1). The config template ships `max_parallel_dev: 4`, reviewer 4, architect 1 and 2 for the other roles; a project onboarded earlier keeps its own values.
 - dev uses `limits.headcount.dev`, else `limits.max_parallel_dev`; reviewer defaults to the dev value. When several features build at once, `team.py wave` splits the dev and reviewer headcount between them (`devs=`, `reviewers=`), and tech-lead's build loop uses that share.
-- Two builds whose `tasks.md` `files:` overlap never run in the same wave; the later one waits.
+- Two builds whose `tasks.md` `files:` overlap never run in the same wave; the later one waits. Across sessions the same rule works per task: each build claims a task's files before its dev starts (`BUSY` → the task waits a round).
 - Cost grows with the number of agents running at once; `limits.feature_budget_usd` still applies per feature.
 
 ## Permissions

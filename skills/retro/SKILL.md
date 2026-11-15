@@ -38,7 +38,7 @@ Do not use when:
 - Check: `python3 "<kit>/scripts/team.py" status` (which features fall in the period, and their sizes).
 
 ## Process
-1. **Record position and skeleton.** Write `.team/current.json` {feature: "retro", stage: "retro", agent: "coach", started_at}. Write the skeleton of `docs/team/retro/<date>.md` from `<kit>/templates/artifacts/retro.md` immediately; already present (a re-run) → read it, reconcile it with the current metrics (the new metrics win), and continue from the first empty section. Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language).
+1. **Record position and skeleton.** `team.py claim retro --stage retro --agent coach`. Write the skeleton of `docs/team/retro/<date>.md` from `<kit>/templates/artifacts/retro.md` immediately; already present (a re-run) → read it, reconcile it with the current metrics (the new metrics win), and continue from the first empty section. Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language).
 2. **List the sources.** For each source: the number of lines in the period, which features. A missing source → a line "not checked: missing <source>" and a narrower conclusion.
 3. **Quantify.** `python3 "<kit>/scripts/measure.py" --since <date>`; paste the output: efficiency scores, trends, anomalies, attention ranking. Refresh `scorecard.json` when needed: `python3 "<kit>/scripts/team.py" scorecard`.
 4. **Follow up the previous retro.** For each earlier proposal in `docs/team/proposals/*/`: approved or not (`Approved-by:`), canary run or not (journals of size S jobs), result keep/rollback/replace/remove — with a source; nothing found → "no evidence found" (which is different from "not done").
@@ -85,7 +85,7 @@ Do not use when:
 - An evidence cell with no path or source line number.
 - A proposal with < 3 eval scenarios, or no check that the current version fails.
 - An overlay missing the `# Overlay from retro <date>: <reason>` line or the version.
-- coach writing outside `docs/team/retro/**`, `docs/team/proposals/**`, `.team/current.json`, `scorecard.json`, memory.
+- coach writing outside `docs/team/retro/**`, `docs/team/proposals/**`, `scorecard.json`, memory.
 - More than 3 bottlenecks; no follow-up section for the previous retro.
 - A retro without the pasted `measure.py` output.
 

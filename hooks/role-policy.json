@@ -1,5 +1,5 @@
 {
-  "_note": "Per-role limits (ADJ-02). Enforced by scripts/role-policy.sh. 'write': globs of writable paths ('*' = anywhere; protect.sh still blocks forbidden areas). 'bash': 'any' | 'read-only' | {'allow': [command globs, 'cmd.*' = the profile's cmd.* slots]}; read-only commands are always allowed. 'agents': subagent_type values the role may call. 'stage_exceptions': extra allowances while .team/current.json has the matching stage. 'readonly_scripts': kit scripts (matched by their real path under <kit>/scripts/, K-40) → write-target glob ('' = writes nothing but temp files); a writing script runs only when the role may write its target. 'worktree_write': true = the role may write any file inside its own worktree .claude/worktrees/<n>/ (researcher POC), never the main tree. '_temp': default limits for temp agents (.claude/agents/<name>.md with the `team: temp` marker) — may write (protect.sh still blocks forbidden areas), Bash read-only + basic git + cmd.*, may call only Explore. 'cp-from-kit-templates': cp is allowed only when every source lies under <kit>/templates/ (K-26).",
+  "_note": "Per-role limits (ADJ-02). Enforced by scripts/role-policy.sh. 'write': globs of writable paths ('*' = anywhere; protect.sh still blocks forbidden areas). 'bash': 'any' | 'read-only' | {'allow': [command globs, 'cmd.*' = the profile's cmd.* slots]}; read-only commands are always allowed. 'agents': subagent_type values the role may call. 'stage_exceptions': extra allowances while the session's position (`team.py claim --stage`, .team/session/<id>.json) has the matching stage. 'readonly_scripts': kit scripts (matched by their real path under <kit>/scripts/, K-40) → write-target glob ('' = writes nothing but temp files); a writing script runs only when the role may write its target. 'worktree_write': true = the role may write any file inside its own worktree .claude/worktrees/<n>/ (researcher POC), never the main tree. '_temp': default limits for temp agents (.claude/agents/<name>.md with the `team: temp` marker) — may write (protect.sh still blocks forbidden areas), Bash read-only + basic git + cmd.*, may call only Explore. 'cp-from-kit-templates': cp is allowed only when every source lies under <kit>/templates/ (K-26).",
   "readonly_commands": [
     "cat",
     "ls",
@@ -95,7 +95,6 @@
     "team:tech-lead": {
       "write": [
         "docs/team/**",
-        ".team/current.json",
         ".team/session/**"
       ],
       "bash": {
@@ -123,7 +122,6 @@
         "docs/team/proposals/**",
         "docs/team/kit-issues.md",
         "docs/team/metrics/scorecard.json",
-        ".team/current.json",
         ".claude/agent-memory/**"
       ],
       "bash": "read-only",
@@ -132,7 +130,6 @@
     "team:analyst": {
       "write": [
         "docs/team/**",
-        ".team/current.json",
         ".team/session/**"
       ],
       "bash": "read-only",
@@ -143,7 +140,6 @@
     "team:researcher": {
       "write": [
         "docs/team/**",
-        ".team/current.json",
         ".team/session/**"
       ],
       "bash": {
@@ -160,7 +156,6 @@
     "team:architect": {
       "write": [
         "docs/team/**",
-        ".team/current.json",
         ".team/session/**"
       ],
       "bash": "read-only",
@@ -171,7 +166,6 @@
     "team:designer": {
       "write": [
         "docs/team/**",
-        ".team/current.json",
         ".team/session/**"
       ],
       "bash": "read-only",
@@ -189,7 +183,6 @@
     "team:qa": {
       "write": [
         "docs/team/features/**",
-        ".team/current.json",
         ".claude/agent-memory/**"
       ],
       "bash": "any",
@@ -200,8 +193,7 @@
         "docs/**",
         "CHANGELOG.md",
         "README.md",
-        "CLAUDE.md",
-        ".team/current.json"
+        "CLAUDE.md"
       ],
       "bash": "read-only",
       "agents": []

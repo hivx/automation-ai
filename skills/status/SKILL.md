@@ -16,7 +16,8 @@ Print the state computed from artifacts (no stored pointer) and who is waiting o
 3. Print the output VERBATIM in a code block, including the "Applicable gates" column.
 4. For each `WAITING_FOR_APPROVAL`, `WAITING_FOR_ANSWER`, `BLOCKED`, `REWORK`, `DESIGN_DEFECT` row: one line "Waiting on the human: <work> — <file>".
 5. Print the next command exactly as the script's "Next" column gives it.
-6. Script fails → print the error verbatim and `<kit>/scripts/team.py --help`; stop. Do not infer.
+6. Another session in the `Session` column, or the human asks who works on what → also run `team.py sessions` and print it verbatim (`<kit>/handbook/sessions.md`).
+7. Script fails → print the error verbatim and `<kit>/scripts/team.py --help`; stop. Do not infer.
 
 ## Common rationalizations
 | Thought | Correct action |

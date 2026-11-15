@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # session-start.sh — SessionStart hook (startup|resume|compact|clear|fork).
 # Writes ${CLAUDE_PLUGIN_ROOT} to .team/plugin_root (only when .team/ exists: takeover/onboard create it); records the session start time;
-# returns additionalContext of at most 12 lines: team.py status summary; latest handoff when source is
-# resume/compact; the 6 core rules when source is compact; a warning for missing plugins.required.
+# registers the session's lane (`team.py sessions --open`, ADJ-38);
+# returns additionalContext of at most 12 lines: team.py status summary; the other live sessions and what they hold;
+# latest handoff of THIS session when source is resume/compact; the 6 core rules when source is compact;
+# a warning for missing plugins.required.
 # Usage: session-start.sh [--root DIR] < hook.json ; session-start.sh --help
 set -uo pipefail
 . "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
@@ -23,12 +25,20 @@ mkdir -p .team/session
 
 lines=()
 if [[ -f .team/config.json || -d docs/team/features ]]; then
-  while IFS= read -r l; do lines+=("$l"); done < <(python3 -I "$KIT_DIR/scripts/team.py" status --brief --root "$TEAM_ROOT" 2>/dev/null | head -n 3)
+  while IFS= read -r l; do lines+=("$l"); done < <(CLAUDE_CODE_SESSION_ID="$sid" python3 -I "$KIT_DIR/scripts/team.py" status --brief --root "$TEAM_ROOT" 2>/dev/null | head -n 3)
 else
   lines+=("team: project not onboarded — run /team:takeover (existing code) or /team:onboard --new.")
 fi
+if [[ -n $sid ]]; then  # session lanes: register this session, list what the other live sessions hold
+  while IFS= read -r l; do lines+=("$l"); done < <(python3 -I "$KIT_DIR/scripts/team.py" sessions --open --session "$sid" \
+    --transcript "$(input_get '.transcript_path')" --root "$TEAM_ROOT" 2>/dev/null | head -n 2)
+fi
 if [[ $source == resume || $source == compact ]]; then
-  latest="$(ls -t .team/session/*.md 2>/dev/null | grep -vE '/(plan|notes-[^/]*)\.md$' | head -n 1)"
+  latest=""; [[ -n $sid && -f .team/session/$sid.md ]] && latest=".team/session/$sid.md"  # this session's own handoff first
+  if [[ -z $latest ]]; then  # else the newest handoff of a session that has ended (a live one is another lane's work)
+    while IFS= read -r h; do [[ -f ${h%.md}.json ]] || { latest="$h"; break; }; done \
+      < <(ls -t .team/session/*.md 2>/dev/null | grep -vE '/(plan|notes-[^/]*)\.md$')
+  fi
   [[ -n $latest ]] && lines+=("Latest handoff: $latest — read it before continuing.")
   notes="$(ls -t .team/session/notes-*.md 2>/dev/null | head -n 1)"  # /team:session save (the hook never overwrites it)
   [[ -n $notes ]] && lines+=("Session notes (session save): $notes.")

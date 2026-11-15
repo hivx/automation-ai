@@ -39,7 +39,7 @@ Do not use when:
 - Check: `python3 "<kit>/scripts/team.py" status <ID>`; G1 on but not approved, or an architecture exists and G2 is not approved → stop.
 
 ## Process
-1. **Record position.** Write `.team/current.json` {feature, stage: "design", agent: "designer", started_at}.
+1. **Record position.** `team.py claim <ID> --stage design --agent designer` (exit 3 `CONFLICT` → stop and return it, `<kit>/handbook/sessions.md`).
 2. **Assumptions before writing.** List what you are assuming. A business assumption → write `questions.md` (2–4 options, recommendation, consequences) and return `NEEDS_ANSWER`. A technical assumption in decide mode → `## Assumptions decided by the team` (what was chosen / why / alternatives / how to fix if wrong).
 3. **Section 1 Context:** the problem, in/out of scope (copied from the spec), the ADR IDs that must be obeyed.
 4. **Section 3 Contracts (written before sections 2 and 4):** for each public entry point: input, output, errors (one style, following the existing code), version. Mark which behaviors are contract. To change, prefer adding an optional field; breaking → a new version + a migration guide (STD-DOC-7).
@@ -53,7 +53,7 @@ Do not use when:
 12. **Section 8 Test plan:** every AC-n and every NFR with a "how to check" → ≥ 1 row `criterion | test file::name | kind | error/boundary path`. A criterion with inputs → at least one boundary or error row (qa will run it). Commands are named only by slot (`cmd.test_one`), never as typed stack commands.
 13. **`--short` (refactor):** sections 1, 7, 8 and the "How to prove behavior is unchanged" section: `cmd.test` before == after (test count and test names), lint/typecheck clean, a single kind of cleanup. Where no test covers the code → a characterization test is the first task, before any change.
 14. **Self-check (decision point).** Every section cites the ADR IDs it obeys. The design cannot meet the criteria while keeping an ADR → `DESIGN_CONFLICT` back to team-leader; never quietly change the architecture (STD-DESIGN-2).
-15. **Write** `docs/team/features/<ID>/design.md` from `<kit>/templates/artifacts/design.md` (Write). Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language); the `## 7. Touchpoints` heading stays English.
+15. **Write** `docs/team/features/<ID>/design.md` from `<kit>/templates/artifacts/design.md` (Write). Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language); the `## 7. Touchpoints` heading stays English. Keep it ≤ 300 lines at M, ≤ 500 at L: tables and signatures over prose, never restate the spec; devs and reviewers read it by section. An amendment edits the affected section in place (git keeps history), never a separate addendum file.
 16. **Return** to team-leader in ≤ 10 lines, first line `designer -> team-leader | <ID> | DESIGNED` (or `DESIGN_CONFLICT`, `NEEDS_ANSWER`).
 
 ## Outputs
@@ -93,6 +93,7 @@ Do not use when:
 
 ## Verification
 - [ ] All sections present (paste `grep -c '^## [1-8]\.' design.md`), or 3 sections + the proof when `--short`.
+- [ ] `wc -l design.md` pasted: ≤ 300 lines at M, ≤ 500 at L; no `design-addendum-*` file.
 - [ ] The AC-n list from the spec and from the test plan are pasted and match.
 - [ ] Each new path is pasted next to its allowed root; the line "0 in protected_paths".
 - [ ] The Explore summary (error, permission and test conventions) is pasted as the basis.

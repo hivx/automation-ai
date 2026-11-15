@@ -43,7 +43,7 @@ Do not use when:
 - The question must be decidable. A vague question ("look into X") → split it into 1–3 sub-questions with an answer shape (yes/no, ranked options, migration steps); if it cannot be split → `NEEDS_CONTEXT`.
 
 ## Process
-1. **Record position.** Write `.team/current.json` {feature, stage: "research", agent: "researcher", started_at}. Without it the Stop hook does not check `## Sources`.
+1. **Record position.** `team.py claim <ID> --stage research --agent researcher` (exit 3 `CONFLICT` → stop and return it, `<kit>/handbook/sessions.md`). Without it the Stop hook does not check `## Sources`.
 2. **Frame the question.** Write 1–3 sub-questions and the answer shape each needs. Spike: record the time box from `intake.md`.
 3. **Detect the version.** The "Versions in use" block from manifest + lockfile. If it cannot be determined → do not ask the human: pick "latest stable as of <date> per <URL>", lower the confidence, and say so explicitly.
 4. **Version-keyed cache.** `docs/team/research/<topic>@<exact version>.md` exists → reuse it, write "from cache", and copy the cache's URLs into `## Sources`. Minor/patch mismatch → read only the changelog for the gap. Major mismatch → research again.

@@ -10,8 +10,8 @@ S (always).
 
 ## Chain
 0. `/team:intake` → team-leader → `intake.md` (`Playbook: quick`) and a one-line `tasks.md` (`- [ ] T1 — … — files: … — test: … — depends: —`).
-1. team-leader calls ONE `team:dev` (Agent, own worktree): branch `team/<ID>` from `base_branch`; a failing test first when behavior changes; `cmd.test_one`, then the tests of the touched module; commit. No tech-lead, reviewer, qa or writer.
-2. dev returns `DONE` with the RED/GREEN lines → team-leader ticks T1 and reports the branch and the commit; the human merges it or asks for `/team:pr`.
+1. team-leader claims T1's files (`team.py claim <ID> --task T1 --files …`; `BUSY` → another session holds one, wait or ask), then calls ONE `team:dev` (Agent, own worktree): branch `team/<ID>` from `base_branch`; a failing test first when behavior changes; `cmd.test_one`, then the tests of the touched module; commit. No tech-lead, reviewer, qa or writer.
+2. dev returns `DONE` with the RED/GREEN lines → team-leader ticks T1, runs `team.py release <ID> --task T1` and reports the branch and the commit; the human merges it or asks for `/team:pr`.
 
 ## Gates
 None (G5 only if it is released to prod).

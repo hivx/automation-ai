@@ -207,6 +207,11 @@
           "type": "integer",
           "minimum": 0,
           "description": "Cap on active temp skills/agents"
+        },
+        "session_idle_min": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Minutes without activity after which a session lane is idle: its items still need the human's answer, its file claims no longer make other sessions wait (default 120)"
         }
       },
       "additionalProperties": false,

@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # handoff.sh — PreCompact (manual|auto) and SessionEnd hook: writes the session handoff.
 # Writes .team/session/<session_id>.md, at most memory.handoff_max_lines lines, only what is NOT in the artifacts:
-# current feature/stage, open tasks, waiting/blocked lines, last 3 journal lines, first action of the next session.
+# current feature/stage, items this session held, open tasks, waiting/blocked lines, last 3 journal lines, first action
+# of the next session. SessionEnd also releases the session's lane (`team.py release --all`, ADJ-38), so other sessions
+# stop waiting on its items and files.
 # Usage: handoff.sh [--root DIR] < hook.json ; handoff.sh --help
 set -uo pipefail
 . "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
@@ -17,7 +19,10 @@ feat="$(current_feature)"; stage="$(current_stage)"
 mkdir -p .team/session
 {
   echo "# Handoff $sid (${event:-manual}, $(date -Iseconds))"
-  echo "- Feature/stage: ${feat:-—} / ${stage:-—} (agent $(jq -r '.agent // "—"' .team/current.json 2>/dev/null || echo —))"
+  lane="$(lane_file)"
+  echo "- Feature/stage: ${feat:-—} / ${stage:-—} (agent $(jq -r '.current.agent // "—"' "$lane" 2>/dev/null || echo —))"
+  held="$(jq -r '.items // {} | keys | join(", ")' "$lane" 2>/dev/null)"
+  [[ -n $held ]] && echo "- Items this session held (claim them again to continue): $held"
   if [[ -n $feat && -f docs/team/features/$feat/tasks.md ]]; then
     open="$(grep -oE '^- \[ \] T[0-9]+' "docs/team/features/$feat/tasks.md" | awk '{print $4}' | paste -sd, -)"
     echo "- Open tasks: ${open:-none}"
@@ -30,4 +35,7 @@ mkdir -p .team/session
     echo "- First action next session: $(python3 -I "$KIT_DIR/scripts/team.py" next "$feat" --root "$TEAM_ROOT" 2>/dev/null | head -n 1)"
   fi
 } | head -n "$max" >".team/session/$sid.md"
+if [[ $event == SessionEnd ]]; then
+  python3 -I "$KIT_DIR/scripts/team.py" release --all --session "$sid" --root "$TEAM_ROOT" >/dev/null 2>&1
+fi
 exit 0

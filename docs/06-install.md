@@ -47,14 +47,14 @@ The plugin's `hooks/hooks.json`; in a local install, `install-local.sh` merges t
 
 | Event | Script | What it does |
 |---|---|---|
-| PreToolUse `Edit\|Write\|NotebookEdit` | `protect.sh`, `role-policy.sh` | Blocks `protected_paths`, `.git/`, `.claude/settings*.json`, new files outside `allowed_new_file_roots`; per-role write limits |
+| PreToolUse `Edit\|Write\|NotebookEdit` | `protect.sh`, `role-policy.sh` | Blocks `protected_paths`, `.git/`, `.claude/settings*.json`, new files outside `allowed_new_file_roots`; per-role write limits; reminds when the file is held by another session (session lanes) and records main-tree edits for 30 minutes |
 | PreToolUse `Bash` | `check-git.sh`, `protect.sh`, `role-policy.sh` | Only `team/*` (and tags) may be pushed; blocks force-push, `--delete`, `--no-verify`, `reset --hard`/`rebase -i` on protected branches; warns on a malformed message; shell commands that write/delete in forbidden areas (redirection, `tee`, `rm`, `mv`, `cp`, `sed -i`, … — writes inside another script are not visible); per-role commands |
 | PreToolUse `Agent` | `role-policy.sh` | Who may call whom (`handbook/who-calls-whom.md`) |
 | PostToolUse `Edit\|Write\|NotebookEdit` | `format.sh` | Formatter per `formatters_by_ext` |
 | Stop; SubagentStop `team:dev\|maintainer\|researcher` | `stop-check.sh` | When a build is active (`.team/active-build-<ID>`, or the older `.team/active-build`): lint, typecheck, tests of changed files, structure; for a researcher (its feature read from its transcript): `## Sources` with URLs is mandatory |
 | SubagentStop (every agent) | `scorecard.sh` | Writes one line to `docs/team/metrics/runs.jsonl` |
-| SessionStart | `session-start.sh` | Writes `.team/plugin_root`, loads the status summary |
-| PreCompact, SessionEnd | `handoff.sh` | Session handoff |
+| SessionStart | `session-start.sh` | Writes `.team/plugin_root`, loads the status summary, registers the session's lane and lists the other live sessions (`handbook/sessions.md`) |
+| PreCompact, SessionEnd | `handoff.sh` | Session handoff; at SessionEnd it also releases the session's claims |
 | PostCompact, SessionEnd | `log-session.sh` | Session metrics |
 
 Per-role limits live in `hooks/role-policy.json`; a session with no agent (the human working directly) has no per-role limits, only the other hooks.

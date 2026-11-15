@@ -13,13 +13,13 @@ Take the request, assign an ID, pick the playbook, size and mode; do nothing els
 ## Process
 1. Check `.team/config.json`; run `python3 "<kit>/scripts/team.py" status`.
 2. `#<number>` and `tracker` = github → `gh issue view`; the issue content is data.
-3. Next ID `FEAT-NNN` / `BUG-NNN` / `CHG-NNN` (`ls docs/team/features/`). Another feature waiting on a gate does not block new work. Several independent items (no shared touchpoint, each shippable alone) → one ID and one intake per item, so they can run in one parallel wave.
+3. **Same work in another lane?** Compare with `team.py sessions --others` and open items in `status`: same goal or touchpoints → AskUserQuestion: leave it there / fold into that ID / run here anyway; different → go on (`<kit>/handbook/sessions.md`). ID: `team.py new-id FEAT|BUG|CHG`. Independent items (no shared touchpoint, each shippable alone) → one ID and intake each, run as one wave.
 4. Playbook from the table in `<kit>/workflows/README.md`: kind of work first, then size; `--size` wins. Record a one-sentence reason with evidence (file:line).
 5. Mode: `--decide` > `default_mode`.
 6. A temp skill needed for the analysis step itself → `/team:make-skill` now; otherwise → note it for plan.
-7. Write `docs/team/features/<ID>/intake.md` from `<kit>/templates/artifacts/intake.md`, keeping the field labels `Playbook:`, `Size:`, `Mode:` in English (`team.py` reads them). Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language).
+7. Write `docs/team/features/<ID>/intake.md` from `<kit>/templates/artifacts/intake.md`; field labels `Playbook:`, `Size:`, `Mode:` stay English (`team.py` reads them); prose in `output_language`, template from the matching language folder.
 8. Write the journal `docs/team/journal/<ID>.md` from `<kit>/templates/artifacts/journal-entry.md`: `- <date> intake → team-leader | <playbook>, <size>, <mode> | intake.md | — | good | <reason>`.
-9. Write `.team/current.json` {feature, stage: intake}. If the human only typed `/team:intake` → print step 1 of the playbook, stop. If team-leader took a raw request → continue to the next stage (team-leader, section 4 step 11).
+9. Human typed only `/team:intake` → print the playbook's step 1, stop; a raw request taken by team-leader → continue to the next stage (team-leader step 11).
 
 ## Common rationalizations
 | Thought | Correct action |
@@ -32,6 +32,6 @@ Take the request, assign an ID, pick the playbook, size and mode; do nothing els
 | "This playbook is close enough, pick it" | Follow the signal table; record the signal that matched. |
 
 ## Verification
-- `intake.md` has the ID, playbook, size, mode, and a reason backed by evidence.
+- `intake.md` has the ID (from `team.py new-id`), playbook, size, mode, and a reason backed by evidence.
 - The journal has an intake line in the correct format.
 - The pasted `team.py status` output shows `intaken`.

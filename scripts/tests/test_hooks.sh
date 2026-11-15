@@ -4,6 +4,12 @@ set -uo pipefail
 KIT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 T="$(mktemp -d)"; trap 'rm -rf "$T"' EXIT
 pass=0; failn=0
+export CLAUDE_CODE_SESSION_ID=t-sess  # session lanes (ADJ-38): the hooks read this session's position from its lane file
+lane() { # lane <feature> <stage>: this session's position, as `team.py claim --stage` writes it
+  mkdir -p "$P/.team/session"
+  jq -nc --arg f "$1" --arg s "$2" --argjson now "$(date +%s)" '{session:"t-sess", seen:$now, current:{feature:$f, stage:$s}, items:{}, files:{}}' \
+    > "$P/.team/session/t-sess.json"
+}
 check() { # check <name> <expected code> <script> <json> [--root dir]
   local name=$1 want=$2 script=$3 json=$4; shift 4
   local got err
@@ -29,7 +35,7 @@ check "protect: new file outside roots blocked"  2 protect.sh "$(w Write "$P/ran
 check "protect: new file in src allowed"         0 protect.sh "$(w Write "$P/src/new.py")"
 check "protect: editing existing file allowed"   0 protect.sh "$(w Edit "$P/src/existing.py")"
 check "protect: .team/profile.json blocked"     2 protect.sh "$(w Edit "$P/.team/profile.json")"
-check "protect: .team/current.json allowed"     0 protect.sh "$(w Write "$P/.team/current.json")"
+check "protect: .team/session lane allowed"     0 protect.sh "$(w Write "$P/.team/session/x.json")"
 check "protect: docs/team always allowed"        0 protect.sh "$(w Write "$P/docs/team/features/FEAT-001/spec.md")"
 check "protect: new file in worktree/tests allowed" 0 protect.sh "$(w Write "$P/.claude/worktrees/agent-x/tests/test_new.py")"
 check "protect: worktree/.env blocked"         2 protect.sh "$(w Write "$P/.claude/worktrees/agent-x/.env")"
@@ -150,10 +156,10 @@ check "role: temp agent curl blocked"             2 role-policy.sh "$(b 'curl ht
 check "role: temp agent calls dev blocked"        2 role-policy.sh "$(ag dev ui-spec)"
 check "role: temp agent runs cmd.test allowed"    0 role-policy.sh "$(b 'pytest -q tests/test_x.py' ui-spec)"
 check "role: coach team.py scorecard allowed"    0 role-policy.sh "$(b "python3 $KIT/scripts/team.py scorecard" team:coach)"
-echo '{"feature":"","stage":"onboard"}' > "$P/.team/current.json"
+lane "" onboard
 check "role: onboard cp from kit/templates allowed" 0 role-policy.sh "$(b "cp $KIT/templates/project/gitignore.tmpl .gitignore.new" team:team-leader)"
 check "role: onboard cp from elsewhere blocked (K-26)" 2 role-policy.sh "$(b 'cp /etc/passwd docs/x' team:team-leader)"
-echo '{"feature":"","stage":"idle"}' > "$P/.team/current.json"
+lane "" idle
 check "role: outside onboard cp from kit blocked" 2 role-policy.sh "$(b "cp $KIT/templates/project/gitignore.tmpl .gitignore.new" team:team-leader)"
 # audit-kit round 2 (K-75): env prefixes, abbreviated long options, cd before redirection, malformed input blocks
 check "role: coach GIT_EXTERNAL_DIFF= blocked"    2 role-policy.sh "$(b 'GIT_EXTERNAL_DIFF=x git diff' team:coach)"
@@ -181,18 +187,18 @@ check "stop: build with red lint blocked"        2 stop-check.sh "$(jq -nc --arg
 jq '.cmd.lint="true"' .team/profile.json > .team/p && mv .team/p .team/profile.json
 check "stop: clean build allows stop"            0 stop-check.sh "$(jq -nc --arg c "$P" '{hook_event_name:"Stop",stop_hook_active:false,cwd:$c}')"
 rm .team/active-build
-echo '{"feature":"FEAT-001","stage":"research"}' > .team/current.json
+lane FEAT-001 research
 printf '# Research\n\n## Sources\n(none yet)\n' > docs/team/features/FEAT-001/research.md
 check "stop: research without URL blocked"       2 stop-check.sh '{"hook_event_name":"Stop","stop_hook_active":false}'
 printf '# Research\n\n## Sources\n- https://docs.python.org/3/ (2026-11-09)\n' > docs/team/features/FEAT-001/research.md
 check "stop: research with Sources allows stop"  0 stop-check.sh '{"hook_event_name":"Stop","stop_hook_active":false}'
 
-# parallel waves: per-feature build flag; researcher's feature comes from its transcript, not current.json
+# parallel waves: per-feature build flag; researcher's feature comes from its transcript, not the session position
 jq '.cmd.lint="false"' .team/profile.json > .team/p && mv .team/p .team/profile.json
 touch .team/active-build-FEAT-009
 check "stop: per-feature active-build-<ID> runs the build checks" 2 stop-check.sh "$(jq -nc --arg c "$P" '{hook_event_name:"SubagentStop",stop_hook_active:false,cwd:$c,agent_type:"team:dev"}')"
 rm .team/active-build-FEAT-009; jq '.cmd.lint="true"' .team/profile.json > .team/p && mv .team/p .team/profile.json
-echo '{"feature":"FEAT-002","stage":"analyze"}' > .team/current.json
+lane FEAT-002 analyze
 mkdir -p docs/team/features/FEAT-003; printf '# Research
 
 ## Sources
@@ -225,6 +231,17 @@ check "role-policy: team-leader K=\$(cat .team/plugin_root); team.py status is r
 check "role-policy: team-leader git reflog is read-only" 0 role-policy.sh "$(b 'git reflog -5' team:team-leader)"
 check "role-policy: team-leader ps is read-only"         0 role-policy.sh "$(b 'ps -eo pid,cmd' team:team-leader)"
 check "role-policy: team-leader other substitution still flagged (block mode)" 2 role-policy.sh "$(b 'echo $(rm -rf x)' team:team-leader)"
+# session lanes (ADJ-38): a file another live session holds → one at a time; a main-tree edit is recorded for this session
+jq -nc --argjson now "$(date +%s)" '{session:"o-sess", seen:$now, current:{}, items:{"FEAT-009":{stage:"build"}},
+  files:{"src/existing.py":{item:"FEAT-009", task:"T2", since:$now}}}' > "$P/.team/session/o-sess.json"
+check "lanes: edit a file another session holds blocked"         2 protect.sh "$(w Edit "$P/src/existing.py")"
+check "lanes: same file from a worktree blocked"                  2 protect.sh "$(w Edit "$P/.claude/worktrees/agent-x/src/existing.py")"
+check "lanes: a file nobody holds allowed"                        0 protect.sh "$(w Write "$P/src/new.py")"
+if [[ $(jq -r '.files["src/new.py"].task' "$P/.team/session/t-sess.json") == edit ]]; then pass=$((pass + 1)); echo "ok   lanes: main-tree edit recorded for this session";
+else failn=$((failn + 1)); echo "FAIL lanes: main-tree edit not recorded — $(cat "$P/.team/session/t-sess.json")"; fi
+jq '.seen = 0' "$P/.team/session/o-sess.json" > "$P/.team/session/o.tmp" && mv "$P/.team/session/o.tmp" "$P/.team/session/o-sess.json"
+check "lanes: a file held by a silent (ended) session allowed"   0 protect.sh "$(w Edit "$P/src/existing.py")"
+rm -f "$P/.team/session/o-sess.json"
 # default "warn" mode: the same violations only remind (exit 0 + additionalContext / systemMessage)
 jq '.enforcement = "warn"' .team/config.json > .team/c.tmp && mv .team/c.tmp .team/config.json
 check "warn mode: push origin main runs, reminded"       0 check-git.sh "$(b 'git push origin main')"

@@ -10,8 +10,8 @@ Subcommands:
   role-policy --root R --policy F      read hook JSON (stdin), check per-role limits (agent_type)
   protect-bash --root R                read hook JSON (stdin), block Bash commands that write/delete forbidden areas (K-24)
   agent-feature <transcript>           print the feature ID a subagent worked on (most cited docs/team/features/<ID>/
-                                       path in its transcript); empty when none. Parallel waves make current.json
-                                       name only the last dispatched feature, so hooks ask the transcript instead.
+                                       path in its transcript); empty when none. In a parallel wave the session's
+                                       position names only the last claimed feature, so hooks ask the transcript.
 Exit codes of check-git/role-policy/protect-bash: 0 allow, 2 block (reason on stderr).
 """
 import fnmatch
@@ -559,11 +559,20 @@ def bash_write_targets(command):
     return out
 
 
+def session_stage(root, data):
+    """This session's stage (session lanes, ADJ-38): .team/session/<session_id>.json → current.stage, written by team.py claim."""
+    sid = data.get("session_id") or os.environ.get("CLAUDE_CODE_SESSION_ID") or ""
+    if not sid:
+        return ""
+    lane = load_json(os.path.join(root, ".team", "session", re.sub(r"[^A-Za-z0-9_.-]", "_", sid) + ".json"), {}) or {}
+    return (lane.get("current") or {}).get("stage", "") if isinstance(lane, dict) else ""
+
+
 def protect_bash(root, data):
     """Apply the protect.sh rules to the write targets of a Bash command: .git/, settings, profile/config, protected_paths."""
     command = (data.get("tool_input") or {}).get("command", "")
     base = data.get("cwd") or root
-    stage = (load_json(os.path.join(root, ".team", "current.json"), {}) or {}).get("stage", "")
+    stage = session_stage(root, data)
     for cwd, t in bash_write_targets(command):
         if t in ("/dev/null", "/dev/stdout", "/dev/stderr", "-") or "$" in t:
             continue  # unresolvable shell variable: outside the check's scope (documented)
@@ -634,7 +643,7 @@ def role_policy(root, data, policy_path):
         role = roles.get("_temp")  # make-agent temp agent: default limits, not free rein
     if not role:
         return 0, ""
-    stage = (load_json(os.path.join(root, ".team", "current.json"), {}) or {}).get("stage", "")
+    stage = session_stage(root, data)
     exc = (role.get("stage_exceptions") or {}).get(stage, {})
     writes = list(role.get("write", [])) + list(exc.get("write", []))
     bash = exc.get("bash", role.get("bash", "read-only"))

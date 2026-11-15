@@ -5,6 +5,8 @@
 #   a NEW file outside structure.allowed_new_file_roots (STD-STRUCT-1).
 #   Exit 2 only when .team/config.json has "enforcement": "block"; by default ("warn") the same check is a reminder
 #   in additionalContext and the tool runs.
+# Session lanes (ADJ-38): a file another live session holds (team.py claim --files, or its main-tree edit in the last
+#   30 min) gets the same treatment ("same file → one at a time"); an edit in the main tree is recorded for this session.
 # Always allowed: docs/team/**, .team/** (except profile/config outside onboard), .claude/{agent-memory,skills,agents,rules}/**, CHANGELOG.md at the root.
 # Reads hook JSON from stdin: tool_name, tool_input.file_path | tool_input.notebook_path.
 # Usage: protect.sh [--root DIR] < hook.json ; protect.sh --help
@@ -42,5 +44,9 @@ fi
 if [[ ! -e $TEAM_ROOT/$rel ]] && ! under_allowed_roots "$rel"; then
   roots="$(profile_get '.structure.allowed_new_file_roots | join(", ")')"
   block "BLOCKED (STD-STRUCT-1): new file '$rel' is outside allowed_new_file_roots ($roots). Put the file in the right place, or ask the human to add the directory to the profile."
+fi
+sid="$(session_id)"
+if [[ -n $sid && -d $TEAM_ROOT/.team/session ]]; then
+  msg="$(python3 -I "$KIT_DIR/scripts/team.py" busy "$path" --claim --session "$sid" --root "$TEAM_ROOT" 2>/dev/null)" || block "$msg"
 fi
 allow

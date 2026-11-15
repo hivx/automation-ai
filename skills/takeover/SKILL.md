@@ -38,7 +38,7 @@ This is exactly T0's job, done by machine:
 - Read `${CLAUDE_SKILL_DIR}/references/tiers.md` for each tier's budget and the small-repo rule.
 
 ## Process
-1. **Record the position.** Write `.team/current.json` {feature: "takeover", stage: "G0", agent: "team-leader", started_at}.
+1. **Record the position.** `team.py claim takeover --stage G0 --agent team-leader` (exit 3 `CONFLICT` → ask the human, `<kit>/handbook/sessions.md`).
 2. **T0 — metadata, no file contents.** detect-stack (above); `git log --stat` (cadence, hot spots); `git tag`; `gh issue list`, `gh pr list` when `gh` and a remote exist. ≤ 10 commands. The tier ends once you know: the stack, the commit cadence, the hot spots. → a first "how far has it got" answer.
 3. **T1 — documents, table of contents first.** README, `docs/`, ADRs, CLAUDE.md, AGENTS.md, CHANGELOG, old specs/plans: ≤ 15 documents; read the headings first and the body only when relevant; record each document's last-update date. Do NOT read code in this tier. → the "what does it do" answer, in the documents' own words.
 4. **T2 — check the documents' claims against the code, by sampling.** ≤ 10 modules (main modules + hot spots), through Explore (Agent): one call per module, all in ONE message so they run at the same time. Repo < 30 files: read directly and record "read directly, < 30 files". Build the table `claim | source (document, date) | code/test evidence | conclusion (true / missing / outdated)`. Look for: features the documents claim but the code lacks; TODO/FIXME; skipped tests; unmerged branches; migrations not yet applied; several ways of doing the same thing (2 HTTP clients, 3 test styles). Document staleness: the document's edit date versus the last commit touching the code area it describes; a document older than the code → lower the confidence of that claim.
@@ -55,7 +55,7 @@ This is exactly T0's job, done by machine:
 ## Outputs
 - `docs/team/assessment.md`, `docs/team/ai-readiness.md`, `docs/team/profile-proposal.md`, `docs/team/debt.md`, `docs/team/open-questions.md`.
 - `docs/team/explore/<slug>.md` (cache with `hash:`), `docs/team/journal/takeover.md`.
-- `.team/current.json` {feature: "takeover", stage: "G0"}.
+- This session's position: `takeover` / `G0` (`team.py claim`).
 - Example message for the human:
   ```
   Takeover done — 5 reports in docs/team/. No source file was modified.

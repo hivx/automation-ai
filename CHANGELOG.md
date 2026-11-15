@@ -5,6 +5,38 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follo
 
 ## [Unreleased]
 
+## [0.6.4] - 2026-11-14
+
+Session lanes: several sessions on one project (owner request, ADJ-38, SPEC-OVERRIDES entry 7, K-99).
+
+### Added
+- `team.py claim` / `release` / `sessions` / `new-id` / `busy`: each Claude session records the items it works on and the files or `@resources` it holds in `.team/session/<session_id>.json`. Same item held by another live session → exit 3 `CONFLICT` (team-leader asks the human); a file another active session holds → exit 4 `BUSY` (the task waits for a later round); different work runs in parallel.
+- `handbook/sessions.md`: the rules of session lanes (one place; skills and agents point to it).
+- `@shared-state` (full `cmd.test`/`cmd.migrate` when `test.shared_state` is true) and `@main-tree` (the only way to move the main checkout off its branch) resources, expiring after 30 minutes.
+- Config `limits.session_idle_min` (default 120): an idle lane keeps its items but its file claims no longer make others wait.
+- Tests: `scripts/tests/test_sessions.sh`; lane cases in `test_hooks.sh`.
+
+### Changed
+- The session position replaces `.team/current.json` (retired): every stage runs `team.py claim <ID> --stage <stage> --agent <role>` instead of writing the shared file; hooks read this session's lane (`lib.sh`, `teamlib.py`).
+- SessionStart registers the lane and lists the other live sessions and what they hold; SessionEnd (`handoff.sh`) releases every claim of the session; a resumed session reads its own handoff first.
+- `protect.sh` reminds (blocks with `enforcement: "block"`) when an Edit/Write targets a file another active session holds, and records main-tree edits for 30 minutes.
+- `team.py status` has a `Session` column (`this`, another session's id, `—`); `team.py wave` holds items other sessions hold; `team.py next` follows this session's position.
+- intake: asks the human only when the same work is held by another session or open elsewhere; IDs come from `team.py new-id` (atomic, never the same ID twice).
+- build/tech-lead: claim each task's files before its dev (`BUSY` → later round), release after the merge and on every exit; merges and `cmd.test` run in the feature worktree, never by switching the main tree. verify/qa/pr work in the feature worktree; playbook quick claims T1's files.
+- `hooks/role-policy.json`: `.team/current.json` dropped from the write lists; stage exceptions follow the session position.
+
+## [0.6.3] - 2026-11-13
+
+Read lean, act more (owner request, ADJ-37, SPEC-OVERRIDES entry 6, K-98).
+
+### Changed
+- handbook: a lean reading rule replaces "Read STD-short before anything else": never re-read a file already in context or the running skill; files over 200 lines are read by section; only reviewer and qa read STD-short, once.
+- build/tech-lead: `tasks.md` keeps only task lines, ticks and `baseline:`; BASE = `git merge-base team/<ID> team/<ID>-task-N`; one journal line per round; no re-reads of tasks.md, the journal or kit files in the loop. Handoffs carry the quoted criteria, the design section headings and the `baseline:` line.
+- dev: reads only the touchpoints and the named design sections, runs no full suite (tech-lead runs `cmd.test` after each merge; quick runs it once), commits directly with git.
+- reviewer: reads STD-short once and the named design sections only; memory files stay ≤ 40 lines.
+- Tasks are vertical slices (one behavior with its tests, ≤ 5 files, ~15–30 minutes) instead of 2–5 minute steps.
+- Size caps: spec.md S 60 / M 150 / L 250 lines; design.md M 300 / L 500 (amendments edit sections in place, no addendum files); plan.md 150; ≤ 4 lines per task.
+
 ## [0.6.2] - 2026-11-13
 
 Right-size the team: only the roles the work needs (owner request, ADJ-36, K-97).

@@ -51,10 +51,17 @@ team-leader sets the size at intake. Force a size with `--size S|M|L` or the lab
 5. tech-lead ticks the task, writes `review-NN.md`, merges into `team/<ID>`, runs `cmd.test`.
 6. No tasks left → `/team:verify`.
 
-A task takes 2–5 minutes and names concrete file paths. Two tasks that touch the same file never run in parallel; the build dispatches in rounds: each round is one message carrying every call that can start now (devs for ready tasks that share no file with a task in flight, reworks, reviews), up to the dev and reviewer headcount, and never waits for a whole wave to be ticked (skill `build`). Independent Explore questions also go in one message. Nobody says "done" before pasting the output.
+A task is one vertical slice (one behavior with its tests, ≤ 5 files, about 15–30 minutes) and names concrete file paths. Two tasks that touch the same file never run in parallel; the build dispatches in rounds: each round is one message carrying every call that can start now (devs for ready tasks that share no file with a task in flight, reworks, reviews), up to the dev and reviewer headcount, and never waits for a whole wave to be ticked (skill `build`). Independent Explore questions also go in one message. Nobody says "done" before pasting the output.
 
 ## Several features at once
 One role can have several people: `limits.headcount.<role>` in `.team/config.json` (template defaults: dev 4 via `max_parallel_dev`, reviewer 4, architect 1, the other roles 2; a missing key means 1, dev from `max_parallel_dev`). A request with several independent items becomes one intake per item, run together. `/team:run --all` runs parallel waves: `team.py wave` picks every feature that can move now, caps each role at its headcount, keeps builds with overlapping `files:` apart and splits the team-wide dev/reviewer headcount between builds; the team-leader dispatches the whole wave in one message (skill `run`). The stages of ONE feature stay sequential.
+
+## Several sessions at once
+A project can run several Claude sessions at the same time, each with its own team. Each session works in its own lane: it records the items it works on and the files it holds (`team.py claim`), and sees the other lanes at start-up and in `/team:status`.
+- Different items run in parallel with no question; the same item held by another session is a question for the human.
+- The same file goes one session at a time (the task waits for a later round, other tasks keep running); different files run in parallel.
+- IDs are allocated atomically; the main tree's branch never changes (feature branches are merged and tested in their own worktree).
+Rules and commands: `handbook/sessions.md`.
 
 ## Stopping and escalation
 The team stops when: a task is BLOCKED after `max_attempts`; `max_rework` is exceeded; it hits `DESIGN_CONFLICT` or a design-defect verdict; an enabled gate is not approved; `feature_budget_usd` is exceeded; it touches `protected_paths`; two rework rounds hit the same error.

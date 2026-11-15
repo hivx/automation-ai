@@ -40,8 +40,8 @@ Do not use when:
 - A clean tree (`git status --porcelain` empty).
 
 ## Process
-1. **Record the position.** Write `.team/current.json` {feature, stage: "pr", agent: "tech-lead", started_at}.
-2. **Catch up with the target branch.** `git fetch`; rebase `team/<ID>` onto `config.base_branch`. Conflicts → resolve them without losing anyone else's changes; if you cannot resolve them with certainty → stop and report.
+1. **Record the position.** `team.py claim <ID> --stage pr --agent tech-lead` (exit 3 `CONFLICT` → stop and return it, `<kit>/handbook/sessions.md`).
+2. **Catch up with the target branch.** `git fetch`; in the feature worktree (never by switching the main tree, `<kit>/handbook/sessions.md`) rebase `team/<ID>` onto `config.base_branch`. Conflicts → resolve them without losing anyone else's changes; if you cannot resolve them with certainty → stop and report.
 3. **Test the branch head AFTER the rebase.** Run `cmd.test` on the commit that will go into the PR; paste the output. Red → stop (never open a PR with red code). Results from before the rebase are no longer valid.
 4. **Check the content.** `pr-body.md` has the four required sections: `grep -cE '^## (Feature|Why|What changed|How verified)$'` = 4 (if the project's PR template has other sections, add those too); missing → back to the writer through the team-leader. A change of > ~1,000 lines → add a size note and a split suggestion to the PR body. Size S or playbook quick without `pr-body.md` → Write it yourself from `tasks.md`, `review-NN.md` and `acceptance.md` (quick: dev's test lines): the four sections, ≤ 15 lines.
 5. **Push the branch.** `git push -u origin team/<ID>` — only `team/*`, no `--force`, no `+refspec`. Rejected (the remote moved on) → `git fetch`, look at the difference, push a new branch `team/<ID>-r<n>` and use it as the head; never force.
