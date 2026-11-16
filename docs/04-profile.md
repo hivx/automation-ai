@@ -37,7 +37,7 @@ The profile holds everything that is specific to the stack. Agents, skills and h
 | `naming.file`, `class`, `function`, `constant`, `test_file` | Naming conventions | `"snake_case"`, `"PascalCase"`, `"test_{name}.py"` |
 | `naming.branch` | Branch pattern | `"team/{id}-{slug}"` |
 | `test.skip_markers[]` | Test-skip markers that must not be used to make things green | `["@pytest.mark.skip", "xfail"]` |
-| `test.shared_state` | `true` when test runs share one database, site or service, so two full suites at once interfere; the build then runs the full `cmd.test` only after each serial merge, never inside a parallel wave | `true` (Frappe/ERPNext site, one shared dev DB) |
+| `test.shared_state` | `true` when test runs share one database, site or service, so two full suites at once interfere; every full `cmd.test` or `cmd.migrate` then holds `@shared-state` (handbook/sessions.md), so two never run at once. The build runs the full suite once per round in any case (ADJ-40) | `true` (Frappe/ERPNext site, one shared dev DB) |
 | `protected_paths[]` | No agent may edit these: secrets, lockfiles, vendored libraries, prod config | `[".env*", "poetry.lock", "vendor/**"]` |
 | `ci.provider`, `ci.runner`, `ci.setup[]` | CI platform | `"github"`, `"ubuntu-latest"` |
 | `deploy.staging`, `deploy.smoke`, `deploy.prod_requires_reviewer` | Staging deploy command, smoke test; prod always needs a human | `true` |

@@ -15,3 +15,9 @@ TodoWrite
 WebFetch
 WebSearch
 Write
+# Browser MCP servers, whole-server form `mcp__<server>__*` (code.claude.com/docs/en/sub-agents.md, accessed 2026-11-16).
+# Reason: qa walks the main flow in a browser before `accepted` (verify step "Try it", ADJ-41); with the tools list
+# above alone qa could not reach any browser, so every UI check in erp_ai ended NOT VERIFIABLE.
+mcp__claude-in-chrome__*
+mcp__playwright__*
+mcp__plugin_playwright_playwright__*

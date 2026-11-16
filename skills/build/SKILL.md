@@ -1,6 +1,6 @@
 ---
 name: build
-description: Use when a plan is approved (or the work is size S, a bug-fix or a hotfix) and a dev must write tests and code, a reviewer must grade them, and each task must be merged into the feature branch.
+description: Use when a plan is approved (or the work is size S, a bug-fix or a hotfix) and a dev must write tests and code, a reviewer must grade them, and the tasks must be merged into the feature branch.
 argument-hint: "<ID> [--task T<N>] [--decide]"
 context: fork
 agent: team:tech-lead
@@ -8,12 +8,12 @@ background: false
 allowed-tools: Bash(python3 *) Bash(cat *) Bash(git *) Bash(touch .team/active-build-*) Bash(rm .team/active-build-*) Bash(rm -f .team/active-build-*)
 ---
 
-# The build loop: dev → reviewer → fix → merge
+# The build loop: devs → merge → one checkpoint (test + review) per round → fix
 
 ## Overview
-This skill runs a feature's build loop until every task in `tasks.md` is ticked: the dev (own worktree) writes a failing test first, then the code; the reviewer (fresh context, read-only) grades it against the Review checklist (10); the dev fixes blockers/majors; the tech-lead merges the task branch into `team/<ID>` and runs `cmd.test`. The skill runs in the `tech-lead` context (fork); the tech-lead calls only `team:dev`, `team:reviewer` and Explore.
+This skill runs a feature's build loop until every task in `tasks.md` is ticked and every merged line is reviewed: devs (own worktrees) write a failing test first, then the code; after each round the tech-lead merges every finished task into `team/<ID>` and holds ONE checkpoint: the full `cmd.test` once, then one reviewer call (fresh context, read-only) over everything merged since the last review, sent beside the next round's devs; one dev fixes the blockers/majors. Tests and review are paid per round, never per task (ADJ-42). The skill runs in the `tech-lead` context (fork); the tech-lead calls only `team:dev`, `team:reviewer` and Explore.
 
-One rule never changes with size: **size S still goes through this skill with 1 dev + 1 reviewer** (K-34); only playbook quick skips it (one dev called by team-leader, ADJ-36). Nobody says "done" without the output of a real command. `.team/active-build-<ID>` (one per feature, so parallel builds do not switch each other off) is created at the start and removed on EVERY exit; the `stop-check.sh` hook reads it to run lint/test when the dev and the tech-lead stop.
+One rule never changes with size: **size S still goes through this skill with 1 dev + 1 reviewer** (K-34); only playbook quick skips it (ADJ-36). Nobody says "done" without the output of a real command. `.team/active-build-<ID>` (one per feature) is created at the start and removed on EVERY exit; `stop-check.sh` reads it.
 
 `$ARGUMENTS`: the `<ID>`; `--task T<N>` to run a single task; `--decide`. `<kit>` = the content of `.team/plugin_root`.
 
@@ -31,81 +31,80 @@ Do not use when:
 ## Discover the stack first
 1. Read `.team/profile.json`: `cmd.test_one`, `cmd.test`, `cmd.lint`, `cmd.typecheck`, `naming.test_file`, `naming.branch`, `structure.allowed_new_file_roots`, `protected_paths`. `cmd.test_one` missing → stop and report (never guess the command).
 2. Read `.team/config.json`: `base_branch`, `limits.headcount.dev` / `limits.max_parallel_dev`, `limits.headcount.reviewer`, `limits.max_rework`, `limits.max_attempts`, `limits.max_agents_per_feature`.
-3. Resume from disk: if `.team/active-build-<ID>` already exists → read `tasks.md` and `git log --oneline <base_branch>..team/<ID>` BEFORE anything else; ticked tasks are never redone.
+3. Resume from disk: if `.team/active-build-<ID>` already exists → read `tasks.md` and `git log --oneline <base_branch>..team/<ID>` BEFORE anything else; ticked tasks are never redone; production code merged after the last `reviewed:` journal line gets its checkpoint first.
 
 ## Inputs and preconditions
 - `python3 "<kit>/scripts/team.py" status <ID>`: no `WAITING_FOR_APPROVAL` for a gate before build.
 - `tasks.md` with lines `- [ ] T<N> — … — files: … — test: … — depends: …`; size S without one → Write a single task from `spec.md` (files = the touchpoints in the spec/intake, test = a test file named per `naming.test_file`).
-- `design.md` (size M/L) for the reviewer to compare against.
+- `design.md` (or `plan.md` § Design) for the reviewer.
 - Branch `team/<ID>` exists (create it from `base_branch` if missing).
 
 ## Process
 1. **Switch the build on.** `touch .team/active-build-<ID>`; `team.py claim <ID> --stage build --agent tech-lead` (`CONFLICT` → stop, return it). Merges run in the feature worktree (`git worktree add .claude/worktrees/<ID> team/<ID>`, once), never by switching the main tree (`<kit>/handbook/sessions.md`). First run of this feature (no `baseline:` line in `tasks.md`): run `cmd.test` on `team/<ID>` and write one line `baseline: <counts> — red: <test names>` under the task list. "Green" from here on means no red test outside that list; never fix or skip a baseline failure inside a task.
-2. **Check before calling anyone (preflight).** Tabulate every pair of tasks that touch a shared file or interface; tasks that contradict themselves (their test does not match their touchpoints); tasks that require something the Review checklist treats as a defect. Any problem → `DESIGN_CONFLICT` to the team-leader, and no dev is called yet.
-3. **Pick what can start.** A task is ready when every `depends:` is ticked, it shares no file or interface (the preflight table) with any task in flight (in dev, review or rework), and `team.py claim <ID> --task T<N> --files <its files>` exits 0 (exit 4 `BUSY`: another session holds a file → the task waits for a later round). Take ready tasks up to your free dev share (the share minus devs in flight). Migrations and shared state go alone. Devs run `cmd.test_one` only; the full `cmd.test` runs after each serial merge (step 12), holding `@shared-state` when `test.shared_state` is true. Write each round as ONE journal line (`round N: dev T4, T5; review T2, T3`). `tasks.md` holds only the task lines, their ticks and the `baseline:` line: no progress, BASE or log lines (every agent reads it). Dev share: the `devs=` line of the team-leader's handoff when several features build at once (`team.py wave` splits the team-wide headcount), else `limits.headcount.dev`, else `limits.max_parallel_dev`; reviewers likewise (`reviewers=`, else `limits.headcount.reviewer`, else the dev share).
-4. **BASE without bookkeeping.** BASE = `git merge-base team/<ID> team/<ID>-task-N` (the fork point); the reviewer's diff is `BASE..team/<ID>-task-N`, never `HEAD~1`. Hold the loop state in your context: never re-Read `tasks.md`, the journal, this SKILL.md or other kit files during the loop; after a compaction, Grep `tasks.md` for `- [ ]` and read the last 20 journal lines.
-5. **Dispatch round — ONE message.** Every call that can start now goes into one message, so they run at the same time: one Agent `team:dev` call per ready task (step 3) and per rework (step 10), each in its own worktree, plus one `team:reviewer` call per task ready for review (step 8). Never hold a ready task, a rework or a review back for a later round. Each call gets a handoff message ≤ 10 lines: task code; criteria (quoted); touchpoints; the design sections to read (≤ 2 headings, never "read design.md"); the `baseline:` line; `cmd.test_one` with `{file}` set to the test file; branch `team/<ID>-task-N` created from `team/<ID>`; the sentence "only modify inside the touchpoints"; the **recurring findings** (STD codes flagged by ≥ 2 reviews of this feature, ≤ 3 lines with the fix); where to write the detailed report. Message templates: `${CLAUDE_SKILL_DIR}/references/handoffs.md`.
-6. **Read each dev's status** (steps 6–11 run per task; a stop in one task does not cancel the others already running) — the first line of the return message is one of `DONE`, `DONE_WITH_CONCERNS`, `NEEDS_CONTEXT`, `BLOCKED`, `DESIGN_CONFLICT` (decision point):
-   - `DONE`: check there is a RED output for the right reason (missing behavior, not an import/syntax error) and a GREEN one after (the full `cmd.test` runs after the merge, step 12, not in the dev); anything missing → back to the dev (counts as one attempt).
+2. **Preflight, before calling anyone.** Tabulate every pair of tasks sharing a file or interface; tasks whose test does not match their touchpoints; tasks that require what the Review checklist treats as a defect. A problem you cannot decide under step 6 → `DESIGN_CONFLICT` to the team-leader, no dev called yet.
+3. **Pick what can start.** A task is ready when every `depends:` is ticked, it shares no file or interface (the preflight table) with any task in flight (in dev, review or rework), and `team.py claim <ID> --task T<N> --files <its files>` exits 0 (exit 4 `BUSY` → the task waits for a later round). Take ready tasks up to your free dev share. Migrations and shared state go alone. Devs run `cmd.test_one` only; the full `cmd.test` runs once per round (step 12), holding `@shared-state` when `test.shared_state` is true. One journal line per round (`round N: dev T4, T5; checkpoint T1–T3`). `tasks.md` holds only task lines, ticks and the `baseline:` line. Dev and reviewer shares: `${CLAUDE_SKILL_DIR}/references/handoffs.md` § Shares.
+4. **No bookkeeping.** REVIEWED = the sha of the last `reviewed:` journal line, else the fork point from `base_branch`; a review range is `REVIEWED..team/<ID>`, never `HEAD~1`. Hold the loop state in your context: never re-Read `tasks.md`, the journal or kit files during the loop (after a compaction: handoffs.md § State after a compaction).
+5. **Dispatch round — ONE message.** Every call that can start now goes into one message, so they run at the same time: one Agent `team:dev` call per ready task (step 3) and per rework (step 10), each in its own worktree, plus the checkpoint's `team:reviewer` call when one is due (step 8). Never hold a ready task, a fix or a due review back. Each call gets a handoff ≤ 10 lines from the templates in `${CLAUDE_SKILL_DIR}/references/handoffs.md` (≤ 2 design headings, never "read design.md"), with the **recurring findings**: blocker/major STD codes flagged by ≥ 2 reviews of this feature, ≤ 3 lines with the fix.
+6. **Read each dev's status** (per task; a stop in one task does not cancel the others) — the return message's first line is one of `DONE`, `DONE_WITH_CONCERNS`, `NEEDS_CONTEXT`, `BLOCKED`, `DESIGN_CONFLICT` (decision point):
+   - `DONE`: check a RED for the right reason (missing behavior, not an import/syntax error), then a GREEN; a missing RED → back to the dev (one attempt), a missing GREEN comes from the round's `cmd.test`.
    - `DONE_WITH_CONCERNS`: a concern about correctness or scope → resolve it before review; any other concern → note it for the review.
    - `NEEDS_CONTEXT`: add the context and call again; never resend the old message unchanged.
    - `BLOCKED`: change one thing (add context, split the task, report that the plan is wrong); after `limits.max_attempts` → stop.
-   - `DESIGN_CONFLICT`: stop and report to the team-leader.
-7. **Review package — in the handoff, not a file.** The range `BASE..team/<ID>-task-N` (step 4) (the reviewer runs `git log`, `git diff --stat` and `git diff` on it itself) and the dev's RED and GREEN output lines copied verbatim (≤ 4 lines) or the path of the dev's report. Never copy the diff into `docs/`: git already holds it.
-8. **Reviewer calls** (Agent `team:reviewer`), one per task ready for review, sent in the next dispatch round (step 5) beside the devs that can start: the review package, the design section headings the task implements, the task criteria, the sentence "grade against the Review checklist (10)". Do not include the dev's explanations; never say "don't flag X".
+   - `DESIGN_CONFLICT`: decide it yourself when it changes no criterion, no contract used outside the feature, no schema, no ADR and no file outside the feature's touchpoints (helper or test names, internal signatures, fixtures, which touchpoint holds a helper): one journal line, then call the dev again with the decision. Otherwise collect every open conflict of the round into ONE report to the team-leader, so one designer call answers them all.
+7. **Review package — in the handoff, not a file.** The range `REVIEWED..team/<ID>` (the reviewer runs `git log`/`git diff` itself), each task's criteria and the dev's RED and GREEN lines verbatim (≤ 4 lines per task), the open findings of the last checkpoint. Never copy the diff into `docs/`.
+8. **One checkpoint per round: test, then review.** After the round's merges (step 12) run the full `cmd.test` once. Green → a review is due when ≥ 3 merged tasks are unreviewed, a merged `[risk]` task is unreviewed, or nothing is left to dispatch. ONE reviewer call (Agent `team:reviewer`) covers the whole range, `[risk]` tasks included, in the next dispatch round beside the devs: the package, the design headings, "grade against the Review checklist (10)". No dev explanations; never say "don't flag X". When it returns: journal line `reviewed: <sha> (T…) <verdict>`. Never review a task alone; never test between merges.
 9. **Read the verdict** — `approve` / `request-changes` / `design-defect`, with a list of "cannot verify from the diff":
    - `design-defect` → stop and report to the team-leader.
-   - "Cannot verify" items → the tech-lead (who holds the context of several tasks) resolves them before ticking; if something is really missing → treat it as a failed review.
-10. **Rework round** (`request-changes`): send the dev the blocker/major findings verbatim + the review path; a new dev sits in a new worktree and must `git switch team/<ID>-task-N` inside its own worktree (K-14). The fix report must contain: finding → change → covering test → command + output. Call the reviewer again in **scoped re-review** mode: only the fix diff (`FIX_BASE..HEAD`), each old finding marked `ADDRESSED` / `NOT ADDRESSED`; out-of-scope notes go to `deferred` and do not extend the round.
-11. **Break the loop.** Count the rounds; > `limits.max_rework`, or the same defect in two rounds → stop; write a ruling for each open finding (reviewer wrong / real but deferred / blocking) and escalate to the team-leader. The last round before the cap may use a fresh dev with the old report as input.
-12. **Merge and tick** (`approve`): merges are serial, one task at a time in task order; merge `team/<ID>-task-N` into `team/<ID>` in the feature worktree, run `cmd.test` there after each merge. Red → find out whether the merge or an earlier task caused it before doing anything else; do not tick. Green → tick the task (`- [x] T<N>`), Write `review-NN.md` from `<kit>/templates/artifacts/review.md` (verdict, findings of every round, number of rounds, diff command, `deferred` section) — ONE review file per task, rounds appended to it — and write one journal line. Clean up: `team.py release <ID> --task T<N>`; `git worktree remove <dev worktree>` (never `--force`; dirty → note it, keep it), then `git branch -d team/<ID>-task-N` (merged only, never `-D`). Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language).
-13. **Loop.** After each round: merge and tick the approved tasks (step 12), then back to step 3 and send the next round at once; never wait for every task of the earlier round to be ticked. Done when every task is ticked or stopped.
-14. **All tasks done.** Size S (bug-fix, hotfix or new-feature S; ADJ-36): automated acceptance here, no `/team:verify` and no As-Built — Write `acceptance.md` from `<kit>/templates/artifacts/acceptance.md` (one row per criterion → the test that covers it → green; the `cmd.test` output on `team/<ID>`; `Verdict: accepted` only when every criterion has a green test, else `rework`) and add a CHANGELOG line if the project keeps one. Size M/L: run `git diff <base_branch>...team/<ID>` and write its output to `docs/team/features/<ID>/diff.patch` with Write (for the writer). Record the number of roles used (distinct roles, not counting re-calls within rework rounds) against `limits.max_agents_per_feature`.
+   - "Cannot verify" items → the tech-lead resolves them; something really missing → a failed review.
+10. **Rework** (`request-changes`): ONE dev in a new worktree (K-14) on `team/<ID>-fix-K`, from `team/<ID>`, gets every blocker/major verbatim + the review path, in the next round; the fix merges like a task. Fix report: finding → change → covering test → command + output. A tests-only fix: the new test red on the old code, green now, closes its findings. A production fix: the next checkpoint covers it and marks the old findings; no separate re-review; new notes → `deferred`.
+11. **Break the loop.** Count the rounds; > `limits.max_rework`, or the same defect in two rounds → stop; write a ruling for each open finding (reviewer wrong / real but deferred / blocking) and escalate to the team-leader.
+12. **Merge, test once, tick.** Merge every task or fix whose `DONE` evidence checks out, `[risk]` included, serially in task order in the feature worktree, no test in between; then the checkpoint's single `cmd.test` (step 8; journal `tested: <sha> <summary>`). Green → tick the round's merged tasks (`- [x] T<N>`), one journal line; a `[risk]` task is ticked only when a checkpoint leaves no blocker/major on it, so tasks that depend on it wait for that review. Red → find the merge that broke it (`${CLAUDE_SKILL_DIR}/references/handoffs.md` § Tests in the loop). After each review call, Write `review-NN.md` from `<kit>/templates/artifacts/review.md` (tasks covered, verdict, findings per round, diff command, `deferred`; ≤ 6 KB) — ONE file per review call, rounds appended. Clean up: `team.py release <ID> --task T<N>`; `git worktree remove <dev worktree>` (never `--force`; dirty → note it, keep it), then `git branch -d team/<ID>-task-N` (merged only, never `-D`). Prose in `output_language` (handbook: Artifact language).
+13. **Loop.** After each round: merge and tick (step 12), then back to step 3 and send the next round at once. Done when every task is ticked or stopped, no blocker/major is open, and no production code was merged after the last `reviewed:` sha.
+14. **All tasks done.** Size S (ADJ-36): acceptance here, no `/team:verify`, no As-Built — Write `acceptance.md` from `<kit>/templates/artifacts/acceptance.md` (criterion → covering test → green; `cmd.test` output; the Try it row: the main flow run once on the running app as the requester would, `/team:verify` § Try it; `Verdict: accepted` only when all pass, else `rework`); a CHANGELOG line if the project keeps one. No `diff.patch`: the writer runs `git diff` itself (ADJ-41). Commit `docs/team/**` once, now or at a stop, never per tick. Record the roles used against `limits.max_agents_per_feature`.
 15. **Every exit** (done, stopped, error): `rm -f .team/active-build-<ID>`; `team.py release <ID> --files`.
 
 ## Outputs
-- Commits on `team/<ID>`; `docs/team/features/<ID>/tasks.md` ticked; a `review-NN.md` per task; `diff.patch` (M/L) or `acceptance.md` (size S).
-- One journal line per dev/reviewer call (the reason before the call, the result after), prose in `output_language`.
+- Commits on `team/<ID>`; `docs/team/features/<ID>/tasks.md` ticked; a `review-NN.md` per review call; `acceptance.md` (size S). No other file in the feature folder (`team.py docs <ID>`).
+- One journal line per round, prose in `output_language`.
 - Return message to the team-leader, ≤ 10 lines:
   ```
   tech-lead -> team-leader | FEAT-012 | DONE
-  Tasks ticked: T1..T4 (review-01..04 approve). Roles used: dev, reviewer (cap M: 6)
-  Rework: T3 two rounds (max_rework=3), round 2 clean
+  Tasks ticked: T1..T4; review-01 T1–T3 (T2 [risk]) request-changes, review-02 T4 + F1 approve. Roles: dev, reviewer (cap M: 6)
+  Rounds: 3, one cmd.test each; rework: F1 (2 findings), one round
   cmd.test on team/FEAT-012: exit 0, "Ran 42 tests … OK"
   Deferred (minor): review-03 STD-NAME-2
-  Files: docs/team/features/FEAT-012/{tasks,review-01..04,diff.patch}
+  Files: docs/team/features/FEAT-012/{tasks,review-01..02}
   Next: /team:verify FEAT-012
   ```
 
 ## Common rationalizations
 | Thought | Correct action |
 |---|---|
-| "Size S, a one-line fix, no reviewer needed" | Still call `team:reviewer` (K-34); a trivial change is playbook quick, chosen at intake, not inside build. |
+| "Size S, a one-line fix, no reviewer needed" | Still call `team:reviewer` (K-34); trivial work is playbook quick, chosen at intake. |
 | "The dev says the tests are green" | You need the pasted red-then-green output; missing → send it back. |
 | "Red because of an import error is still red" | Red must come from missing behavior; send the dev back to fix the test. |
 | "A flaky red test, unrelated, merge anyway" | Stop: reproduce it, record it in `debt.md` (STD-TEST-7); do not merge. |
 | "Three lines to fix, I will do it myself" | Send it to the dev; the tech-lead writes only `docs/team/**`. |
+| "Review the `[risk]` task alone, before its merge" | It joins the round's checkpoint; its dependents wait for that review. |
+| "A local naming question, ask the designer" | Decide it, one journal line; only criteria, contracts, schema, ADRs or outside files go up, all in one report. |
 | "One more rework round and it is done" | Over `max_rework`, or the same defect twice: stop and escalate. |
-| "The reviewer is nitpicking, drop that finding" | Rule on it only at the cap, in writing; never drop it silently. |
-| "HEAD~1 is the task's diff" | Use the recorded `BASE..task branch head`. |
-| "Safer to run the devs one by one" | Ready, file-disjoint tasks start together; call all of them in one message, up to your dev share. |
-| "Wait until the whole wave is ticked, then start the next" | Each round carries every call that can start: new devs, reworks and reviews together. |
-| "Write the diff into docs so the reviewer has one file" | Pass the range; the reviewer runs the git commands. A copy in `docs/` only goes stale. |
+| "The reviewer is nitpicking, drop that finding" | Rule on it only at the cap, in writing. |
+| "Run the task's tests after each merge, to be safe" | The dev ran them; one `cmd.test` after the round's merges covers all, a red one is traced to its merge. |
 | "The suite was red before we started, so red is fine" | Only the tests on the `baseline:` line may stay red; any other red test blocks the tick. |
 | "Dev already got this finding last task, it will remember" | Each dev starts fresh: put the recurring findings in every handoff. |
 
 ## Red flags
 - A test is green on its first run, or there is no red output.
-- The dev's return message has no command, or says "should work".
+- The dev's return message has no command, or "should work".
 - The diff touches files outside the touchpoints, or `.team/profile.json`/`config.json`.
 - Two running tasks touch the same file, in this session or another (`team.py sessions`); `git switch` in the main tree.
 - A dispatch message with one Agent call while other tasks were ready, in rework or waiting for review.
+- A task reviewed alone, or a review call outside a checkpoint; one designer call per open point.
 - A `review-NN.md` says approve without a diff command or a tier-1 verdict.
-- The same finding appears in two consecutive rounds.
 - A task is ticked without a merge commit on `team/<ID>`; `.team/active-build-<ID>` remains after stopping.
 - Size S has only a dev call and no reviewer.
-- `review-pkg-*` or `*.diff` files under `docs/team/`; several review files for one task.
-- Merged `team/<ID>-task-*` branches still listed after their tick; two full `cmd.test` runs at once with `test.shared_state` true.
+- `review-pkg-*` or `*.diff` files under `docs/team/`; a task started while a `[risk]` task it depends on is unreviewed.
+- Merged `team/<ID>-task-*` branches still listed after their tick; two full `cmd.test` runs at once with `test.shared_state` true, or two in one round; a test run between merges; a dev called only to rerun tests.
 
 ## Verification
 - [ ] Each task: the red output (name of the failing assertion) and the green output of `cmd.test_one` are pasted.
@@ -113,13 +112,13 @@ Do not use when:
 - [ ] `git log --oneline <base_branch>..team/<ID>` is pasted; each commit has the form `type(scope): description (<ID>)`.
 - [ ] Size S: `acceptance.md` maps every criterion to a green test; no qa or writer was called.
 - [ ] `git diff --name-only` of each task is a subset of its touchpoints.
-- [ ] Each task has a `review-NN.md` with verdict, diff command and round count; rework rounds have ADDRESSED/NOT ADDRESSED.
-- [ ] The journal has one line per round listing every task that was ready, in rework or waiting for review (up to the shares); `tasks.md` has no progress lines.
-- [ ] `ls .team/active-build-<ID>` reports no such file; `diff.patch` exists and is not empty.
+- [ ] Every ticked task is named in a `review-NN.md` (verdict, diff command, ADDRESSED/NOT ADDRESSED); no blocker/major open; `git diff --stat <last reviewed: sha>..team/<ID>` lists no production file.
+- [ ] One journal line per round, naming every task started, in rework or in review; `tasks.md` has no progress lines.
+- [ ] `ls .team/active-build-<ID>` reports no such file; `team.py docs <ID>` reports 0 problems.
 - [ ] `git branch --list 'team/<ID>-task-*' --merged team/<ID>` prints nothing (merged task branches deleted); the `baseline:` line is in `tasks.md`.
 
 ## See also
-- `${CLAUDE_SKILL_DIR}/references/handoffs.md` — handoff templates for the dev, the reviewer and rework rounds; the status table.
+- `${CLAUDE_SKILL_DIR}/references/handoffs.md` — handoff templates for the dev, the reviewer and rework rounds; the status table; tests in the loop.
 - Agents `tech-lead`, `dev`, `reviewer`; `<kit>/templates/artifacts/review.md`, `tasks.md`.
 - `/team:plan` (before), `/team:verify` (after), `/team:commit` (used by the dev).
 - `handbook/STD.md`: Review checklist (10), STD-TEST-1/4/5, STD-DESIGN-1, STD-GIT-3/4.

@@ -212,6 +212,55 @@
           "type": "integer",
           "minimum": 1,
           "description": "Minutes without activity after which a session lane is idle: its items still need the human's answer, its file claims no longer make other sessions wait (default 120)"
+        },
+        "doc_kb": {
+          "type": "object",
+          "description": "KB budget per artifact kind (intake, questions, spec, research, arch-impact, design, plan, tasks, review, acceptance, asbuilt, pr-body, journal): a number or {S,M,L}; overrides the kit default. Read by team.py docs and the write hook (ADJ-41).",
+          "additionalProperties": {
+            "oneOf": [
+              {
+                "type": "integer",
+                "minimum": 1
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "S": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "M": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "L": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "max_criteria": {
+          "type": "object",
+          "properties": {
+            "S": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "M": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "L": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "additionalProperties": false,
+          "description": "Most acceptance criteria a spec may carry per size (default S 5, M 12, L 24); more → split the feature (ADJ-41)"
         }
       },
       "additionalProperties": false,

@@ -10,9 +10,9 @@ From intake (S, M or L).
 ## Chain
 0. `/team:intake` → team-leader → `intake.md` (already run).
 1. `/team:analyze` → analyst → `spec.md` (size S: short version, no G1).
-2. [`/team:research` → researcher → `research.md`: when the spec still has technical questions.]
+2. [`/team:research` → researcher → `research.md`: when the spec still has technical questions; one call per feature, all questions at once.]
 3. [`/team:architect` → architect → `arch-impact.md`: size L only.]
-4. `/team:design` → designer → `design.md` (skipped at size S).
+4. `/team:design` → designer → `design.md` (size L only; size M: the plan's `## Design` section, ADJ-43).
 5. `/team:plan` → tech-lead → `plan.md`, `tasks.md` (skipped at size S).
 6. `/team:build` → tech-lead → dev, reviewer (size S: 1 dev).
 7. `/team:verify` → qa → `acceptance.md` (size S: skipped; tech-lead writes `acceptance.md` at the end of build, no qa call).

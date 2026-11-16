@@ -19,12 +19,14 @@ Writing order: contracts before flow. Every observable behavior of a public entr
 
 ## When to use (and when not)
 Use when:
-- Size M/L after analyze (and after architect for size L), before `/team:plan`.
+- Size L after architect, before `/team:plan`; size M only in the playbooks with a design step (`data-migration`, `integration`, `refactor`).
 - Playbook `refactor` (`--short`), `data-migration` (mapping, rollback; G2b on), `integration` (contracts, retry, idempotency).
 - qa returned `design-defect`: rewrite the wrong part of the design, then re-plan/rebuild the affected part.
+- A build stopped with a `DESIGN_CONFLICT` report: ONE call answers every point it lists, by editing the affected `design.md` sections in place (and the task lines it changes); no ruling, fix or addendum file. Points that change no criterion, outside contract, schema, ADR or outside file belong to the tech-lead: return them unanswered.
 
 Do not use when:
 - Size S: the criteria in the spec are enough for one task → `/team:build` directly.
+- Size M new-feature: the tech-lead writes `## Design` in `plan.md` (ADJ-43) → `/team:plan`.
 - A multi-module structural decision or a new NFR is needed → `/team:architect` first.
 - The question is a business rule → `NEEDS_ANSWER` back to team-leader; never guess it in the design.
 
@@ -50,10 +52,10 @@ Do not use when:
 9. **Section 6 Migration and rollback:** when there is a `cmd.migrate` and data changes → up, down, and row-count reconciliation (STD-OPS-2, STD-OPS-3); large tables in batches; rollback trigger conditions and success criteria. designer only plans; dev runs it on a copy, qa runs up/down/up. No data change → write "none".
 10. **Observability (STD-OPS-5):** one log or metric for each important new path, with no sensitive data — so `/team:release` can prove the feature runs in prod.
 11. **Section 7 Touchpoints:** real paths, "edit" (Glob finds the file) or "new" (under `structure.allowed_new_file_roots`); test files per `structure.tests` and `naming.test_file`. Machine checkpoint: paste each new path next to the allowed root it matches; no path may match `protected_paths`. The notes column says why the file is touched — never a task number.
-12. **Section 8 Test plan:** every AC-n and every NFR with a "how to check" → ≥ 1 row `criterion | test file::name | kind | error/boundary path`. A criterion with inputs → at least one boundary or error row (qa will run it). Commands are named only by slot (`cmd.test_one`), never as typed stack commands.
+12. **Section 8 Test plan:** every AC-n and every NFR with a "how to check" → ≥ 1 row `criterion | test file::name | kind | error/boundary path`. A criterion with inputs → one boundary or error row that the criterion or the design names (qa will run it); other edges are the dev's call. No row tests an ADR by scanning source text, a constant against its own literal, or prompt wording the spec does not quote. Commands are named only by slot (`cmd.test_one`), never as typed stack commands.
 13. **`--short` (refactor):** sections 1, 7, 8 and the "How to prove behavior is unchanged" section: `cmd.test` before == after (test count and test names), lint/typecheck clean, a single kind of cleanup. Where no test covers the code → a characterization test is the first task, before any change.
 14. **Self-check (decision point).** Every section cites the ADR IDs it obeys. The design cannot meet the criteria while keeping an ADR → `DESIGN_CONFLICT` back to team-leader; never quietly change the architecture (STD-DESIGN-2).
-15. **Write** `docs/team/features/<ID>/design.md` from `<kit>/templates/artifacts/design.md` (Write). Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language); the `## 7. Touchpoints` heading stays English. Keep it ≤ 300 lines at M, ≤ 500 at L: tables and signatures over prose, never restate the spec; devs and reviewers read it by section. An amendment edits the affected section in place (git keeps history), never a separate addendum file.
+15. **Write** `docs/team/features/<ID>/design.md` from `<kit>/templates/artifacts/design.md` (Write). Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language); the `## 7. Touchpoints` heading stays English. Budget ≤ 30 KB at M, ≤ 50 KB at L (`limits.doc_kb.design`; the write hook reminds, `team.py docs <ID>` checks): tables and signatures over prose, never restate the spec; devs and reviewers read it by section. An amendment or a build ruling edits the affected section in place (git keeps history), never a separate addendum, ruling or fix file (ADJ-41).
 16. **Return** to team-leader in ≤ 10 lines, first line `designer -> team-leader | <ID> | DESIGNED` (or `DESIGN_CONFLICT`, `NEEDS_ANSWER`).
 
 ## Outputs
@@ -93,7 +95,7 @@ Do not use when:
 
 ## Verification
 - [ ] All sections present (paste `grep -c '^## [1-8]\.' design.md`), or 3 sections + the proof when `--short`.
-- [ ] `wc -l design.md` pasted: ≤ 300 lines at M, ≤ 500 at L; no `design-addendum-*` file.
+- [ ] `python3 "<kit>/scripts/team.py" docs <ID>` pasted: no `design.md` problem (≤ 30 KB at M, ≤ 50 KB at L) and no stray file.
 - [ ] The AC-n list from the spec and from the test plan are pasted and match.
 - [ ] Each new path is pasted next to its allowed root; the line "0 in protected_paths".
 - [ ] The Explore summary (error, permission and test conventions) is pasted as the basis.

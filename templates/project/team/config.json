@@ -41,7 +41,29 @@
     "feature_budget_usd": null,
     "context_warn_pct": 60,
     "max_temp_skills": 5,
-    "session_idle_min": 120
+    "session_idle_min": 120,
+    "max_criteria": {
+      "S": 5,
+      "M": 12,
+      "L": 24
+    },
+    "doc_kb": {
+      "spec": {
+        "S": 6,
+        "M": 15,
+        "L": 25
+      },
+      "design": {
+        "S": 15,
+        "M": 30,
+        "L": 50
+      },
+      "plan": 12,
+      "tasks": 12,
+      "review": 6,
+      "acceptance": 15,
+      "journal": 20
+    }
   },
   "models": {
     "team-leader": "fable",

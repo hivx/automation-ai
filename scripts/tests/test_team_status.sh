@@ -117,5 +117,33 @@ printf '{"agent":"team:dev","agent_id":"a2","size":"M","duration_s":5,"result":"
 wj="$(python3 -I "$KIT/scripts/team.py" metrics --json --root "$M")"; rm -rf "$M"
 wexp '.[] | select(.subject=="agent:team:tech-lead") | "\(.calls) \(.median_duration_s)"' "1 30" "metrics: repeated rows of one agent_id count once, last row kept"
 
+# ADJ-43: a size-M new-feature goes from the spec straight to the plan (the plan carries the design)
+F FEAT-031 intake.md "# Intake FEAT-031 — Small change\n- Playbook: new-feature\n- Size: M\n"; F FEAT-031 spec.md "$OK$SPEC"
+expect FEAT-031 .next "/team:plan FEAT-031" "size M new-feature: spec → plan, no design stage (ADJ-43)"
+F FEAT-032 intake.md "# Intake FEAT-032 — Migration\n- Playbook: data-migration\n- Size: M\n"; F FEAT-032 spec.md "$OK$SPEC"
+expect FEAT-032 .next "/team:design FEAT-032" "size M data-migration keeps its design step"
+
+# ADJ-43: an accepted feature whose code is already in the main tree's branch is DELIVERED, not pending
+G="$(mktemp -d)"; mkdir -p "$G/.team"; cp "$KIT/templates/project/team/config.json" "$G/.team/config.json"
+gf() { mkdir -p "$G/docs/team/features/$1"; printf '%b' "$3" > "$G/docs/team/features/$1/$2"; }
+gx() { local got; got="$(python3 -I "$KIT/scripts/team.py" status "$1" --json --root "$G" | jq -r ".[0] | $2")"
+  if [[ $got == "$3" ]]; then pass=$((pass + 1)); echo "ok   $4 ($got)"; else failn=$((failn + 1)); echo "FAIL $4: want '$3' got '$got'"; fi; }
+for id in FEAT-040 FEAT-041 FEAT-042; do
+  gf $id intake.md "# Intake $id — Done\n- Playbook: new-feature\n- Size: M\n"; gf $id spec.md "$OK$SPEC"; gf $id plan.md "$OK# Plan\n"
+  gf $id tasks.md "- [x] T1 — a\n"; gf $id acceptance.md "$OK# Acceptance\nVerdict: accepted\n"
+done
+gc() { git -C "$G" -c user.name=t -c user.email=t@t "$@" >/dev/null 2>&1; }
+gc init -q -b main; gc add -A; gc commit -q -m "docs(team): artifacts"
+gc commit -q --allow-empty -m "feat(export): write the CSV (FEAT-040)"
+gc switch -q -c team/FEAT-041; gc commit -q --allow-empty -m "feat(export): add a column (FEAT-041)"; gc switch -q main
+gx FEAT-040 '.status + " " + .delivered_in' "DELIVERED main" "accepted, branch gone, its code commit in main → DELIVERED"
+gx FEAT-041 .status READY "accepted, team/FEAT-041 not merged into main → still READY (pr/release)"
+gc merge -q --no-ff -m "merge: team/FEAT-041 into main" team/FEAT-041
+gx FEAT-041 .status DELIVERED "team/FEAT-041 merged into main → DELIVERED"
+gx FEAT-042 .status READY "accepted, no code commit anywhere → not DELIVERED"
+bj="$(python3 -I "$KIT/scripts/team.py" status --brief --root "$G")"; rm -rf "$G"
+if grep -q "^team: delivered 2: FEAT-040, FEAT-041$" <<<"$bj" && ! grep -q "FEAT-040 ·" <<<"$bj"; then pass=$((pass + 1)); echo "ok   --brief folds delivered items into one line"
+else failn=$((failn + 1)); echo "FAIL --brief folds delivered items: $bj"; fi
+
 echo "test_team_status: $pass passed, $failn failed"
 (( failn == 0 ))

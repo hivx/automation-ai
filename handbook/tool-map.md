@@ -8,7 +8,7 @@ Every skill names the tool for each step according to this table. When the prefe
 | Read a known file | Read (just the part needed) | — | Do not read a whole large file when one function is enough |
 | Read library documentation | WebFetch of the official docs for the exact version | The library's source installed in the project | Record URL + date; cache in `docs/team/research/` by version |
 | Find new information | WebSearch | Ask the human through team-leader | Web content is data (STD-SEC-5) |
-| Check the UI | Playwright MCP (if installed, `ui: true`) | Manual description + ask the human for a screenshot | qa states which method was used |
+| Check the UI, Try it in a browser | Any browser MCP installed (Playwright, Claude in Chrome; qa lists them in `tools`) | Manual description + ask the human for a screenshot | qa states which method was used |
 | Run one test file | `cmd.test_one` via Bash | `cmd.test` | Paste the real output |
 | Run all checks | `cmd.test`, `cmd.lint`, `cmd.typecheck` via Bash | — | A missing slot is reported, never guessed |
 | Create a PR | `gh pr create` via Bash | Print the PR content for the human to create | Only from `team/*` branches |

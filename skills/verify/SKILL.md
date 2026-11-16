@@ -35,7 +35,7 @@ Do not use when:
 3. The command that checks each criterion comes from the "how to check" column in `spec.md` and the test plan in `design.md`; if another command is needed, use only a `cmd.*` slot or a data-reading command. Never write a new check script.
 
 ## Inputs and preconditions
-- `docs/team/features/<ID>/spec.md` (criteria + DoD), `design.md` (test plan, size M/L), `tasks.md` fully ticked.
+- `docs/team/features/<ID>/spec.md` (criteria + DoD), `design.md` (test plan; size M new-feature: `plan.md` § Design), `tasks.md` fully ticked.
 - `python3 "<kit>/scripts/team.py" status <ID>` reports `built`; otherwise hand it back and stop.
 - Branch `team/<ID>` is checked out in the feature worktree `.claude/worktrees/<ID>` (or can be: `git worktree add`), with a clean tree.
 
@@ -47,20 +47,20 @@ Do not use when:
 5. **Regression evidence (bug-fix).** A "bug is fixed" criterion needs a reproducing test: its RED output before the fix must be in the dev report or a `review-NN.md`; if absent → `rework` with the request "paste the red output of the reproducing test". qa never reverts code itself to try it.
 6. **Beyond the happy path.** A criterion with inputs → run at least one command for an error path or a boundary value named in the test plan. Only happy-path evidence → record a gap.
 7. **Test quality.** For each criterion, find the test that covers it (file::name) and read it: does the assertion state the criterion exactly (expected value hard-coded, not computed by the very code under test; not only checking a mock)? No covering test → `rework` (STD-TEST-2); a test that can never fail → `rework` (STD-TEST-5).
-8. **General checks.** `cmd.test`, `cmd.lint`, `cmd.typecheck` (if present), `cmd.build` (if present): paste the exit code and error count. Odd warnings in the output (deprecations, errors printed while the exit code is 0) are a note in the general-checks table; an error swallowed while the exit code stays 0 is `rework` (STD-ERR-1).
-9. **Skip markers and weakened assertions.** Grep `git diff <base_branch>...team/<ID>` for every string in `test.skip_markers`, and for assertion lines that were deleted or loosened (STD-TEST-4, STD-TEST-5). Paste the result, even when it is empty.
+8. **General checks.** `cmd.test`: when the last `tested:` journal line names `git rev-parse team/<ID>`, paste that line instead of running the suite again on the same commit (ADJ-43); else run it. `cmd.lint`, `cmd.typecheck` (if present), `cmd.build` (if present): run them. Paste the exit code and error count. Odd warnings in the output (deprecations, errors printed while the exit code is 0) are a note in the general-checks table; an error swallowed while the exit code stays 0 is `rework` (STD-ERR-1).
+9. **Skip markers and weakened assertions.** Grep `git diff <base_branch>...team/<ID>` for every string in `test.skip_markers`, and for assertion lines that were deleted or loosened (STD-TEST-4, STD-TEST-5). Paste the result, even when it is empty. A deleted test of behavior the spec replaced is expected (STD-TEST-9), not a finding.
 10. **Migration** (if `cmd.migrate` exists and the diff contains a migration): write the expected figures first, run up → down → up, reconcile the counts (STD-OPS-2, STD-OPS-3).
-11. **UI** (`ui: true`): Playwright MCP if available; if not → that criterion is `NOT VERIFIABLE` and you return `NEEDS_ANSWER` so the team-leader asks the human for screenshots (qa never asks the human directly).
+11. **Try it like the requester (ADJ-41).** Tests passing on a branch is not the product working. On a running instance of the pinned commit (apply `cmd.migrate`; start it with `cmd.run`, or use the running site the profile or intake names), switch the feature on as the spec's read-back says, then walk the main flow end to end where the requester works (the `You will see:` line: screen, ticket, command), with real data and settings, never a test fixture. A browser flow (`ui: true`, or the read-back names a screen): drive it with any browser MCP available (Playwright, Claude in Chrome); none → that row is `NOT VERIFIABLE` and you return `NEEDS_ANSWER` so the team-leader asks the human for screenshots (qa never asks the human directly). DoD lines marked "after G4" that need the running app are run here when G4 is off. Write the `## Try it` section of `acceptance.md`: instance and commit, what you did → what happened, and ≤ 3 steps the human can follow to see it. Green tests but a broken walk-through → `rework`.
 12. **Failures before conclusions (decision point).** A red command → classify it: wrong test / wrong code / environment / flaky.
     - Flaky: record 3 runs; flaky = `rework` + a line in `debt.md`, never `accepted`.
     - Environment cannot run it: no conclusion; return `BLOCKED` with the command and the error.
     - A failure that already exists on `base_branch`: name it, never hide it.
 13. **DoD.** Grade the build part of the DoD (tests, code, docs changed within tasks). As-Built, CHANGELOG and user docs are written in `/team:asbuilt` AFTER G4: their absence is NOT a reason for `rework` — write "owner: writer, after G4" and the check command so `/team:release` checks it again. An existing README that describes the behavior just run WRONGLY → `rework`. Compare `git diff --name-only` with `protected_paths` (STD-SEC-1).
 14. **Verdict** per `${CLAUDE_SKILL_DIR}/references/evidence.md`:
-    - `accepted`: every criterion passes, the build part of the DoD is complete, Acceptance checklist 6/6, no `NOT VERIFIABLE` item.
+    - `accepted`: every criterion passes, the Try it walk-through works, the build part of the DoD is complete, Acceptance checklist 6/6, no `NOT VERIFIABLE` item.
     - `rework`: code/tests/docs are lacking but the design is right; every failing criterion has a reproduce command and an owning task (T<N>).
     - `design-defect`: the code matches the design but the design/spec cannot satisfy the criterion (contradictory criteria, impossible NFR).
-15. **Write** `docs/team/features/<ID>/acceptance.md` from `<kit>/templates/artifacts/acceptance.md` (Write): commit, criteria table, general checks, the 6-item checklist, DoD, a `NOT VERIFIABLE` section if any, and a last line of the exact form `Verdict: accepted` (or `rework`, `design-defect`). Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language).
+15. **Write** `docs/team/features/<ID>/acceptance.md` from `<kit>/templates/artifacts/acceptance.md` (Write): commit, criteria table, Try it, general checks, the 6-item checklist, DoD, a `NOT VERIFIABLE` section if any, and a last line of the exact form `Verdict: accepted` (or `rework`, `design-defect`). Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language).
 16. **Return** to the team-leader in ≤ 10 lines; record metrics if asked to (`bash "<kit>/scripts/log-run.sh" --skill verify --result <verdict>`).
 
 ## Outputs
@@ -70,6 +70,7 @@ Do not use when:
   ```
   qa -> team-leader | FEAT-012 | rework
   Commit checked: a9d41e0 (team/FEAT-012). File: docs/team/features/FEAT-012/acceptance.md
+  Try it: site dev.local, Invoices → Export CSV → 2026-11.csv downloaded, 42 rows (Claude in Chrome)
   Passed 3/4 criteria; AC-2 failed: <cmd.test_one tests/auth/test_otp.py> → exit 1, "AssertionError: 200 != 401" (task T3)
   cmd.test exit 0; cmd.lint exit 0; new skip markers: 0
   DoD missing: CHANGELOG (STD-DOC-3). Checklist 6: 4 pass, 2 fail
@@ -92,6 +93,7 @@ Do not use when:
 | "Fix the assertion to get it done" | qa never modifies code or tests; write `rework`. |
 | "The output in the dev's message is enough" | Only output qa just ran, on the recorded commit. |
 | "The happy path passes, that is enough" | Also run the boundary/error path named in the test plan; if missing, record a gap. |
+| "All tests are green, the feature works" | Tests run on fixtures; walk the main flow on a running instance, switched on, like the requester. |
 
 ## Red flags
 - The words "probably", "seems", "looks like" in `acceptance.md`.
@@ -111,6 +113,7 @@ Do not use when:
 - [ ] Output of `cmd.test`, `cmd.lint`, `cmd.typecheck` (if present) with error counts.
 - [ ] The grep result for skip markers and deleted assertions in the diff is pasted (even if empty).
 - [ ] A criterion → covering test table.
+- [ ] `## Try it` names the instance and commit, what was done → what happened, and ≤ 3 steps for the human.
 - [ ] `grep -E '^Verdict: (accepted|rework|design-defect)$' acceptance.md` returns exactly one line; `team.py status <ID>` agrees.
 
 ## See also

@@ -17,6 +17,10 @@ Verdict: design-defect	Verdict: lỗi thiết kế | Phán quyết: lỗi thiế
 approve	phán quyết: duyệt
 request-changes	phán quyết: yêu cầu sửa
 BLOCKED	BỊ CHẶN | ĐANG CHẶN
+DELIVERED	ĐÃ GIAO | ĐÃ BÀN GIAO
+tested: <sha>	đã test: | đã kiểm thử:
+[risk]	[rủi ro] | [nguy cơ]
+reviewed: <sha>	đã review: | đã rà soát:
 WAITING_FOR_ANSWER	CHỜ_TRẢ_LỜI | CHỜ TRẢ LỜI
 WAITING_FOR_APPROVAL	CHỜ_DUYỆT | CHỜ DUYỆT
 DESIGN_CONFLICT	XUNG_ĐỘT_THIẾT_KẾ | XUNG ĐỘT THIẾT KẾ

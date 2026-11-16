@@ -5,7 +5,7 @@ argument-hint: "<ID> [create|update|reply]"
 context: fork
 agent: team:tech-lead
 background: false
-allowed-tools: Bash(gh pr *) Bash(git fetch *) Bash(git rebase *) Bash(git push *) Bash(git log *) Bash(git status *) Bash(cat *)
+allowed-tools: Bash(gh pr *) Bash(git fetch *) Bash(git rebase *) Bash(git push *) Bash(git log *) Bash(git status *) Bash(git merge-base *) Bash(cat *)
 ---
 
 # Pull request: open, update, reply to review
@@ -41,8 +41,8 @@ Do not use when:
 
 ## Process
 1. **Record the position.** `team.py claim <ID> --stage pr --agent tech-lead` (exit 3 `CONFLICT` → stop and return it, `<kit>/handbook/sessions.md`).
-2. **Catch up with the target branch.** `git fetch`; in the feature worktree (never by switching the main tree, `<kit>/handbook/sessions.md`) rebase `team/<ID>` onto `config.base_branch`. Conflicts → resolve them without losing anyone else's changes; if you cannot resolve them with certainty → stop and report.
-3. **Test the branch head AFTER the rebase.** Run `cmd.test` on the commit that will go into the PR; paste the output. Red → stop (never open a PR with red code). Results from before the rebase are no longer valid.
+2. **Catch up with the target branch.** `git fetch`; in the feature worktree (never by switching the main tree, `<kit>/handbook/sessions.md`) rebase `team/<ID>` onto `config.base_branch` only when the base moved (`git merge-base --is-ancestor <base_branch> team/<ID>` fails). Conflicts → resolve them without losing anyone else's changes; if you cannot resolve them with certainty → stop and report.
+3. **Test the commit that goes into the PR.** No rebase was needed and the last `tested:` journal line names that sha → paste it (ADJ-43). Otherwise run `cmd.test` on it and paste the output. Red → stop (never open a PR with red code). Results from before a rebase are no longer valid.
 4. **Check the content.** `pr-body.md` has the four required sections: `grep -cE '^## (Feature|Why|What changed|How verified)$'` = 4 (if the project's PR template has other sections, add those too); missing → back to the writer through the team-leader. A change of > ~1,000 lines → add a size note and a split suggestion to the PR body. Size S or playbook quick without `pr-body.md` → Write it yourself from `tasks.md`, `review-NN.md` and `acceptance.md` (quick: dev's test lines): the four sections, ≤ 15 lines.
 5. **Push the branch.** `git push -u origin team/<ID>` — only `team/*`, no `--force`, no `+refspec`. Rejected (the remote moved on) → `git fetch`, look at the difference, push a new branch `team/<ID>-r<n>` and use it as the head; never force.
 6. **`create`.** `gh pr create --base <config.base_branch> --head team/<ID> --title "<main commit line>" --body-file docs/team/features/<ID>/pr-body.md`. The title follows the commit format, never "Fix bug" or "Phase 1".
@@ -60,7 +60,7 @@ Do not use when:
 10. **Never merge.** Every playbook except docs-only: stop after opening/updating. docs-only: `gh pr merge --auto` (still subject to the branch-protection rules), only when the diff contains only `docs/**` and `README.md` — check with `git diff --name-only <base_branch>...HEAD`. Green CI is not a permission to merge.
 11. **Keep the worktree.** Never delete the worktree or the task branch while the PR is open; review comments are fixed there.
 12. **Check afterwards.** `gh pr view <number> --json url,state,headRefName,baseRefName` (and the check states if any); the head is `team/*`, the base is `config.base_branch`.
-13. **Journal and return.** One journal line (Write) with the PR URL; a return message of ≤ 10 lines.
+13. **Journal and return.** Append one journal line (Edit) with the PR URL; a return message of ≤ 10 lines.
 
 ## Outputs
 - A PR opened or updated; replies to comments (`reply` mode); the PR URL in `docs/team/journal/<ID>.md`.
@@ -78,7 +78,7 @@ Do not use when:
 ## Common rationalizations
 | Thought | Correct action |
 |---|---|
-| "Tests passed before the rebase" | Rerun `cmd.test` on the branch head after the rebase. |
+| "Tests passed before the rebase" | A rebase makes a new commit: rerun `cmd.test`. No rebase: the `tested:` line of that sha stands. |
 | "The push was rejected, a force-push fixes it" | A new branch `team/<ID>-r<n>`; never force-push (STD-GIT-4). |
 | "CI is green, I will merge it for them" | Never merge yourself; only the human, or the docs-only auto rule. |
 | "The reviewer is wrong, ignore the comment" | Reply with STD/design grounds; the human decides. |
@@ -101,7 +101,7 @@ Do not use when:
 
 ## Verification
 - [ ] `git rev-parse --abbrev-ref HEAD` and `git log --oneline <base_branch>..HEAD` are pasted.
-- [ ] Output of `cmd.test` on the branch head after the rebase, exit code 0.
+- [ ] Output of `cmd.test` on the PR's commit (or its `tested:` line when no rebase was needed), exit code 0.
 - [ ] The output of `git push` contains only the ref `team/<ID>` (or `-r<n>`).
 - [ ] `gh pr view --json url,state,headRefName,baseRefName` is pasted; head `team/*`, base correct.
 - [ ] Reply mode: a table comment → class → grounds → task (if any); no human comment is left without a reply.

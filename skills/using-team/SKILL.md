@@ -14,7 +14,7 @@ The team works from `/team:*` skills and playbooks, not from memory. This skill 
 2. List the temp skills in `.claude/skills/` (see `docs/team/skills-registry.md`). Priority: the human's words > kit process skills > temp skills > default behavior.
 3. If `<kit>/workflows/` has a playbook for this kind of work (`<kit>` = contents of `.team/plugin_root`) → follow its chain; skills govern the detailed steps. If they disagree → follow the skill and report it with `/team:feedback`.
 4. Several skills match → run them one after another and record the whole chain; never blend two processes.
-5. Write one journal line in `docs/team/journal/<ID>.md` (Write) BEFORE editing the first artifact: which skill/playbook you chose and why.
+5. Append one journal line to `docs/team/journal/<ID>.md` (Edit) BEFORE editing the first artifact: which skill/playbook you chose and why.
 6. No skill matches → write "no matching skill" + the closest skill you ruled out + the reason; if the work will recur → propose `/team:make-skill`.
 
 ## Common rationalizations

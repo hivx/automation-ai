@@ -42,6 +42,32 @@ check "protect: worktree/.env blocked"         2 protect.sh "$(w Write "$P/.clau
 check "protect: worktree/random blocked"       2 protect.sh "$(w Write "$P/.claude/worktrees/agent-x/random/x.py")"
 check "protect: outside the project allowed"     0 protect.sh "$(w Write "/tmp/elsewhere.txt")"
 check "protect: new root CHANGELOG.md allowed"   0 protect.sh "$(w Write "$P/CHANGELOG.md")"
+# lean docs (ADJ-41): only the stage artifacts in a feature folder, each under its KB budget after the write
+wc_() { jq -nc --arg f "$1" --arg c "$2" '{hook_event_name:"PreToolUse", tool_name:"Write", tool_input:{file_path:$f, content:$c}}'; }
+printf -- '- Size: M\n' > docs/team/features/FEAT-001/intake.md
+check "docs: review-01.md allowed"                0 protect.sh "$(w Write "$P/docs/team/features/FEAT-001/review-01.md")"
+check "docs: design-addendum file blocked"        2 protect.sh "$(w Write "$P/docs/team/features/FEAT-001/design-addendum-1.md")"
+check "docs: diff.patch blocked"                  2 protect.sh "$(w Write "$P/docs/team/features/FEAT-001/diff.patch")"
+check "docs: dev report file blocked"             2 protect.sh "$(w Write "$P/docs/team/features/FEAT-001/dev-T3.md")"
+check "docs: spec.md 10 KB at size M allowed"     0 protect.sh "$(wc_ "$P/docs/team/features/FEAT-001/spec.md" "$(head -c 10240 /dev/zero | tr '\0' a)")"
+check "docs: spec.md 20 KB at size M blocked"     2 protect.sh "$(wc_ "$P/docs/team/features/FEAT-001/spec.md" "$(head -c 20480 /dev/zero | tr '\0' a)")"
+head -c 5000 /dev/zero | tr '\0' a > docs/team/features/FEAT-001/review-02.md
+check "docs: Edit growing review-02 past 6 KB blocked" 2 protect.sh "$(jq -nc --arg f "$P/docs/team/features/FEAT-001/review-02.md" --arg n "$(head -c 2000 /dev/zero | tr '\0' b)" '{hook_event_name:"PreToolUse", tool_name:"Edit", tool_input:{file_path:$f, old_string:"aaaa", new_string:$n}}')"
+check "docs: journal/<ID>.md allowed"             0 protect.sh "$(w Write "$P/docs/team/journal/FEAT-001.md")"
+check "docs: extra journal file blocked"          2 protect.sh "$(w Write "$P/docs/team/journal/FEAT-001.pending.md")"
+mkdir -p docs/team/journal; head -c 3000 /dev/zero | tr '\0' a > docs/team/journal/FEAT-001.md
+check "docs: Write over an existing journal blocked" 2 protect.sh "$(wc_ "$P/docs/team/journal/FEAT-001.md" "x")"
+check "docs: Edit appending to the journal allowed"  0 protect.sh "$(jq -nc --arg f "$P/docs/team/journal/FEAT-001.md" '{hook_event_name:"PreToolUse", tool_name:"Edit", tool_input:{file_path:$f, old_string:"aaaa", new_string:"aaaa\n- one line"}}')"
+rm -f docs/team/journal/FEAT-001.md
+check "docs: other docs/team files allowed"       0 protect.sh "$(w Write "$P/docs/team/debt.md")"
+out="$(python3 -I "$KIT/scripts/team.py" docs FEAT-001 --root "$P")"  # exit 1 on problems: read the text, not the code
+if [[ $out == *"0 problem(s)"* ]]; then pass=$((pass + 1)); echo "ok   docs: team.py docs on a clean folder reports none";
+else failn=$((failn + 1)); echo "FAIL docs: clean folder reported problems — $out"; fi
+touch docs/team/features/FEAT-001/design-w1-fixes.md
+out="$(python3 -I "$KIT/scripts/team.py" docs FEAT-001 --root "$P")"
+if [[ $out == *"design-w1-fixes.md → design.md"* ]]; then pass=$((pass + 1)); echo "ok   docs: team.py docs names a stray file and where it belongs";
+else failn=$((failn + 1)); echo "FAIL docs: stray file not reported — $out"; fi
+rm -f docs/team/features/FEAT-001/design-w1-fixes.md docs/team/features/FEAT-001/review-02.md docs/team/features/FEAT-001/intake.md
 
 # check-git.sh
 check "git: push origin main blocked"            2 check-git.sh "$(b 'git push origin main')"
@@ -247,6 +273,9 @@ jq '.enforcement = "warn"' .team/config.json > .team/c.tmp && mv .team/c.tmp .te
 check "warn mode: push origin main runs, reminded"       0 check-git.sh "$(b 'git push origin main')"
 check "warn mode: edit .team/profile.json runs"           0 protect.sh "$(w Edit "$P/.team/profile.json")"
 check "warn mode: rm of protected path runs"             0 protect.sh "$(b 'rm .claude/settings.json')"
+out="$(CLAUDE_PROJECT_DIR="$P" bash "$KIT/scripts/protect.sh" <<<"$(w Write "$P/docs/team/features/FEAT-001/design-addendum-1.md")" 2>/dev/null)"
+if jq -e '.hookSpecificOutput.additionalContext | test("ADJ-41")' <<<"$out" >/dev/null; then pass=$((pass + 1)); echo "ok   warn mode: stray docs file runs, the ADJ-41 rule reaches Claude";
+else failn=$((failn + 1)); echo "FAIL warn mode: no ADJ-41 reminder for a stray docs file — $out"; fi
 check "warn mode: team-leader non-read-only Bash runs"    0 role-policy.sh "$(b 'python3 -c "print(1)"' team:team-leader)"
 out="$(CLAUDE_PROJECT_DIR="$P" bash "$KIT/scripts/check-git.sh" <<<"$(b 'git push origin main')" 2>/dev/null)"
 if jq -e '.hookSpecificOutput.additionalContext | test("RULE \\(reminder")' <<<"$out" >/dev/null; then pass=$((pass + 1)); echo "ok   warn mode: reminder reaches Claude as additionalContext";

@@ -14,6 +14,12 @@ Verdict: <accepted | rework | design-defect>
 |---|---|---|---|
 | AC-1 | `<command>` | `<real output>` | pass / fail |
 
+## Try it
+<!-- On a running instance, done the way the requester will do it (verify step "Try it"). Fails → Verdict: rework. -->
+- Instance: <site / URL / command>, commit <sha>, feature switched on: <yes / how>
+- Walk-through: <what was done → what happened (output, record created, screenshot path)>
+- For you (≤ 3 steps): 1. <…> 2. <…> 3. <…>
+
 ## Common checks
 - `cmd.test`: <output>
 - `cmd.lint`: <output>

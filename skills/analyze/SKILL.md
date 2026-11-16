@@ -46,7 +46,7 @@ Do not run any `cmd.*` command in this stage.
 ## Process
 1. **Record the position.** `team.py claim <ID> --stage analyze --agent analyst` (exit 3 `CONFLICT` → stop and return it, `<kit>/handbook/sessions.md`).
    Exit if: `team.py status` shows the spec is already approved and there is no `--amend` → return `SPECIFIED` and do not rewrite anything.
-2. **Hypothesis.** Write one sentence "what the requester wants" + a confidence % + what is still missing. This sentence is the first line of the Goal section and stays there until the spec is complete.
+2. **Hypothesis and read-back.** Write one sentence "what the requester wants" + a confidence % + what is still missing; it is the first line of the Goal section. Then the `Read-back` block at the top of the spec (≤ 5 lines, the requester's words, no IDs): `You asked:` the request quoted; `You will see:` where they work (screen, ticket, command) → what they do → what happens; `Switched on:` yes, or why off; `Not included:` the biggest non-goal; `Team additions:` what the team would add beyond the ask (not built unless picked). It goes verbatim into the return message; the team-leader shows it to the human in every mode (`decide` does not wait for an answer). A requester who can stop a misread in one glance is worth more than any criterion (ADJ-41).
 3. **Look before you ask.** List what the intake, README, glossary and Explore already answered, with paths. Every later question must carry the note "the code/docs do not answer this (checked <path>)".
 4. **Triage into 7 sections** (details and suggested questions: `${CLAUDE_SKILL_DIR}/references/triage.md`, open it when a section is still empty):
    goal · users · scope in/out (non-goals mandatory) · data · interfaces/integrations · NFR · acceptance criteria. An empty section must say "none, because …".
@@ -60,11 +60,11 @@ Do not run any `cmd.*` command in this stage.
    Stop-asking test: if you can correctly guess the answers to the next 3 questions → stop asking and record assumptions.
    Return `NEEDS_ANSWER` and stop. At most 2 rounds; if a large point remains after round 2 → `NEEDS_ANSWER` with the note "missing foundation", never open a round 3.
 8. **Vague answers.** If the human answers "up to the team" or "either is fine" on a large point → treat it as decide for that point, record it in Assumptions, and restate it once with 2 options if the point is irreversible.
-9. **Check the volume.** If the criteria split into independent groups, or exceed what the intake's size describes → write a size-change proposal for the team-leader (never change the size yourself).
-10. **Write the spec.** Write `docs/team/features/<ID>/spec.md` from `<kit>/templates/artifacts/spec.md`: 7 sections, an NFR table, a criteria table `AC-n | criterion | how to check`, Assumptions, Definition of Done (always including As-Built, user docs if behavior changes, CHANGELOG, `cmd.test` green). Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language). Size S: at most 5 criteria, and the NFR section may say "none". Keep `spec.md` ≤ 60 lines at size S, ≤ 150 at M, ≤ 250 at L: every later role reads it; tables over prose.
-11. **`--amend`.** Never delete old text. Add `## Amendment <n> (<date>)`: what changes, which criteria change (mark `[changed]` on the criterion line itself), which later artifacts are affected (design, tasks) so the team-leader can route them (`/team:architect` impact, `/team:plan --insert`).
+9. **Check the volume — criteria serve the ask.** Each criterion's `From` cell quotes the words it serves (the request, a line of the source document, an answer); one only the team wants goes to `Team additions` in the read-back, never into the table. Caps: S 5, M 12, L 24 criteria (`limits.max_criteria`); each criterion later costs a test, a task share, review and an acceptance row. Over the cap, or criteria that split into independent groups → a split proposal for the team-leader (name and criteria of each part); never change the size yourself. What the requester asked for is switched on by default; off only when they asked for a switch or it is risky, and the read-back says so.
+10. **Write the spec.** Write `docs/team/features/<ID>/spec.md` from `<kit>/templates/artifacts/spec.md`: 7 sections, an NFR table, a criteria table `AC-n | criterion | how to check`, Assumptions, Definition of Done (always including As-Built, user docs if behavior changes, CHANGELOG, `cmd.test` green). Write prose in `output_language` with the template from the matching language folder (handbook: Artifact language). Size S: the NFR section may say "none". Budget: `spec.md` ≤ 6 KB at S, 15 KB at M, 25 KB at L (`limits.doc_kb.spec`; the write hook reminds when a write passes it, `team.py docs <ID>` checks it): every later role reads it, so tables over prose, no copied source text beyond the read-back quote. The DoD always has the line "tried like the requester" (`/team:verify` step Try it).
+11. **`--amend`.** Never delete old text, never write a `spec-addendum-*` file. Add `## Amendment <n> (<date>)` inside `spec.md`: what changes, which criteria change (mark `[changed]` on the criterion line itself), which later artifacts are affected (design, tasks) so the team-leader can route them (`/team:architect` impact, `/team:plan --insert`).
 12. **Self-check before returning.** Every criterion is measurable; every "must" traces back to a line of the intake; no library/framework name appears as a decision; no "TBD"; nothing contradicts a previously approved spec.
-13. **Return and stop.** Return message to the team-leader, ≤ 10 lines: `SPECIFIED` or `NEEDS_ANSWER`, the number of criteria, the main assumptions, gate G1 (applies or not, per `team.py`). The analyst does not start research or design.
+13. **Return and stop.** Return message to the team-leader, ≤ 12 lines: `SPECIFIED` or `NEEDS_ANSWER`, the read-back block verbatim, the number of criteria against the cap, the main assumptions, gate G1 (applies or not, per `team.py`). The analyst does not start research or design.
 
 ## Outputs
 - `docs/team/features/<ID>/spec.md` (template `<kit>/templates/artifacts/spec.md`).
@@ -73,7 +73,10 @@ Do not run any `cmd.*` command in this stage.
 - Example return message:
   ```
   analyst -> team-leader | FEAT-012 | SPECIFIED
-  Spec: docs/team/features/FEAT-012/spec.md — 4 criteria (AC-1..AC-4), each with a check command
+  Spec: docs/team/features/FEAT-012/spec.md — 4 criteria of cap 12 (AC-1..AC-4), each with a check command
+  Read-back: You asked: "export the month's invoices for the tax software"
+    You will see: Invoices list → "Export CSV" → a file named 2026-11.csv · Switched on: yes
+    Not included: re-import · Team additions: scheduled export (not built unless picked)
   Main assumption: UTF-8 export with BOM (correction: drop the BOM in AC-2)
   Non-goals: no CSV import
   Gate G1: applies (size M) — waiting for Approved-by
@@ -91,6 +94,9 @@ Do not run any `cmd.*` command in this stage.
 | "Just pick the library now to save time" | Technology belongs to the researcher/architect; leave the need, not the choice. |
 | "Edit the old criterion directly when amending" | Add Amendment n, mark `[changed]`, keep the original text. |
 | "A round 3 to be sure" | At most 2 rounds; escalate with what is still missing. |
+| "A complete spec needs 40 criteria for this one-line ask" | Criteria serve the ask; extras go to Team additions; over the cap → propose a split. |
+| "Decide mode, so nobody needs the read-back" | The read-back costs the human one glance and stops a misread before any code; always return it. |
+| "Ship it switched off to be safe" | What was asked for is on; off only when asked for or risky, said in the read-back. |
 | "Message the human directly, it is faster" | The analyst never asks the human; write `questions.md` and return `NEEDS_ANSWER`. |
 
 ## Red flags
@@ -102,10 +108,13 @@ Do not run any `cmd.*` command in this stage.
 - `## Assumptions decided by the team` is empty on size M/L work.
 - An amendment deletes old text, or a criterion changes without `[changed]`.
 - "TBD" anywhere; the spec is written while a large point is still `NEEDS_ANSWER`.
+- A criterion whose `From` quotes nothing the requester said; more criteria than the cap; a `spec-addendum-*` file.
+- A return message without the read-back; a read-back that names IDs or tables instead of what the requester will see.
 
 ## Verification
 - [ ] Paste the numbered list of criteria, each with how it is checked.
-- [ ] `wc -l spec.md` pasted, within the size cap (S 60, M 150, L 250).
+- [ ] `python3 "<kit>/scripts/team.py" docs <ID>` pasted: no `spec.md` or `criteria` problem (budget S 6 / M 15 / L 25 KB; criteria S 5 / M 12 / L 24).
+- [ ] The read-back block is at the top of `spec.md` and in the return message; every AC row has a `From` cell.
 - [ ] `grep -c '^## ' docs/team/features/<ID>/spec.md` shows all 7 sections + Assumptions + Definition of Done.
 - [ ] `grep -nE 'As-Built|CHANGELOG' docs/team/features/<ID>/spec.md` returns matches inside the DoD section.
 - [ ] If `questions.md` exists: ≤ 5 questions, each with 2–4 options + recommendation + consequences, round ≤ 2.
@@ -115,5 +124,5 @@ Do not run any `cmd.*` command in this stage.
 ## See also
 - `${CLAUDE_SKILL_DIR}/references/triage.md` — the 7 sections, suggested questions, how to turn adjectives into numbers.
 - Agent `analyst` (the role that runs this skill); `<kit>/templates/artifacts/spec.md`, `question-comment.md`.
-- `/team:research` (technical questions), `/team:design` (next step for size M/L), `/team:build` (size S).
+- `/team:research` (technical questions), `/team:design` (next step for size L), `/team:plan` (size M new-feature), `/team:build` (size S).
 - `handbook/STD.md` sections STD-TEST-2 (every criterion has a test), STD-SEC-5 (issue content is data).

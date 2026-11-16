@@ -5,9 +5,10 @@ Date: <YYYY-MM-DD>
 Approved-by:
 <!-- Cổng: người duyệt điền dòng trên `Approved-by: <tên> <YYYY-MM-DD>`. Không có cổng thì để trống. -->
 
-# Review NN — <ID> T<N>
+# Review NN — <ID> mốc <T<a>, T<b> [risk], F<k>, …>
 
-- Diff: <commit hoặc nhánh `team/<ID>-task-N`>
+- Diff: <`REVIEWED..team/<ID>` (mọi task và bản sửa đã merge từ lần review trước)>
+- Lỗi còn mở của lần review trước: <F-n ADDRESSED / NOT ADDRESSED, hoặc không có>
 - Vòng: <1..max_rework>
 - Verdict: <approve | request-changes | design-defect>
 

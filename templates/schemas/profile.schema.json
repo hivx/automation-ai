@@ -152,7 +152,7 @@
         },
         "shared_state": {
           "type": "boolean",
-          "description": "true when test runs share one database, site or service and two full suites at once interfere (deadlocks, leaked rows); the build then runs the full cmd.test only after each serial merge, never inside a parallel wave"
+          "description": "true when test runs share one database, site or service and two full suites at once interfere (deadlocks, leaked rows); every full cmd.test or cmd.migrate then holds @shared-state, so two never run at once (the build runs the full suite once per round in any case)"
         }
       },
       "additionalProperties": false

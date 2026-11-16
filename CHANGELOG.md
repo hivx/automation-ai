@@ -5,6 +5,72 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follo
 
 ## [Unreleased]
 
+## [0.6.9] - 2026-11-16
+
+Results first: fewer steps before code, no retest of an unchanged commit, progress the lead can see (owner request, ADJ-43, SPEC-OVERRIDES entry 12, K-104).
+
+### Added
+- `team.py status`: `DELIVERED` — accepted work whose code is already in the main tree's branch (`team/<ID>` merged into HEAD, or its code commits `type(scope): … (<ID>)` reachable from HEAD after the branch was deleted); its Next says nothing is left for the team. `--brief` lists active work first and folds delivered items into `team: delivered N: …`. Tests in `test_team_status.sh`.
+- team-leader and `/team:run`: after every stage, ≤ 3 lines for the human in `output_language`: what works now, what is left, what is needed from them.
+
+### Changed
+- Size M new-feature: `team.py next` goes from the spec to `/team:plan`; `plan.md` carries a ≤ 40-line `## Design` (template `plan.md` and `vi/`). `/team:design` stays for size L and the data-migration, integration, refactor playbooks.
+- `/team:research`: one call per feature, every open question at once.
+- No retest of an unchanged commit: each round's green `cmd.test` writes the journal line `tested: <sha> <summary>`; `/team:verify` (qa) and `/team:pr` paste it for the same commit and run the suite only on a new one; `/team:pr` rebases only when the base branch moved.
+
+## [0.6.8] - 2026-11-16
+
+One checkpoint per round: test and review together (owner request, ADJ-42, SPEC-OVERRIDES entry 11, K-103).
+
+### Changed
+- `/team:build` and tech-lead: after a round, every finished task and fix is merged with no test in between (the per-merge `cmd.test_one` of 0.6.6 is gone), the full `cmd.test` runs once, then ONE reviewer call covers everything merged since the last review (`REVIEWED..team/<ID>`), beside the next round's devs. Due at ≥ 3 unreviewed tasks, an unreviewed `[risk]` task, or the end.
+- `[risk]` tasks are no longer reviewed alone before their merge: they join the checkpoint and are ticked only after it, so their dependents wait.
+- Rework: one dev per checkpoint on `team/<ID>-fix-K`; the next checkpoint marks the old findings `ADDRESSED`/`NOT ADDRESSED`, no separate re-review call. Done = every task ticked, no open blocker/major, no production code after the last review.
+- reviewer, dev, plan, `docs/01-process.md`, templates `tasks.md` and `review.md` (English and `vi/`).
+
+## [0.6.7] - 2026-11-16
+
+Product before paperwork: try it like the requester, read the request back, lean docs and lean tests (owner request, ADJ-41, SPEC-OVERRIDES entry 10, K-102).
+
+### Added
+- `team.py docs [<ID>]`: lists stray files in `docs/team/features/<ID>/` (only the stage artifacts are allowed: intake, questions, spec, research, arch-impact, design, plan, tasks, review-NN, acceptance, asbuilt, pr-body, source-*), artifacts over their KB budget, criteria over the size cap, and journal problems; `team.py status` adds one "Docs over budget" line and `--json` a `docs_problems` count.
+- `protect.sh` checks every write under `docs/team/` (`team.py docs --hook`): a stray file, an artifact or journal over its budget after the write, or a Write over an existing journal (append with Edit) gets the rule as a reminder (`enforcement: "block"` stops it).
+- Config `limits.doc_kb` (KB budget per artifact kind, a number or {S,M,L}) and `limits.max_criteria` (S 5, M 12, L 24).
+- `/team:verify` step "Try it": on a running instance of the commit, the feature switched on, qa walks the main flow where the requester works (any browser MCP for a browser flow) and writes ≤ 3 steps for the human; `accepted` needs it. Size S writes the Try it row inside `/team:build`. Templates `acceptance.md` (+ `vi/`) get a `## Try it` section.
+- qa lists browser MCP servers in `tools` (`mcp__claude-in-chrome__*`, `mcp__playwright__*`, `mcp__plugin_playwright_playwright__*`); `scripts/allowed-tools.txt` registers them.
+- `/team:analyze` writes a Read-back block (you asked / you will see / switched on / not included / team additions) at the top of `spec.md` and in its return message; the team-leader shows it to the human in every mode, and shows qa's Try it steps after `accepted`.
+- STD-TEST-9 (lean tests).
+
+### Changed
+- Spec criteria quote what they serve (`From` column); the team's own ideas go to Team additions; caps S 5 / M 12 / L 24, more → split. What was asked for is switched on by default.
+- Size caps move from lines to KB (spec S 6 / M 15 / L 25, design M 30 / L 50, plan 12, tasks 12, review 6, acceptance 15, journal 20), checked by `team.py docs` instead of `wc -l`.
+- `/team:build` no longer writes `diff.patch`; `/team:asbuilt` and writer read the diff with `git diff <base_branch>...team/<ID>`. Dev reports live in the return message and the commit body, never a `dev-T*.md` file. Process docs are committed once per stage, never per tick.
+- STD-TEST-8 covers the edges the criteria or design name; other edges are the dev's call. ADR constraints are checked in review, not by a test suite per ADR. A task that replaces behavior retires its old tests, and qa accepts those deletions.
+- `/team:intake` sizes the change, not its importance (L needs several modules and new NFRs; unsure → the smaller size).
+- The team-leader never asks the human about the kit's own process (gates, merges, limits, red tests). Journals are appended with Edit.
+
+## [0.6.6] - 2026-11-15
+
+Tests run once per round, not after every merge (owner request, ADJ-40, SPEC-OVERRIDES entry 9, K-101).
+
+### Changed
+- `/team:build` and tech-lead: after each merge only the merged task's `test:` files run (`cmd.test_one`); the full `cmd.test` runs once per round, after the round's last merge. Green → the round's merged tasks are ticked; red → the merge that turned a test red is found (that test file at each merge of the round, oldest first), the task stays unticked and one dev fixes it on `team/<ID>-fix-K`, merged first in the next round. Rules in `skills/build/references/handoffs.md` § Tests in the loop.
+- No dev call only to rerun tests for evidence: a missing GREEN comes from the tech-lead's merge check, a missing RED goes back in a rework call.
+- dev: each test run is one foreground call (Bash `timeout` up to 600000 ms) that waits inside itself when the test site is busy, never a loop of short checks; reruns only after a change; the other test files of the touched module run once.
+- `test.shared_state` (profile schema, `docs/04-profile.md`): now describes the `@shared-state` hold, not a per-merge cadence.
+
+## [0.6.5] - 2026-11-15
+
+Few, larger tasks; review by risk (owner request, ADJ-39, SPEC-OVERRIDES entry 8, K-100).
+
+### Changed
+- `/team:plan`: a task delivers 1–4 criteria end to end (~100–400 changed lines with tests, ≤ 6 files); fold small pieces, do not split them; caps M 6 / L 12 tasks, a bigger plan returns `BLOCKED` with a proposed feature split. `Receives:`/`Returns:` only for names other tasks or modules consume. `[risk]` marks tasks touching authorization or secrets, a migration or schema, money or data deletion, an outside contract or shared state.
+- `/team:build`: a `[risk]` task is reviewed before its merge; other tasks merge on red-then-green evidence and share one checkpoint review (`REVIEWED..team/<ID>`, every 3 merged tasks and at the end; journal `reviewed: <sha>`). One `review-NN.md` per review call. Checkpoint findings go to one fix branch `team/<ID>-fix-K`; a tests-only fix merges without re-review. The tech-lead decides local design points itself and sends the rest to the team-leader in one report.
+- `reviewer` and the handbook Finding format: `major` is defined (missed criterion, test that cannot fail, security or data loss, broken contract, edit outside the touchpoints, a named edge untested); other edges and hand-made mutants are minor and never block.
+- `dev`: a private helper or test name that differs from the task text is the dev's call; only a consumed contract is a `DESIGN_CONFLICT`.
+- `/team:design` answers a build's `DESIGN_CONFLICT` report in one call, in place in `design.md`; `/team:architect` reviews a design once.
+- Templates `tasks.md` and `review.md` (English and `vi/`).
+
 ## [0.6.4] - 2026-11-14
 
 Session lanes: several sessions on one project (owner request, ADJ-38, SPEC-OVERRIDES entry 7, K-99).

@@ -15,7 +15,7 @@ Print the state computed from artifacts (no stored pointer) and who is waiting o
 2. Run (Bash): `python3 "<kit>/scripts/team.py" status $ARGUMENTS` (`<kit>` = the path read from `.team/plugin_root`, typed literally).
 3. Print the output VERBATIM in a code block, including the "Applicable gates" column.
 4. For each `WAITING_FOR_APPROVAL`, `WAITING_FOR_ANSWER`, `BLOCKED`, `REWORK`, `DESIGN_DEFECT` row: one line "Waiting on the human: <work> — <file>".
-5. Print the next command exactly as the script's "Next" column gives it.
+5. Print the next command exactly as the script's "Next" column gives it. A `DELIVERED` row is finished work already in the main branch (ADJ-43): list it under "Delivered", never as pending.
 6. Another session in the `Session` column, or the human asks who works on what → also run `team.py sessions` and print it verbatim (`<kit>/handbook/sessions.md`).
 7. Script fails → print the error verbatim and `<kit>/scripts/team.py --help`; stop. Do not infer.
 

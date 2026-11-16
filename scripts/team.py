@@ -8,6 +8,11 @@ Subcommands:
                                         feature, capped by limits.headcount[role] (max_parallel_dev for dev);
                                         builds whose tasks.md `files:` overlap go one at a time; each build
                                         gets its share of the team-wide dev and reviewer headcount
+  docs [<ID>...]                        lean docs (ADJ-41): stray files in docs/team/features/<ID>/, artifacts over
+                                        their KB budget (limits.doc_kb), criteria over limits.max_criteria, journal
+                                        size; exit 1 when any problem
+  docs --path P [--bytes N]             may P be written with N bytes? prints the rule, exit 1 if not
+  docs --hook                           the same for the PreToolUse Write/Edit JSON on stdin (protect.sh)
   metrics                               aggregate docs/team/metrics/runs.jsonl by agent/skill/size
   scorecard                             write docs/team/metrics/scorecard.json
 Session lanes (several Claude sessions on one project; rules: handbook/sessions.md):
@@ -33,6 +38,7 @@ import json
 import os
 import re
 import statistics
+import subprocess
 import sys
 import time
 
@@ -113,9 +119,47 @@ GATES = [("specified", "G1_spec", "spec.md"), ("architected", "G2_arch", "arch-i
          ("verified", "G4_uat", "acceptance.md")]
 
 
+# Lean docs (ADJ-41): a feature folder holds only these artifacts, each under a byte budget. Anything else is a copy
+# of git, a ruling or a note: it belongs in a return message, a journal line or an in-place edit of its artifact.
+DOC_FILES = {"intake.md": "intake", "questions.md": "questions", "spec.md": "spec", "research.md": "research",
+             "arch-impact.md": "arch-impact", "design.md": "design", "plan.md": "plan", "tasks.md": "tasks",
+             "acceptance.md": "acceptance", "asbuilt.md": "asbuilt", "pr-body.md": "pr-body"}
+DOC_PATTERNS = [(re.compile(r"^review-\d+\.md$"), "review"), (re.compile(r"^source-[\w.-]+$"), "source")]
+DOC_KB = {"intake": 6, "questions": 6, "spec": {"S": 6, "M": 15, "L": 25}, "research": 20, "arch-impact": 15,
+          "design": {"S": 15, "M": 30, "L": 50}, "plan": 12, "tasks": 12, "review": 6, "acceptance": 15,
+          "asbuilt": 10, "pr-body": 6, "source": None, "journal": 20}
+MAX_CRITERIA = {"S": 5, "M": 12, "L": 24}
+FOLD_INTO = [(r"\.(patch|diff)$", "git itself (`git diff`), never a file"),
+             (r"^review-(pkg|raw)", "the reviewer handoff: pass the range, the reviewer runs git diff itself"),
+             (r"^review", "one review-NN.md per review call, rounds appended"),
+             (r"^journal", "docs/team/journal/<ID>.md"), (r"^spec", "spec.md (`## Amendment <n>`)"),
+             (r"^(plan|tasks|preflight)", "plan.md / tasks.md"), (r"^acceptance", "acceptance.md"),
+             (r"^research", "research.md"), (r"^(design|arch-ruling|ruling)|fix", "design.md, edited in place"),
+             (r"^arch", "arch-impact.md, or the architect's return message"),
+             (r"^dev", "the dev's return message and commit message"),
+             (r"", "the return message, or an in-place edit of the artifact it belongs to")]
 NO_SPEC_PLAYBOOKS = {"bug-fix", "hotfix", "refactor", "dependency-upgrade", "spike", "ci-fix", "docs-only", "quick"}
 NO_PLAN_PLAYBOOKS = {"bug-fix", "hotfix", "refactor", "quick"}
 # Right-sized chains (ADJ-36): quick = one dev, done when its task is ticked; size S = acceptance inside build, no As-Built.
+
+
+def delivered_in(root, fid):
+    """The main tree's branch when an accepted feature's code is already in it (ADJ-43), else ''.
+    team/<ID> still exists → it must be an ancestor of HEAD; deleted after its merge → a code commit
+    `type(scope): … (<ID>)` must be reachable from HEAD. No git, or the main tree on a team/* branch → ''."""
+    def git(*args):
+        try:
+            p = subprocess.run(["git", "-C", root, *args], capture_output=True, text=True, timeout=15)
+            return p.returncode, p.stdout.strip()
+        except (OSError, subprocess.SubprocessError):
+            return 1, ""
+    rc, head = git("rev-parse", "--abbrev-ref", "HEAD")
+    if rc or not head or head == "HEAD" or head.startswith("team/"):
+        return ""
+    if git("rev-parse", "-q", "--verify", f"refs/heads/team/{fid}")[0] == 0:
+        return head if git("merge-base", "--is-ancestor", f"team/{fid}", "HEAD")[0] == 0 else ""
+    rc, out = git("log", "-1", "--format=%h", "-E", f"--grep=^(feat|fix|test|refactor|perf)(\\(.*\\))?!?: .*\\({fid}\\)$", "HEAD")
+    return head if rc == 0 and out else ""
 
 
 def feature_state(root, fid, cfg, held=None):
@@ -195,11 +239,14 @@ def feature_state(root, fid, cfg, held=None):
             status, wfile = "DESIGN_DEFECT", "acceptance.md"
         elif stage == "released":
             status = "RELEASED"
+    delivered = delivered_in(root, fid) if status == "READY" and stage == "verified" else ""
+    if delivered:  # the lead already has it (ADJ-43): not pending work
+        status = "DELIVERED"
     lane = (held or {}).get(fid) or {}
     st = dict(id=fid, title=title_of(fid, art["intake.md"], art["spec.md"]), playbook=playbook or "—",
               size=size or "—", mode=mode or "—", stage=stage or "—", status=status, gate=gate,
               waiting_file=f"docs/team/features/{fid}/{wfile}" if wfile else "",
-              blocked_later=later, tasks_done=len(done), tasks_total=len(tasks),
+              blocked_later=later, tasks_done=len(done), tasks_total=len(tasks), delivered_in=delivered,
               g5_approved=approved(art["asbuilt.md"], prod=True), has_asbuilt=art["asbuilt.md"] is not None,
               active=lane.get("session") == "this", held_by=lane.get("session", ""),
               gates=[g for g in ("G1_spec", "G2_arch", "G2b_design", "G3_plan", "G4_uat", "G5_prod") if gates_cfg.get(g)])
@@ -219,6 +266,8 @@ def next_cmd(st, cond):
         return f"/team:build {fid}"
     if st["status"] == "DESIGN_DEFECT":
         return f"/team:design {fid}"
+    if st["status"] == "DELIVERED":
+        return f"Delivered: in {st['delivered_in']}, nothing left for the team; prod is your call (/team:release {fid})"
     if s == "—":
         return f"/team:intake (no intake.md yet for {fid})"
     if pb == "quick":
@@ -240,6 +289,8 @@ def next_cmd(st, cond):
             return f"/team:architect {fid}"
         if pb == "client-docs":
             return f"team-leader hands off to writer (playbook client-docs), then /team:pr {fid}"
+        if size == "M" and pb == "new-feature":  # ADJ-43: the plan carries the design at size M
+            return f"/team:plan {fid}"
         return f"/team:design {fid}"
     if s == "researched":
         if pb == "spike":
@@ -248,6 +299,8 @@ def next_cmd(st, cond):
             return f"/team:plan {fid}"
         if size == "L" or pb in ("integration", "new-project"):
             return f"/team:architect {fid}"
+        if size == "M" and pb == "new-feature":
+            return f"/team:plan {fid}"
         return f"/team:design {fid}"
     if s == "architected":
         return f"/team:design {fid}"
@@ -270,7 +323,7 @@ def next_cmd(st, cond):
     return f"/team:run {fid}"
 
 
-HOLD = {"WAITING_FOR_APPROVAL", "WAITING_FOR_ANSWER", "BLOCKED", "DESIGN_DEFECT", "RELEASED"}
+HOLD = {"WAITING_FOR_APPROVAL", "WAITING_FOR_ANSWER", "BLOCKED", "DESIGN_DEFECT", "RELEASED", "DELIVERED"}
 NEXT_CMD = re.compile(r"^/team:([a-z][a-z-]*)\s+(\S+)([^,]*)")
 FILES = re.compile(r"files:\s*([^—\n]+)")
 
@@ -341,6 +394,123 @@ def features(root):
     if not os.path.isdir(base):
         return []
     return sorted(d for d in os.listdir(base) if os.path.isdir(os.path.join(base, d)) and ID_RE.match(d))
+
+
+def intake_size(intake):
+    m = re.search(rf"(?i)(?:{LEGACY_SIZE}|size)\**\s*:\**\s*\**\s*([SML])\b", intake or "")
+    if re.search(r"(?i)playbook\**\s*:\**\s*\[?`?quick\b", intake or ""):
+        return "S"
+    return m.group(1).upper() if m else ""
+
+
+def doc_kind(name):
+    if name in DOC_FILES:
+        return DOC_FILES[name]
+    return next((kind for rx, kind in DOC_PATTERNS if rx.match(name)), None)
+
+
+def doc_cap(cfg, kind, size):
+    """KB budget of one artifact kind at a size; config limits.doc_kb overrides the kit default (ADJ-41)."""
+    cap = ((cfg.get("limits") or {}).get("doc_kb") or {}).get(kind, DOC_KB.get(kind))
+    if isinstance(cap, dict):
+        cap = cap.get(size) or max(v for v in cap.values())
+    return cap
+
+
+def criteria_cap(cfg, size):
+    return dict(MAX_CRITERIA, **((cfg.get("limits") or {}).get("max_criteria") or {})).get(size or "L")
+
+
+def fold_hint(name):
+    return next(hint for pat, hint in FOLD_INTO if re.search(pat, name))
+
+
+def criteria_count(spec):
+    return len(set(re.findall(r"(?m)^\s*(?:\||[-*])\s*[*`]*(AC-\d+)\b", spec or "")))
+
+
+def doc_path_problem(root, cfg, rel, nbytes=None):
+    """One path about to be written (hook) or on disk: '' when fine, else the rule it breaks (ADJ-41)."""
+    parts = rel.replace(os.sep, "/").split("/")
+    if parts[:3] == ["docs", "team", "features"] and len(parts) >= 5 and ID_RE.match(parts[3]):
+        fid, name = parts[3], parts[4]
+        kind = doc_kind(name) if len(parts) == 5 else None
+        if kind is None:
+            return (f"BLOCKED (ADJ-41): docs/team/features/{fid}/ holds only the stage artifacts (intake, questions, spec, "
+                    f"research, arch-impact, design, plan, tasks, review-NN, acceptance, asbuilt, pr-body, source-*). "
+                    f"Put '{'/'.join(parts[4:])}' in {fold_hint(name)}.")
+        size = intake_size(read(os.path.join(root, "docs", "team", "features", fid, "intake.md"))) or "L"
+    elif parts[:3] == ["docs", "team", "journal"] and len(parts) == 4:
+        fid, name, kind, size = parts[3][:-3], parts[3], "journal", "L"
+        if not (name.endswith(".md") and (ID_RE.match(fid) or fid == "takeover")):
+            return f"BLOCKED (ADJ-41): one journal per item, docs/team/journal/<ID>.md; append '{name}' there."
+    else:
+        return ""
+    cap = doc_cap(cfg, kind, size)
+    if nbytes is None:
+        p = os.path.join(root, rel)
+        nbytes = os.path.getsize(p) if os.path.isfile(p) else 0
+    if cap and nbytes > cap * 1024:
+        return (f"BLOCKED (ADJ-41): {rel} would be {nbytes / 1024:.0f} KB, over its {cap} KB budget (size {size}). "
+                f"Every later role reads it: cut copied text and prose, one line per decision, tables over paragraphs; "
+                f"never split it into extra files.")
+    return ""
+
+
+def doc_problems(root, cfg, fid):
+    """Every docs problem of one item: stray files, artifacts over budget, too many criteria (ADJ-41)."""
+    d = os.path.join(root, "docs", "team", "features", fid)
+    size = intake_size(read(os.path.join(d, "intake.md"))) or "L"
+    def shown(names):
+        return ", ".join(names[:3]) + (f", … (+{len(names) - 3})" if len(names) > 3 else "")
+
+    out, stray, reviews = [], {}, []
+    for name in sorted(os.listdir(d)) if os.path.isdir(d) else []:
+        p = os.path.join(d, name)
+        kind = doc_kind(name) if os.path.isfile(p) else None
+        if kind is None:
+            stray.setdefault(fold_hint(name), []).append(name + ("/" if os.path.isdir(p) else ""))
+            continue
+        cap, kb = doc_cap(cfg, kind, size), os.path.getsize(p) / 1024
+        if cap and kb > cap:
+            if kind == "review":
+                reviews.append(f"{name[:-3]} {kb:.1f}")
+            else:
+                out.append(("over", f"{name} {kb:.1f} KB > {cap} KB"))
+    if reviews:
+        out.append(("over", f"{len(reviews)} review file(s) > {doc_cap(cfg, 'review', size)} KB: {shown(reviews)}"))
+    for hint, names in stray.items():
+        out.append(("stray", f"{len(names)} file(s) {shown(names)} → {hint}"))
+    n, cap = criteria_count(read(os.path.join(d, "spec.md"))), criteria_cap(cfg, size)
+    if cap and n > cap:
+        out.append(("criteria", f"spec.md {n} criteria > {cap} → split into features (analyze: check the volume)"))
+    jdir, extra = os.path.join(root, "docs", "team", "journal"), []
+    for name in sorted(os.listdir(jdir)) if os.path.isdir(jdir) else []:
+        if name == f"{fid}.md":
+            kb, cap = os.path.getsize(os.path.join(jdir, name)) / 1024, doc_cap(cfg, "journal", size)
+            if cap and kb > cap:
+                out.append(("journal", f"{name} {kb:.1f} KB > {cap} KB → one line per round; older rounds live in git"))
+        elif name.startswith((f"{fid}.", f"{fid}-")):
+            extra.append(name)
+    if extra:
+        out.append(("journal", f"{len(extra)} extra file(s) {shown(extra)} → append to docs/team/journal/{fid}.md"))
+    return size, out
+
+
+def docs_report(root, cfg, ids, as_json):
+    rows = [(fid,) + doc_problems(root, cfg, fid) for fid in ids]
+    if as_json:
+        print(json.dumps([{"id": f, "size": s, "problems": [{"kind": k, "text": t} for k, t in p]} for f, s, p in rows],
+                         ensure_ascii=False, indent=2))
+    else:
+        for fid, size, probs in rows:
+            if probs:
+                print(f"docs {fid} (size {size}): {len(probs)} problem(s) — fold the content into its artifact, then "
+                      f"`git rm` the stray files (git history keeps them)")
+                for kind, text in probs:
+                    print(f"  {kind:<9} {text}")
+        print(f"docs: {len(rows)} item(s), {sum(len(p) for _, _, p in rows)} problem(s)")
+    return 1 if any(p for _, _, p in rows) else 0
 
 
 def waiting_lines(st):
@@ -866,16 +1036,45 @@ def main(argv):
     if sub in LANE_SUBS:
         return lane_main(sub, rest)
     root = os.environ.get("CLAUDE_PROJECT_DIR") or os.getcwd()
-    flags, pos, i = set(), [], 0
+    flags, pos, opt, i = set(), [], {}, 0
     while i < len(rest):
-        if rest[i] == "--root" and i + 1 < len(rest):
-            root, i = rest[i + 1], i + 2
+        if rest[i] in ("--root", "--path", "--bytes") and i + 1 < len(rest):
+            opt[rest[i]], i = rest[i + 1], i + 2
             continue
         (flags.add if rest[i].startswith("--") else pos.append)(rest[i])
         i += 1
-    root = os.path.abspath(root)
+    root = os.path.abspath(opt.get("--root", root))
     as_json = "--json" in flags
     cfg = config(root)
+    if sub == "docs":
+        if "--hook" in flags:  # PreToolUse Write/Edit JSON on stdin (protect.sh): size after the write
+            data = json.loads(sys.stdin.read() or "{}")
+            ti = data.get("tool_input") or {}
+            p = ti.get("file_path") or ""
+            if not p:
+                return 0
+            ap = p if os.path.isabs(p) else os.path.join(root, p)
+            if "content" in ti:
+                nbytes = len((ti.get("content") or "").encode("utf-8"))
+            else:
+                cur = read(ap) or ""
+                old, new = ti.get("old_string") or "", ti.get("new_string") or ""
+                count = (cur.count(old) if ti.get("replace_all") else 1) if old else 0
+                nbytes = len(cur.encode("utf-8")) + count * (len(new.encode("utf-8")) - len(old.encode("utf-8")))
+            opt["--path"], opt["--bytes"] = os.path.relpath(ap, root), str(max(nbytes, 0))
+            if ("content" in ti and opt["--path"].replace(os.sep, "/").startswith("docs/team/journal/")
+                    and os.path.isfile(ap) and os.path.getsize(ap) > 2048):
+                print(f"BLOCKED (ADJ-41): {opt['--path']} exists; append your lines with Edit. A Write resends and "
+                      f"rewrites the whole journal on every handoff.")
+                return 1
+        if "--path" in opt:  # one path about to be written, with its size after the write
+            p = opt["--path"]
+            rel = os.path.relpath(p, root) if os.path.isabs(p) else p
+            msg = doc_path_problem(root, cfg, rel, int(opt["--bytes"]) if opt.get("--bytes", "").isdigit() else None)
+            if msg:
+                print(msg)
+            return 1 if msg else 0
+        return docs_report(root, cfg, pos or features(root), as_json)
     sid, lane = this_lane(root, cfg)
     held = held_map(root, cfg, sid)
     if sub == "wave":
@@ -903,6 +1102,8 @@ def main(argv):
                 return 0
             print(json.dumps({"id": rows[0]["id"], "next": rows[0]["next"]}, ensure_ascii=False) if as_json else rows[0]["next"])
             return 0
+        for r in rows:  # lean docs (ADJ-41): every status read shows the items whose folder broke the budget
+            r["docs_problems"] = len(doc_problems(root, cfg, r["id"])[1])
         if as_json:
             print(json.dumps(rows, ensure_ascii=False, indent=2))
             return 0
@@ -915,11 +1116,17 @@ def main(argv):
             print("team: no features yet — start with /team:intake \"<request>\".")
             return 0
         if "--brief" in flags:
-            for r in rows[:5]:
-                print(f"team: {r['id']} · {r['stage']} · {r['status']}{(' ' + r['gate']) if r['gate'] else ''} · applicable gates {','.join(g.split('_')[0] for g in r['gates']) or '—'}{(' · held by session ' + r['held_by']) if r['held_by'] not in ('', 'this') else ''} → {r['next']}")
+            done = [r["id"] for r in rows if r["status"] in ("DELIVERED", "RELEASED")]
+            for r in [r for r in rows if r["status"] not in ("DELIVERED", "RELEASED")][:5]:
+                print(f"team: {r['id']} · {r['stage']} · {r['status']}{(' ' + r['gate']) if r['gate'] else ''} · applicable gates {','.join(g.split('_')[0] for g in r['gates']) or '—'}{(' · held by session ' + r['held_by']) if r['held_by'] not in ('', 'this') else ''}{(' · docs: ' + str(r['docs_problems']) + ' problem(s)') if r['docs_problems'] else ''} → {r['next']}")
+            if done:
+                print(f"team: delivered {len(done)}: {', '.join(done)}")
             return 0
         print(table(rows))
         lines = [l for r in rows for l in waiting_lines(r)]
+        bad = [f"{r['id']} ({r['docs_problems']})" for r in rows if r["docs_problems"]]
+        if bad:
+            lines.append(f"Docs over budget (ADJ-41): {', '.join(bad)} → `team.py docs <ID>` lists what to fold or cut")
         if lines:
             print()
             print("\n".join(lines))

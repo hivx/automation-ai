@@ -36,7 +36,8 @@
 - STD-TEST-5 (2) Do not change an assertion to match wrong behavior; change a test only when the spec changes.
 - STD-TEST-6 (2) Write tests that are independent and repeatable: no dependence on run order, wall-clock time or external networks.
 - STD-TEST-7 (2) Record a flaky test in `docs/team/debt.md` and fix it; do not disable it.
-- STD-TEST-8 (2) Test edge cases and error paths, not only the happy path.
+- STD-TEST-8 (2) Test the edge cases and error paths the criteria or the design name, not only the happy path; other edges are the dev's call.
+- STD-TEST-9 (2) Keep tests lean: assert what a criterion or the design names; never a constant against its own literal, wording the spec does not quote, the test helpers themselves, or an ADR by scanning source text; a fixture two files use lives in the shared helper; a task that replaces behavior deletes the tests of the old one.
 - STD-ERR-1 (2) Do not swallow errors; every catch must handle the error, add context and rethrow, or state clearly why it is ignored.
 - STD-ERR-2 (2) Validate input at system boundaries (API, form, file, message).
 - STD-ERR-3 (2) Do not expose internal details (stack traces, queries, paths) in error messages shown to users.
@@ -85,7 +86,7 @@
 ## Review checklist (10)
 1. The diff does exactly and fully what the task's spec and criteria ask, nothing extra (STD-DESIGN-5, STD-TEST-2).
 2. Edits stay within the touchpoints; new files are in the right place (STD-DESIGN-1, STD-STRUCT-1, STD-STRUCT-2).
-3. A failing test came first; tests cover edges and error paths; no skip/xfail/only (STD-TEST-1, STD-TEST-8, STD-TEST-4).
+3. A failing test came first; tests cover the edges and error paths the criteria or design name, and nothing the criteria do not need; no skip/xfail/only (STD-TEST-1, STD-TEST-8, STD-TEST-9, STD-TEST-4).
 4. No test was changed to match wrong behavior; tests are independent and repeatable (STD-TEST-5, STD-TEST-6).
 5. Errors are handled; input is validated at boundaries; external calls have timeouts (STD-ERR-1, STD-ERR-2, STD-ERR-5).
 6. No secrets, no injection, authorization in place, no sensitive data exposed (STD-SEC-1, STD-SEC-3, STD-SEC-4, STD-SEC-6).
@@ -105,6 +106,6 @@
 ## Finding format
 One line per finding:
 `severity | STD | file:line | description | fix`
-- `severity` ∈ `blocker` (blocks the merge), `major` (must be fixed in this task), `minor`.
+- `severity` ∈ `blocker` (blocks the merge), `major` (must be fixed in this task), `minor`. `major` only for: a criterion not met or wrong behavior; a test that cannot fail, or a skip; a security or data-loss risk; a broken contract; an edit outside the touchpoints; an edge case or error path the criteria or design name, left untested. Any other missing edge, a surviving hand-made mutant, naming, structure or style is `minor` and never blocks.
 - List only blockers and majors. Fold every minor into one final line: `minor | — | — | <n> small points: ... | dev's call`.
 - Each finding has exactly one STD code; without a code it is not a finding.

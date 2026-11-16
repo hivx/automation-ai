@@ -30,6 +30,7 @@ Do not use when:
 - The answer is already in the code → Explore reading the code is enough; record it in the spec.
 - You want to pick the technology outright → research only recommends; the decision happens in `/team:architect` or `/team:design`.
 - Size S with no technical question: skip it (P5 — do not call a role that is not needed).
+- `research.md` already exists for this feature: ONE research call per feature answers every named question at once (ADJ-43). A new question after it → decide it in the design or plan and record the assumption, or `NEEDS_ANSWER` to the human; never a second round of research before any code exists.
 
 ## Discover the stack first
 1. Read `.team/profile.json`: `stack`, `language`, `cmd.*` (POC commands come only from here), `protected_paths`.

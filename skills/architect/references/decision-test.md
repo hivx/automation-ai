@@ -17,12 +17,14 @@ Missing one → not an ADR. Record it under `## Left to the designer` with the r
 | Redis cache "for speed later" | — | — | — | no NFR → dropped (STD-DESIGN-5) |
 
 ## Checkable constraints
-Every ADR has at least one line reviewer can check on a diff:
+Every ADR has at least one line the reviewer can check by reading a diff:
 - "Only `src/billing/**` writes the invoices table" → grep for write statements in other modules.
 - "Every outbound call goes through `src/clients/` and has a timeout" → grep HTTP client imports outside that directory.
 - "No module under `src/domain/` imports `src/api/`" → dependency direction.
 
 A vague constraint ("code must be clean", "easy to extend") is not a constraint.
+
+A constraint is checked in review, not by a test suite (ADJ-41). At most ONE small project test may guard import direction and a short security allowlist; a scanner gets one good and one bad sample, no hardening against aliases or `getattr`, and never tests of the scanner itself. In erp_ai, "checkable" became `test_architecture.py`: 9,783 lines of a home-made static analyzer for 34 ADRs, two thirds of it testing the analyzer.
 
 ## Dimensions to sweep
 | Dimension | Question |

@@ -5,9 +5,10 @@ Date: <YYYY-MM-DD>
 Approved-by:
 <!-- Gate: the approver fills in the line above as `Approved-by: <name> <YYYY-MM-DD>`. Leave it empty when there is no gate. -->
 
-# Review NN — <ID> T<N>
+# Review NN — <ID> checkpoint <T<a>, T<b> [risk], F<k>, …>
 
-- Diff: <commit or branch `team/<ID>-task-N`>
+- Diff: <`REVIEWED..team/<ID>` (every task and fix merged since the last review)>
+- Open findings of the last review: <F-n ADDRESSED / NOT ADDRESSED, or none>
 - Round: <1..max_rework>
 - Verdict: <approve | request-changes | design-defect>
 

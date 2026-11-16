@@ -14,6 +14,12 @@ Verdict: <accepted | rework | design-defect>
 |---|---|---|---|
 | AC-1 | `<lệnh>` | `<đầu ra thật>` | đạt / không |
 
+## Chạy thử
+<!-- Trên bản đang chạy, làm đúng như người yêu cầu sẽ làm (bước "Try it" của verify). Không đạt → Verdict: rework. -->
+- Bản chạy: <site / URL / lệnh>, commit <sha>, tính năng đang bật: <có / cách bật>
+- Đã làm: <làm gì → thấy gì (đầu ra, bản ghi được tạo, đường dẫn ảnh chụp)>
+- Anh/chị thử (≤ 3 bước): 1. <…> 2. <…> 3. <…>
+
 ## Kiểm chung
 - `cmd.test`: <đầu ra>
 - `cmd.lint`: <đầu ra>

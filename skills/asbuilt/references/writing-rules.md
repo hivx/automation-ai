@@ -1,9 +1,9 @@
 # As-Built writing rules
 
 ## Reading the diff by design section
-1. Get the file list from `diff.patch`: Grep `^diff --git a/` → one line per file.
+1. Get the file list from git: `git diff --stat <base_branch>...team/<ID>` → one line per file (no `diff.patch` copy, ADJ-41).
 2. For each touchpoint in `design.md` section 7: is the file in the diff?
-   - Yes, and the kind of change matches ("new"/"edit") → read that file's hunks.
+   - Yes, and the kind of change matches ("new"/"edit") → read that file's hunks with `git diff <base_branch>...team/<ID> -- <path>`.
    - No → a row "differs: not touched (design planned an edit)"; look for the reason in `tasks.md`.
 3. A file in the diff that is not among the touchpoints → its own row "outside touchpoints", citing the `review-NN.md` that accepted it (reviewer scores item 2 of the checklist).
 4. For design sections 2–6 (data, API, flow, permissions, migration): find the hunk that proves each point (field name, error code, permission check, migration file). Record the `file:line` of the first `+` line in the hunk.

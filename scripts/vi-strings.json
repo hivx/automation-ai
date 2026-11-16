@@ -5,7 +5,7 @@
   "architect": "Dùng khi việc cỡ L hay dự án mới cần kiến trúc hệ thống, khi thay đổi chạm nhiều module, hợp đồng hay NFR cần đánh giá tác động, hoặc khi design.md cần review ba câu về độ khớp kiến trúc.",
   "asbuilt": "Dùng khi feature đã accepted và duyệt G4, cần As-Built, release notes, mục CHANGELOG, cập nhật README/tài liệu người dùng và nội dung PR trước khi phát hành.",
   "audit-kit": "Dùng khi cần kiểm toán chính bộ kit team đang chạy trong dự án: hook có thể bị lách, quyền quá rộng, chỉ dẫn mâu thuẫn, tên lệch, skill không dùng, agent chạm trần lượt.",
-  "build": "Dùng khi plan đã duyệt (hoặc việc cỡ S, bug-fix, hotfix) và cần dev viết test, code, reviewer chấm, rồi gộp từng task vào nhánh feature.",
+  "build": "Dùng khi plan đã duyệt (hoặc việc cỡ S, bug-fix, hotfix) và cần dev viết test, code, reviewer chấm, rồi gộp các task vào nhánh feature.",
   "ci": "Dùng khi pipeline CI đỏ, khi dự án cần dựng CI lần đầu, thêm một bước kiểm, hoặc viết và kiểm script deploy, rollback, smoke.",
   "clean": "Dùng khi cần dọn dẹp không đổi hành vi đúng một loại nợ: code chết, đặt tên, cấu trúc, phụ thuộc thừa, test mồ côi, đơn giản hóa, ngừng dùng API cũ, hoặc bổ sung log/metric.",
   "commit": "Dùng khi dev hoặc maintainer đã có thay đổi xanh và cần commit đúng chuẩn của đội.",
@@ -16,7 +16,7 @@
   "make-agent": "Dùng khi team-leader thấy một chuyên môn riêng của dự án đủ lớn để cần ngữ cảnh, bộ tool hoặc model riêng, mà không vai nào của kit đảm nhận được và một skill tạm không đủ.",
   "make-skill": "Dùng khi team-leader thấy một task cần chuyên môn riêng của dự án mà kit chưa có, hoặc một chuỗi bước đã lặp lại ở nhiều task, và nêu được nhu cầu một câu kèm bằng chứng.",
   "onboard": "Dùng khi G0 của takeover đã được duyệt, hoặc repo rỗng cần cấu hình đội lần đầu (--new), để cài profile, config, settings, rule, CI và khung docs/team cho dự án.",
-  "plan": "Dùng khi feature đã có spec và design được duyệt và cần chia thành task (mỗi task một lát cắt hành vi kèm test, khoảng 15–30 phút) có touchpoints, hoặc khi change-request cần chèn task mới (--insert).",
+  "plan": "Dùng khi feature đã có spec và design được duyệt và cần chia thành task (mỗi task một lát cắt dọc 1–4 tiêu chí, khoảng 100–400 dòng kèm test; cỡ M tối đa 6 task, L tối đa 12) có touchpoints, hoặc khi change-request cần chèn task mới (--insert).",
   "pr": "Dùng khi nhánh feature hoặc nhánh sửa CI đã sẵn sàng cần mở hay cập nhật pull request, hoặc cần trả lời bình luận review của người.",
   "release": "Dùng khi feature đã accepted, duyệt G4 và có As-Built, cần merge, gắn tag, đưa lên staging cho UAT, rồi lên prod khi người đã duyệt G5.",
   "research": "Dùng khi spec còn câu hỏi kỹ thuật cần docs chính thức đúng phiên bản, cần so sánh phương án, đọc changelog trước khi nâng cấp phụ thuộc, tìm hiểu API ngoài để tích hợp, hoặc làm spike.",
@@ -34,7 +34,7 @@
    "khong": "Viết code, viết spec, review code"
   },
   "tech-lead": {
-   "viec": "Lập plan, chia task theo lát cắt hành vi (khoảng 15–30 phút) có touchpoints, giao dev, điều phối review 2 tầng, tích hợp nhánh, tick task, ghi note cấp task",
+   "viec": "Lập plan, chia ít task to (1–4 tiêu chí, khoảng 100–400 dòng) có touchpoints, giao dev, mỗi lượt một mốc: merge hết task, chạy test một lần, review gộp một lần, tích hợp nhánh, tick task, ghi note cấp task",
    "khong": "Tự code task lớn, bỏ qua review"
   },
   "coach": {
@@ -62,7 +62,7 @@
    "khong": "Mở rộng phạm vi, sửa thiết kế, push nhánh chính, skip test"
   },
   "reviewer": {
-   "viec": "Context mới, chỉ thấy diff + design + handbook; finding có mã STD, mức độ, file:line, cách sửa; verdict approve / request-changes / design-defect",
+   "viec": "Context mới, mỗi lượt review gộp một lần mọi task đã merge từ lần review trước (cả task [risk]); chỉ thấy diff + design + handbook; major chỉ khi trượt tiêu chí, test không thể đỏ, bảo mật, phá hợp đồng; finding có mã STD, mức độ, file:line, cách sửa; verdict approve / request-changes / design-defect",
    "khong": "Sửa code, góp ý phong cách ngoài STD"
   },
   "qa": {
@@ -188,7 +188,8 @@
   "STD-TEST-5": "Không sửa assertion cho khớp hành vi sai; chỉ đổi test khi spec đổi.",
   "STD-TEST-6": "Viết test độc lập và lặp lại được: không phụ thuộc thứ tự chạy, giờ thật hay mạng ngoài.",
   "STD-TEST-7": "Ghi test chập chờn vào `docs/team/debt.md` và sửa; không tắt nó.",
-  "STD-TEST-8": "Kiểm cả trường hợp biên và đường lỗi, không chỉ đường thuận.",
+  "STD-TEST-8": "Kiểm các trường hợp biên và đường lỗi mà tiêu chí hoặc design nêu tên, không chỉ đường thuận; biên khác do dev tự quyết.",
+  "STD-TEST-9": "Test gọn: chỉ kiểm điều tiêu chí hoặc design nêu; không so hằng với chính giá trị của nó, không kiểm câu chữ spec không trích, không test helper của test, không quét mã nguồn để kiểm ADR; fixture hai file cùng dùng nằm ở helper chung; task thay hành vi thì xóa test của hành vi cũ.",
   "STD-ERR-1": "Không nuốt lỗi; mỗi chỗ bắt lỗi phải xử lý, thêm ngữ cảnh rồi ném tiếp, hoặc ghi rõ vì sao bỏ qua.",
   "STD-ERR-2": "Kiểm tra đầu vào tại ranh giới hệ thống (API, form, file, message).",
   "STD-ERR-3": "Không lộ chi tiết nội bộ (stack trace, truy vấn, đường dẫn) trong thông báo lỗi cho người dùng.",
@@ -281,6 +282,11 @@
   "limits.context_warn_pct": "Ngưỡng % ngữ cảnh để nhắc nén (mức văn bản, không hook đo).",
   "limits.max_temp_skills": "Số skill/agent tạm đang hoạt động tối đa.",
   "limits.session_idle_min": "Số phút không hoạt động để một phiên bị coi là rảnh: việc nó giữ vẫn phải hỏi anh trước khi phiên khác nhận, nhưng file nó giữ không còn bắt phiên khác chờ (mặc định 120).",
+  "limits.max_criteria": "Trần số tiêu chí nghiệm thu của một spec theo cỡ; nhiều hơn thì tách feature (mặc định S 5, M 12, L 24).",
+  "limits.max_criteria.S": "Trần tiêu chí cho cỡ S.",
+  "limits.max_criteria.M": "Trần tiêu chí cho cỡ M.",
+  "limits.max_criteria.L": "Trần tiêu chí cho cỡ L.",
+  "limits.doc_kb": "Trần dung lượng (KB) cho từng loại tài liệu trong thư mục feature và journal, một số hoặc theo cỡ {S,M,L}; ghi đè mặc định của kit. `team.py docs` và hook ghi file đọc khóa này.",
   "models": "Ghi đè model theo vai trò.",
   "models.team-leader": "Model cho vai team-leader.",
   "models.tech-lead": "Model cho vai tech-lead.",
@@ -344,7 +350,7 @@
   "naming.branch": "Mẫu tên nhánh (team/{id}-{slug}).",
   "test": "Cấu hình test.",
   "test.skip_markers": "Dấu bỏ qua test bị cấm dùng để cho xanh",
-  "test.shared_state": "true khi các lần chạy test dùng chung một database/site/dịch vụ (hai bộ test chạy cùng lúc sẽ deadlock, rò dữ liệu); khi đó build chỉ chạy đủ cmd.test sau mỗi lần merge tuần tự, không chạy trong đợt song song",
+  "test.shared_state": "true khi các lần chạy test dùng chung một database/site/dịch vụ (hai bộ test chạy cùng lúc sẽ deadlock, rò dữ liệu); khi đó mỗi lần chạy đủ cmd.test hay cmd.migrate phải giữ @shared-state, nên không bao giờ có hai lần chạy cùng lúc (dù vậy build vẫn chỉ chạy đủ bộ test một lần mỗi lượt)",
   "protected_paths": "Glob không agent nào được sửa: secret, lockfile, vendored, cấu hình prod",
   "ci": "Cấu hình CI.",
   "ci.provider": "Nhà cung cấp CI: github, gitlab hoặc none.",

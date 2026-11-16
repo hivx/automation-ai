@@ -8,6 +8,8 @@
 # Session lanes (ADJ-38): a file another live session holds (team.py claim --files, or its main-tree edit in the last
 #   30 min) gets the same treatment ("same file → one at a time"); an edit in the main tree is recorded for this session.
 # Always allowed: docs/team/**, .team/** (except profile/config outside onboard), .claude/{agent-memory,skills,agents,rules}/**, CHANGELOG.md at the root.
+# Lean docs (ADJ-41): under docs/team/features/<ID>/ only the stage artifacts, and docs/team/journal/<ID>.md, each under its
+#   KB budget after the write (team.py docs --hook); anything else gets the same block/remind treatment.
 # Reads hook JSON from stdin: tool_name, tool_input.file_path | tool_input.notebook_path.
 # Usage: protect.sh [--root DIR] < hook.json ; protect.sh --help
 set -uo pipefail
@@ -33,7 +35,10 @@ case "$rel" in
   .team/profile.json|.team/config.json)
     [[ "$(current_stage)" == onboard ]] && allow
     block "BLOCKED (STD-SEC-1): $rel changes only through /team:onboard or by the human." ;;
-  docs/team/*|.team/*|.claude/agent-memory/*|.claude/skills/*|.claude/agents/*|.claude/rules/*) allow ;;
+  docs/team/*)   # lean docs (ADJ-41): only the stage artifacts, each under its KB budget (team.py docs)
+    msg="$(printf '%s' "$HOOK_INPUT" | python3 -I "$KIT_DIR/scripts/team.py" docs --hook --root "$TEAM_ROOT" 2>/dev/null)" || block "$msg"
+    allow ;;
+  .team/*|.claude/agent-memory/*|.claude/skills/*|.claude/agents/*|.claude/rules/*) allow ;;
   CHANGELOG.md) allow ;;   # the DoD requires CHANGELOG at the root (STD-DOC-3)
 esac
 

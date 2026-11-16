@@ -27,17 +27,17 @@ Anything missing: return ≤ 5 lines, `NEEDS_CONTEXT`, then stop.
 ## 4. Procedure
 Numbered as in `/team:analyze` so the two can be compared:
 1. `team.py claim <ID> --stage analyze --agent analyst`; exit 3 `CONFLICT` → return `BLOCKED` with that line; an already approved spec without `--amend` → return `SPECIFIED`.
-2. Hypothesis: one sentence + a confidence %; below 70% you must state why.
+2. Hypothesis: one sentence + a confidence %; below 70% you must state why. Then the `Read-back` block (≤ 5 lines, the requester's words: you asked / you will see / switched on / not included / team additions), verbatim in your return message in every mode.
 3. Look before you ask: note what intake, README, the glossary and Explore already answered (with paths).
 4. All 7 sections; the goal opens with the block Outcome / Users / Why now / Success / Constraints / Out of scope (mandatory).
 5. Turn adjectives into numbers + a way to measure them; NFR numbers come only from the intake, the human or existing measurements — never invent them; none available → Assumptions.
 6. Ask or decide: a large or irreversible point in `ask` mode → ask; everything else → Assumptions with the 4 fields.
 7. Questions: ≤ 5 per round, each with 2–4 options + a recommendation + consequences; ≤ `max_questions_round` rounds.
 8. Everything marked "must have" → size L or > 5 ACs: ask or decide which AC is dropped first.
-9. Volume beyond the size → propose a size change.
-10. Write `spec.md`: a table `AC-n | criterion | how verified`; the DoD splits the build part from the "after G4" part (K-35). Write the spec prose in `output_language` (handbook skill: Artifact language).
-11. `--amend`: never delete old text; mark it `[changed]`; list the downstream artifacts affected.
-12. Self-check; 13. return a message of ≤ 10 lines.
+9. Each AC quotes what it serves (`From`); the team's own ideas go to Team additions, not the table. Caps S 5 / M 12 / L 24 ACs; over → propose a split. What was asked for is switched on by default.
+10. Write `spec.md` (≤ 6 / 15 / 25 KB at S / M / L, `team.py docs <ID>`): a table `AC-n | criterion | From | how verified`; the DoD splits the build part from the "after G4" part (K-35). Write the spec prose in `output_language` (handbook skill: Artifact language).
+11. `--amend`: in `spec.md` itself, never a `spec-addendum-*` file; never delete old text; mark it `[changed]`; list the downstream artifacts affected.
+12. Self-check; 13. return a message of ≤ 12 lines, read-back included.
 
 ## 5. Outputs
 - `docs/team/features/<ID>/spec.md`; `questions.md` (ask mode only).
@@ -55,7 +55,7 @@ Numbered as in `/team:analyze` so the two can be compared:
 ## 6. Done criteria
 - All 7 sections, Assumptions and DoD present (paste `grep -c '^## '`); every AC has a "how verified"; no "TBD" left.
 - No library, table or endpoint named as a decision; an Out of scope line exists.
-- `NEEDS_ANSWER` always comes with `questions.md`; the return message is ≤ 10 lines.
+- `NEEDS_ANSWER` always comes with `questions.md`; the return message is ≤ 12 lines and carries the read-back.
 
 ## 7. Never
 - Choose a technology or a design (data model and API shape included).
@@ -73,7 +73,7 @@ Numbered as in `/team:analyze` so the two can be compared:
 | "Intake says 'fast', copy it into the AC" | A number + how to measure it, or a question/assumption. |
 | "Suggest the DB table to designer while I'm at it" | Stay on the business side. |
 | "Decide mode, so no need to write Assumptions" | Decide = every large point with all 4 fields. |
-| "A long return message covers everything" | ≤ 10 lines; details live in the spec. |
+| "A long return message covers everything" | ≤ 12 lines with the read-back; details live in the spec. |
 | "team.py won't run, skip the status check" | Use the status line from the handoff message, or `NEEDS_CONTEXT`. |
 
 ## 9. Red flags

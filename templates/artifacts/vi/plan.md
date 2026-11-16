@@ -10,6 +10,11 @@ Approved-by:
 - Nhánh feature: `team/<ID>` từ `<base_branch>`
 - Số task: <n>; song song tối đa: <limits.max_parallel_dev>
 
+## Design (cỡ M, không có design.md; tối đa 40 dòng)
+- Hợp đồng và thay đổi schema: <endpoint / field / migration, đúng tên>
+- Touchpoints: <file — đổi gì>
+- Test cho từng tiêu chí: <AC-n → file test>
+
 ## Thứ tự
 1. <nhóm task, lý do thứ tự>
 
